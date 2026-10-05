@@ -1,0 +1,678 @@
+{
+  "id": "exp-2026-10-05-01",
+  "fecha": "2026-10-05T11:03:36",
+  "commit": "9378207",
+  "descripcion": "Análisis exploratorio de OULAD: presentaciones por módulo, distribución de final_result por presentación y bajas por semana (incluidas las anteriores al día 0)",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "n_registros": 32593,
+    "n_variables": 12,
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv"
+    ],
+    "distribucion_clases": {
+      "no_desercion": 22437,
+      "desercion": 10156
+    },
+    "distribucion_final_result": {
+      "Distinction": 3024,
+      "Pass": 12361,
+      "Fail": 7052,
+      "Withdrawn": 10156
+    }
+  },
+  "exploracion": {
+    "n_modulos": 7,
+    "n_presentaciones": 22,
+    "presentaciones_por_modulo": {
+      "AAA": [
+        "2013J",
+        "2014J"
+      ],
+      "BBB": [
+        "2013B",
+        "2013J",
+        "2014B",
+        "2014J"
+      ],
+      "CCC": [
+        "2014B",
+        "2014J"
+      ],
+      "DDD": [
+        "2013B",
+        "2013J",
+        "2014B",
+        "2014J"
+      ],
+      "EEE": [
+        "2013J",
+        "2014B",
+        "2014J"
+      ],
+      "FFF": [
+        "2013B",
+        "2013J",
+        "2014B",
+        "2014J"
+      ],
+      "GGG": [
+        "2013J",
+        "2014B",
+        "2014J"
+      ]
+    },
+    "detalle_presentaciones": [
+      {
+        "code_module": "AAA",
+        "code_presentation": "2013J",
+        "module_presentation_length": 268,
+        "n_estudiantes": 383
+      },
+      {
+        "code_module": "AAA",
+        "code_presentation": "2014J",
+        "module_presentation_length": 269,
+        "n_estudiantes": 365
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2013B",
+        "module_presentation_length": 240,
+        "n_estudiantes": 1767
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2013J",
+        "module_presentation_length": 268,
+        "n_estudiantes": 2237
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2014B",
+        "module_presentation_length": 234,
+        "n_estudiantes": 1613
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2014J",
+        "module_presentation_length": 262,
+        "n_estudiantes": 2292
+      },
+      {
+        "code_module": "CCC",
+        "code_presentation": "2014B",
+        "module_presentation_length": 241,
+        "n_estudiantes": 1936
+      },
+      {
+        "code_module": "CCC",
+        "code_presentation": "2014J",
+        "module_presentation_length": 269,
+        "n_estudiantes": 2498
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2013B",
+        "module_presentation_length": 240,
+        "n_estudiantes": 1303
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2013J",
+        "module_presentation_length": 261,
+        "n_estudiantes": 1938
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2014B",
+        "module_presentation_length": 241,
+        "n_estudiantes": 1228
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2014J",
+        "module_presentation_length": 262,
+        "n_estudiantes": 1803
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2013J",
+        "module_presentation_length": 268,
+        "n_estudiantes": 1052
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2014B",
+        "module_presentation_length": 241,
+        "n_estudiantes": 694
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2014J",
+        "module_presentation_length": 269,
+        "n_estudiantes": 1188
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2013B",
+        "module_presentation_length": 240,
+        "n_estudiantes": 1614
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2013J",
+        "module_presentation_length": 268,
+        "n_estudiantes": 2283
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2014B",
+        "module_presentation_length": 241,
+        "n_estudiantes": 1500
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2014J",
+        "module_presentation_length": 269,
+        "n_estudiantes": 2365
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2013J",
+        "module_presentation_length": 261,
+        "n_estudiantes": 952
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2014B",
+        "module_presentation_length": 241,
+        "n_estudiantes": 833
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2014J",
+        "module_presentation_length": 269,
+        "n_estudiantes": 749
+      }
+    ],
+    "final_result_por_presentacion": [
+      {
+        "code_module": "AAA",
+        "code_presentation": "2013J",
+        "Distinction": 20,
+        "Pass": 258,
+        "Fail": 45,
+        "Withdrawn": 60
+      },
+      {
+        "code_module": "AAA",
+        "code_presentation": "2014J",
+        "Distinction": 24,
+        "Pass": 229,
+        "Fail": 46,
+        "Withdrawn": 66
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2013B",
+        "Distinction": 155,
+        "Pass": 648,
+        "Fail": 459,
+        "Withdrawn": 505
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2013J",
+        "Distinction": 176,
+        "Pass": 896,
+        "Fail": 521,
+        "Withdrawn": 644
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2014B",
+        "Distinction": 166,
+        "Pass": 561,
+        "Fail": 396,
+        "Withdrawn": 490
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2014J",
+        "Distinction": 180,
+        "Pass": 972,
+        "Fail": 391,
+        "Withdrawn": 749
+      },
+      {
+        "code_module": "CCC",
+        "code_presentation": "2014B",
+        "Distinction": 192,
+        "Pass": 471,
+        "Fail": 375,
+        "Withdrawn": 898
+      },
+      {
+        "code_module": "CCC",
+        "code_presentation": "2014J",
+        "Distinction": 306,
+        "Pass": 709,
+        "Fail": 406,
+        "Withdrawn": 1077
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2013B",
+        "Distinction": 54,
+        "Pass": 456,
+        "Fail": 361,
+        "Withdrawn": 432
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2013J",
+        "Distinction": 98,
+        "Pass": 731,
+        "Fail": 428,
+        "Withdrawn": 681
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2014B",
+        "Distinction": 119,
+        "Pass": 360,
+        "Fail": 259,
+        "Withdrawn": 490
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2014J",
+        "Distinction": 112,
+        "Pass": 680,
+        "Fail": 364,
+        "Withdrawn": 647
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2013J",
+        "Distinction": 127,
+        "Pass": 482,
+        "Fail": 200,
+        "Withdrawn": 243
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2014B",
+        "Distinction": 72,
+        "Pass": 285,
+        "Fail": 164,
+        "Withdrawn": 173
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2014J",
+        "Distinction": 157,
+        "Pass": 527,
+        "Fail": 198,
+        "Withdrawn": 306
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2013B",
+        "Distinction": 118,
+        "Pass": 664,
+        "Fail": 421,
+        "Withdrawn": 411
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2013J",
+        "Distinction": 187,
+        "Pass": 908,
+        "Fail": 513,
+        "Withdrawn": 675
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2014B",
+        "Distinction": 107,
+        "Pass": 547,
+        "Fail": 384,
+        "Withdrawn": 462
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2014J",
+        "Distinction": 258,
+        "Pass": 859,
+        "Fail": 393,
+        "Withdrawn": 855
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2013J",
+        "Distinction": 141,
+        "Pass": 451,
+        "Fail": 294,
+        "Withdrawn": 66
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2014B",
+        "Distinction": 128,
+        "Pass": 350,
+        "Fail": 255,
+        "Withdrawn": 100
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2014J",
+        "Distinction": 127,
+        "Pass": 317,
+        "Fail": 179,
+        "Withdrawn": 126
+      }
+    ],
+    "bajas_por_semana": {
+      "definicion_semana": "floor(date_unregistration / 7); el día 0 es el inicio del módulo-presentación",
+      "conteos": {
+        "-53": 1,
+        "-52": 0,
+        "-51": 0,
+        "-50": 0,
+        "-49": 0,
+        "-48": 0,
+        "-47": 0,
+        "-46": 1,
+        "-45": 0,
+        "-44": 0,
+        "-43": 1,
+        "-42": 0,
+        "-41": 0,
+        "-40": 1,
+        "-39": 1,
+        "-38": 1,
+        "-37": 0,
+        "-36": 2,
+        "-35": 0,
+        "-34": 2,
+        "-33": 1,
+        "-32": 1,
+        "-31": 3,
+        "-30": 7,
+        "-29": 1,
+        "-28": 4,
+        "-27": 2,
+        "-26": 6,
+        "-25": 5,
+        "-24": 8,
+        "-23": 9,
+        "-22": 12,
+        "-21": 21,
+        "-20": 16,
+        "-19": 21,
+        "-18": 39,
+        "-17": 25,
+        "-16": 39,
+        "-15": 35,
+        "-14": 55,
+        "-13": 62,
+        "-12": 64,
+        "-11": 58,
+        "-10": 80,
+        "-9": 100,
+        "-8": 139,
+        "-7": 127,
+        "-6": 101,
+        "-5": 154,
+        "-4": 213,
+        "-3": 305,
+        "-2": 375,
+        "-1": 580,
+        "0": 719,
+        "1": 1068,
+        "2": 215,
+        "3": 360,
+        "4": 303,
+        "5": 216,
+        "6": 246,
+        "7": 256,
+        "8": 230,
+        "9": 220,
+        "10": 203,
+        "11": 146,
+        "12": 171,
+        "13": 204,
+        "14": 218,
+        "15": 199,
+        "16": 152,
+        "17": 165,
+        "18": 167,
+        "19": 163,
+        "20": 155,
+        "21": 174,
+        "22": 207,
+        "23": 190,
+        "24": 177,
+        "25": 122,
+        "26": 80,
+        "27": 80,
+        "28": 93,
+        "29": 105,
+        "30": 98,
+        "31": 108,
+        "32": 102,
+        "33": 64,
+        "34": 17,
+        "35": 0,
+        "36": 0,
+        "37": 0,
+        "38": 0,
+        "39": 0,
+        "40": 0,
+        "41": 0,
+        "42": 0,
+        "43": 0,
+        "44": 0,
+        "45": 0,
+        "46": 0,
+        "47": 0,
+        "48": 0,
+        "49": 0,
+        "50": 0,
+        "51": 0,
+        "52": 0,
+        "53": 0,
+        "54": 0,
+        "55": 0,
+        "56": 0,
+        "57": 0,
+        "58": 0,
+        "59": 0,
+        "60": 0,
+        "61": 0,
+        "62": 0,
+        "63": 1
+      }
+    },
+    "bajas_antes_dia_0_por_presentacion": [
+      {
+        "code_module": "AAA",
+        "code_presentation": "2013J",
+        "n_registros": 383,
+        "bajas_total": 60,
+        "bajas_antes_dia_0": 7
+      },
+      {
+        "code_module": "AAA",
+        "code_presentation": "2014J",
+        "n_registros": 365,
+        "bajas_total": 66,
+        "bajas_antes_dia_0": 13
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2013B",
+        "n_registros": 1767,
+        "bajas_total": 505,
+        "bajas_antes_dia_0": 122
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2013J",
+        "n_registros": 2237,
+        "bajas_total": 647,
+        "bajas_antes_dia_0": 234
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2014B",
+        "n_registros": 1613,
+        "bajas_total": 489,
+        "bajas_antes_dia_0": 262
+      },
+      {
+        "code_module": "BBB",
+        "code_presentation": "2014J",
+        "n_registros": 2292,
+        "bajas_total": 736,
+        "bajas_antes_dia_0": 239
+      },
+      {
+        "code_module": "CCC",
+        "code_presentation": "2014B",
+        "n_registros": 1936,
+        "bajas_total": 898,
+        "bajas_antes_dia_0": 250
+      },
+      {
+        "code_module": "CCC",
+        "code_presentation": "2014J",
+        "n_registros": 2498,
+        "bajas_total": 1049,
+        "bajas_antes_dia_0": 213
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2013B",
+        "n_registros": 1303,
+        "bajas_total": 431,
+        "bajas_antes_dia_0": 77
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2013J",
+        "n_registros": 1938,
+        "bajas_total": 684,
+        "bajas_antes_dia_0": 190
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2014B",
+        "n_registros": 1228,
+        "bajas_total": 489,
+        "bajas_antes_dia_0": 101
+      },
+      {
+        "code_module": "DDD",
+        "code_presentation": "2014J",
+        "n_registros": 1803,
+        "bajas_total": 631,
+        "bajas_antes_dia_0": 148
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2013J",
+        "n_registros": 1052,
+        "bajas_total": 243,
+        "bajas_antes_dia_0": 66
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2014B",
+        "n_registros": 694,
+        "bajas_total": 173,
+        "bajas_antes_dia_0": 50
+      },
+      {
+        "code_module": "EEE",
+        "code_presentation": "2014J",
+        "n_registros": 1188,
+        "bajas_total": 302,
+        "bajas_antes_dia_0": 67
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2013B",
+        "n_registros": 1614,
+        "bajas_total": 411,
+        "bajas_antes_dia_0": 85
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2013J",
+        "n_registros": 2283,
+        "bajas_total": 677,
+        "bajas_antes_dia_0": 171
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2014B",
+        "n_registros": 1500,
+        "bajas_total": 461,
+        "bajas_antes_dia_0": 123
+      },
+      {
+        "code_module": "FFF",
+        "code_presentation": "2014J",
+        "n_registros": 2365,
+        "bajas_total": 831,
+        "bajas_antes_dia_0": 195
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2013J",
+        "n_registros": 952,
+        "bajas_total": 65,
+        "bajas_antes_dia_0": 22
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2014B",
+        "n_registros": 833,
+        "bajas_total": 100,
+        "bajas_antes_dia_0": 23
+      },
+      {
+        "code_module": "GGG",
+        "code_presentation": "2014J",
+        "n_registros": 749,
+        "bajas_total": 124,
+        "bajas_antes_dia_0": 20
+      }
+    ],
+    "coherencia_bajas_final_result": {
+      "con_fecha_baja": 10072,
+      "con_fecha_baja_por_final_result": {
+        "Distinction": 0,
+        "Pass": 0,
+        "Fail": 9,
+        "Withdrawn": 10063
+      },
+      "withdrawn_sin_fecha_baja": 93,
+      "bajas_antes_dia_0": 2678,
+      "bajas_dia_0_o_posterior": 7394,
+      "sin_fecha_registro": 45
+    }
+  },
+  "tiempo_ejecucion_s": 1.6,
+  "figuras": [
+    "figuras/exp-2026-10-05-01_presentaciones_por_modulo.png",
+    "figuras/exp-2026-10-05-01_final_result_por_presentacion.png",
+    "figuras/exp-2026-10-05-01_bajas_por_semana.png"
+  ]
+}

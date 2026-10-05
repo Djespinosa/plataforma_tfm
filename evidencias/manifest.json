@@ -1,0 +1,28 @@
+{
+  "generado": "2026-10-05T11:03:36",
+  "commit": "9378207",
+  "experimentos": [
+    "experimentos/exp-2026-10-05-01.json"
+  ],
+  "figuras": [
+    {
+      "archivo": "figuras/exp-2026-10-05-01_presentaciones_por_modulo.png",
+      "descripcion": "Presentaciones por módulo y estudiantes matriculados en OULAD",
+      "experimento": "exp-2026-10-05-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-05-01_final_result_por_presentacion.png",
+      "descripcion": "Distribución de final_result por módulo-presentación en OULAD",
+      "experimento": "exp-2026-10-05-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-05-01_bajas_por_semana.png",
+      "descripcion": "Bajas por semana relativa al inicio, incluidas las anteriores al día 0, en OULAD",
+      "experimento": "exp-2026-10-05-01"
+    }
+  ],
+  "capturas": [],
+  "arquitectura": [],
+  "pruebas": [],
+  "usabilidad": []
+}
