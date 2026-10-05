@@ -5,6 +5,7 @@ Genera:
   - Distribución de final_result por presentación (studentInfo.csv).
   - Bajas por semana a partir de date_unregistration (studentRegistration.csv),
     incluidas las anteriores al día 0 del módulo-presentación.
+  - Calidad de datos, versiones del entorno y SHA-256 de los CSV de entrada.
 
 Uso:
     python ml/exploracion_oulad.py
@@ -14,7 +15,9 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import platform
 import subprocess
 import sys
 import time
@@ -27,11 +30,14 @@ matplotlib.use("Agg")
 import matplotlib.patches  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.ticker  # noqa: E402
+import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[1]
 DATOS = RAIZ / "data" / "raw" / "oulad"
 EVIDENCIAS = RAIZ / "evidencias"
+ARCHIVOS_ENTRADA = ["courses.csv", "studentInfo.csv", "studentRegistration.csv"]
+PRESENTACION_REFERENCIA = "2014J"
 
 ORDEN_RESULTADOS = ["Distinction", "Pass", "Fail", "Withdrawn"]
 COLORES_RESULTADOS = {
@@ -70,11 +76,28 @@ def siguiente_id(dir_experimentos: Path, fecha: datetime) -> str:
     return f"{prefijo}{max(existentes, default=0) + 1:02d}"
 
 
+def sha256(ruta: Path) -> str:
+    h = hashlib.sha256()
+    with ruta.open("rb") as f:
+        for bloque in iter(lambda: f.read(1 << 20), b""):
+            h.update(bloque)
+    return h.hexdigest()
+
+
+def versiones_entorno() -> dict:
+    return {
+        "python": platform.python_version(),
+        "pandas": pd.__version__,
+        "numpy": np.__version__,
+        "matplotlib": matplotlib.__version__,
+    }
+
+
 def cargar_datos() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     claves = ["code_module", "code_presentation", "id_student"]
-    cursos = pd.read_csv(DATOS / "courses.csv")
-    info = pd.read_csv(DATOS / "studentInfo.csv", na_values="?")
-    registro = pd.read_csv(DATOS / "studentRegistration.csv", na_values="?")
+    cursos, info, registro = (
+        pd.read_csv(DATOS / archivo, na_values="?") for archivo in ARCHIVOS_ENTRADA
+    )
     if info.duplicated(claves).any() or registro.duplicated(claves).any():
         raise ValueError("Claves (módulo, presentación, estudiante) duplicadas en OULAD")
     return cursos, info, registro
@@ -185,22 +208,39 @@ def figura_bajas(por_semana: pd.Series, ruta: Path) -> None:
     plt.close(fig)
 
 
-def coherencia_bajas(info: pd.DataFrame, registro: pd.DataFrame) -> dict:
-    """Cruza date_unregistration con final_result para documentar la definición de deserción."""
-    union = info.merge(
-        registro, on=["code_module", "code_presentation", "id_student"], validate="1:1"
+def calidad_datos(cursos: pd.DataFrame, info: pd.DataFrame, registro: pd.DataFrame) -> dict:
+    """Incoherencias entre date_unregistration, final_result y la duración del módulo."""
+    claves = ["code_module", "code_presentation"]
+    union = info.merge(registro, on=[*claves, "id_student"], validate="1:1").merge(
+        cursos, on=claves, validate="m:1"
     )
-    con_fecha = union["date_unregistration"].notna()
-    retirado = union["final_result"] == "Withdrawn"
+    baja = union["date_unregistration"]
+    con_fecha = baja.notna()
+    antes_dia_0 = baja < 0
+    tras_fin = baja > union["module_presentation_length"]
     return {
+        "bajas_antes_dia_0": {
+            "total": int(antes_dia_0.sum()),
+            PRESENTACION_REFERENCIA: int(
+                (antes_dia_0 & (union["code_presentation"] == PRESENTACION_REFERENCIA)).sum()
+            ),
+        },
+        "bajas_dia_0_o_posterior": int((baja >= 0).sum()),
+        "withdrawn_sin_fecha_baja": int(((union["final_result"] == "Withdrawn") & ~con_fecha).sum()),
+        "fail_con_fecha_baja": int(((union["final_result"] == "Fail") & con_fecha).sum()),
+        "matriculas_sin_fecha_registro": int(union["date_registration"].isna().sum()),
+        "bajas_posteriores_duracion_modulo": {
+            "definicion": "date_unregistration > module_presentation_length (courses.csv)",
+            "total": int(tras_fin.sum()),
+            "por_presentacion": [
+                {"code_module": m, "code_presentation": p, "n": int(n)}
+                for (m, p), n in union[tras_fin].groupby(claves).size().items()
+            ],
+        },
         "con_fecha_baja": int(con_fecha.sum()),
         "con_fecha_baja_por_final_result": {
             r: int((con_fecha & (union["final_result"] == r)).sum()) for r in ORDEN_RESULTADOS
         },
-        "withdrawn_sin_fecha_baja": int((retirado & ~con_fecha).sum()),
-        "bajas_antes_dia_0": int((union["date_unregistration"] < 0).sum()),
-        "bajas_dia_0_o_posterior": int((union["date_unregistration"] >= 0).sum()),
-        "sin_fecha_registro": int(union["date_registration"].isna().sum()),
     }
 
 
@@ -277,14 +317,16 @@ def main() -> None:
         "commit": commit,
         "descripcion": (
             "Análisis exploratorio de OULAD: presentaciones por módulo, distribución de "
-            "final_result por presentación y bajas por semana (incluidas las anteriores al día 0)"
+            "final_result por presentación, bajas por semana (incluidas las anteriores al día 0) "
+            "y calidad de datos"
         ),
         "dataset": {
             "nombre": "OULAD",
             "version": "2017",
             "n_registros": int(len(info)),
             "n_variables": int(info.shape[1]),
-            "tablas_usadas": ["courses.csv", "studentInfo.csv", "studentRegistration.csv"],
+            "tablas_usadas": ARCHIVOS_ENTRADA,
+            "sha256": {archivo: sha256(DATOS / archivo) for archivo in ARCHIVOS_ENTRADA},
             "distribucion_clases": {
                 "no_desercion": int(totales.drop("Withdrawn").sum()),
                 "desercion": int(totales["Withdrawn"]),
@@ -312,8 +354,9 @@ def main() -> None:
                 "conteos": {str(int(s)): int(n) for s, n in por_semana.items()},
             },
             "bajas_antes_dia_0_por_presentacion": bajas_antes_dia_0_por_presentacion(registro),
-            "coherencia_bajas_final_result": coherencia_bajas(info, registro),
         },
+        "calidad_datos": calidad_datos(cursos, info, registro),
+        "entorno": versiones_entorno(),
         "tiempo_ejecucion_s": round(time.perf_counter() - inicio, 2),
         "figuras": [archivo for archivo, _, _ in figuras],
     }
