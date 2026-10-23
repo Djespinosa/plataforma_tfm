@@ -1,9 +1,10 @@
 {
-  "generado": "2026-10-05T11:21:48",
-  "commit": "913ca7e",
+  "generado": "2026-10-23T16:18:55",
+  "commit": "7008368",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
-    "experimentos/exp-2026-10-05-02.json"
+    "experimentos/exp-2026-10-05-02.json",
+    "experimentos/exp-2026-10-23-01.json"
   ],
   "figuras": [
     {
@@ -35,10 +36,21 @@
       "archivo": "figuras/exp-2026-10-05-02_bajas_por_semana.png",
       "descripcion": "Bajas por semana relativa al inicio, incluidas las anteriores al día 0, en OULAD",
       "experimento": "exp-2026-10-05-02"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-23-01_poblacion_prevalencia_por_corte.png",
+      "descripcion": "Población en riesgo y prevalencia de Withdrawn por corte y partición en OULAD",
+      "experimento": "exp-2026-10-23-01"
     }
   ],
   "capturas": [],
   "arquitectura": [],
-  "pruebas": [],
+  "pruebas": [
+    {
+      "archivo": "pruebas/exp-2026-10-23-01_antifuga.xml",
+      "descripcion": "Pruebas automatizadas anti-fuga de los cortes",
+      "experimento": "exp-2026-10-23-01"
+    }
+  ],
   "usabilidad": []
 }
