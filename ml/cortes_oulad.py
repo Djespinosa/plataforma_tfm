@@ -417,7 +417,12 @@ def ejecutar_pruebas(ruta_xml: Path) -> dict:
     import pytest
 
     codigo = pytest.main([str(RAIZ / "ml" / "tests"), "-q", f"--junitxml={ruta_xml}"])
-    raiz = ET.parse(ruta_xml).getroot()
+    arbol = ET.parse(ruta_xml)
+    raiz = arbol.getroot()
+    # El nombre del equipo no debe llegar al repositorio público.
+    for elemento in raiz.iter("testsuite"):
+        elemento.attrib.pop("hostname", None)
+    arbol.write(ruta_xml, encoding="utf-8", xml_declaration=True)
     suite = raiz if raiz.tag == "testsuite" else raiz.find("testsuite")
     total, fallos, errores, omitidas = (int(suite.get(k, 0)) for k in ("tests", "failures", "errors", "skipped"))
     if codigo != 0 or omitidas:
