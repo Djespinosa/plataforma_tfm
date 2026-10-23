@@ -15,11 +15,6 @@ Uso:
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
-import platform
-import subprocess
-import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -30,12 +25,19 @@ matplotlib.use("Agg")
 import matplotlib.patches  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.ticker  # noqa: E402
-import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-RAIZ = Path(__file__).resolve().parents[1]
-DATOS = RAIZ / "data" / "raw" / "oulad"
-EVIDENCIAS = RAIZ / "evidencias"
+from evidencias import (  # noqa: E402
+    DATOS,
+    EVIDENCIAS,
+    actualizar_manifest,
+    comprobar_arbol_limpio,
+    escribir_json,
+    sha256,
+    siguiente_id,
+    versiones_entorno,
+)
+
 ARCHIVOS_ENTRADA = ["courses.csv", "studentInfo.csv", "studentRegistration.csv"]
 PRESENTACION_REFERENCIA = "2014J"
 
@@ -47,50 +49,6 @@ COLORES_RESULTADOS = {
     "Withdrawn": "#d73027",
 }
 DPI = 300
-
-
-def git(*args: str) -> str:
-    return subprocess.run(
-        ["git", *args], cwd=RAIZ, capture_output=True, text=True, check=True
-    ).stdout.strip()
-
-
-def comprobar_arbol_limpio(salida: Path) -> str:
-    """Devuelve el commit actual; aborta si se exporta a evidencias/ con cambios sin confirmar."""
-    commit = git("rev-parse", "--short", "HEAD")
-    if salida.resolve() == EVIDENCIAS.resolve() and git("status", "--porcelain"):
-        sys.exit(
-            "El árbol de trabajo tiene cambios sin confirmar. Confirma un commit antes de "
-            "exportar a evidencias/ (CONTRATO.md) o usa --salida para un ensayo."
-        )
-    return commit
-
-
-def siguiente_id(dir_experimentos: Path, fecha: datetime) -> str:
-    prefijo = f"exp-{fecha:%Y-%m-%d}-"
-    existentes = [
-        int(p.stem.removeprefix(prefijo))
-        for p in dir_experimentos.glob(f"{prefijo}*.json")
-        if p.stem.removeprefix(prefijo).isdigit()
-    ]
-    return f"{prefijo}{max(existentes, default=0) + 1:02d}"
-
-
-def sha256(ruta: Path) -> str:
-    h = hashlib.sha256()
-    with ruta.open("rb") as f:
-        for bloque in iter(lambda: f.read(1 << 20), b""):
-            h.update(bloque)
-    return h.hexdigest()
-
-
-def versiones_entorno() -> dict:
-    return {
-        "python": platform.python_version(),
-        "pandas": pd.__version__,
-        "numpy": np.__version__,
-        "matplotlib": matplotlib.__version__,
-    }
 
 
 def cargar_datos() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -256,27 +214,6 @@ def bajas_antes_dia_0_por_presentacion(registro: pd.DataFrame) -> list[dict]:
     return tabla.to_dict(orient="records")
 
 
-def actualizar_manifest(salida: Path, fecha: datetime, commit: str, id_exp: str, figuras: list[dict]) -> None:
-    ruta = salida / "manifest.json"
-    manifest = (
-        json.loads(ruta.read_text(encoding="utf-8"))
-        if ruta.exists()
-        else {k: [] for k in ["experimentos", "figuras", "capturas", "arquitectura", "pruebas", "usabilidad"]}
-    )
-    manifest["generado"] = fecha.isoformat(timespec="seconds")
-    manifest["commit"] = commit
-    archivo_exp = f"experimentos/{id_exp}.json"
-    if archivo_exp not in manifest["experimentos"]:
-        manifest["experimentos"].append(archivo_exp)
-    nuevas = {f["archivo"] for f in figuras}
-    manifest["figuras"] = [f for f in manifest["figuras"] if f["archivo"] not in nuevas] + figuras
-    orden = ["generado", "commit", "experimentos", "figuras", "capturas", "arquitectura", "pruebas", "usabilidad"]
-    manifest = {k: manifest[k] for k in orden if k in manifest} | {
-        k: v for k, v in manifest.items() if k not in orden
-    }
-    ruta.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--salida", type=Path, default=EVIDENCIAS, help="Carpeta de evidencias (por defecto evidencias/)")
@@ -356,13 +293,11 @@ def main() -> None:
             "bajas_antes_dia_0_por_presentacion": bajas_antes_dia_0_por_presentacion(registro),
         },
         "calidad_datos": calidad_datos(cursos, info, registro),
-        "entorno": versiones_entorno(),
+        "entorno": versiones_entorno("pandas", "numpy", "matplotlib"),
         "tiempo_ejecucion_s": round(time.perf_counter() - inicio, 2),
         "figuras": [archivo for archivo, _, _ in figuras],
     }
-    (salida / "experimentos" / f"{id_exp}.json").write_text(
-        json.dumps(experimento, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    escribir_json(salida / "experimentos" / f"{id_exp}.json", experimento)
     actualizar_manifest(
         salida, fecha, commit, id_exp,
         [{"archivo": a, "descripcion": d, "experimento": id_exp} for a, d, _ in figuras],

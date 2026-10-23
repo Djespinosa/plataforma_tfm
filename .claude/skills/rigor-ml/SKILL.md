@@ -54,6 +54,8 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       3 por pliegue). Todo lo que tenga validación interna (Optuna, calibración, apilamiento, umbral) usa **los mismos**
       pliegues. Estudiantes repetidos entre presentaciones: se cuentan y se declaran.
 - [ ] Preprocesamiento (imputación, escalado, codificación) dentro de un `Pipeline` ajustado por pliegue.
+- [ ] Las columnas de entrada salen del catálogo de variables; `NO_VARIABLES` de `ml/cortes_oulad.py` (incluido
+      `pliegue`, que vale NA en 2014J y delataría la partición) se descarta de forma explícita.
 - [ ] **Regla 3 de CLAUDE.md:** la prueba no interviene en ninguna decisión. Las configuraciones que se evaluarán en
       prueba (principal, referencias, variantes D8 y D20) se declaran en un archivo confirmado en un commit **anterior**
       a la primera evaluación en prueba. Cada configuración se evalúa en prueba una sola vez.
