@@ -60,24 +60,36 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - [ ] Referencias: clase mayoritaria; regresión logística por defecto (criterio de éxito); regresión logística
       **optimizada con el mismo presupuesto** que AutoML (comparación justa, resultado central).
 - [ ] Semillas fijas y registradas (Optuna, modelos, *bootstrap*).
+- [ ] **Entrega 2 (prompt de la memoria, 2026-10-23):** ningún modelo se evalúa en 2014J; todas las métricas son
+      *out-of-fold*. De 2014J solo se exportan recuentos descriptivos (población, prevalencia, subgrupos, solapamiento).
+- [ ] **Variantes (2026-10-23):** D8, ablación y D20 **reutilizan los hiperparámetros** de la configuración principal
+      (mismo momento y familia) y solo reentrenan; se declara. **Salvaguarda D8:** si la pérdida de ROC-AUC sin variables
+      sensibles es ≥ 0,02 con hiperparámetros reutilizados, la variante sin sensibles se repite con búsqueda propia antes
+      de aplicar la regla (la reutilización penaliza a esa variante y la regla decide la configuración por defecto).
 
 ## 3. AutoML y optimización
 
 - [ ] Candidatos: RL regularizada, RF, GB, XGBoost, LightGBM, CatBoost, MLP y apilamiento de los mejores.
-- [ ] Optuna con TPE; métrica objetivo ROC-AUC (**D6**) media en los pliegues de D29-rev; se registran `n_trials`,
-      semilla, espacio de búsqueda por modelo y tiempo.
+- [ ] Optuna con TPE y poda (valor intermedio = media acumulada tras cada pliegue); métrica objetivo ROC-AUC (**D6**)
+      media en los pliegues de D29-rev; se registran `n_trials`, semilla, configuración del muestreador y del podador,
+      espacio de búsqueda por modelo y tiempo. La RL optimizada recibe el mismo nº de ensayos que cada familia.
 - [ ] **D30** Desbalance: pesos de clase como hiperparámetro; sin sobremuestreo por defecto.
 - [ ] Apilamiento: la validación interna del metamodelo también agrupada por presentación (en scikit-learn 1.4,
       `StackingClassifier` no recibe `groups`: pasar los *splits* precalculados como `cv`).
 
 ## 4. Métricas, calibración y umbral
 
-- [ ] **D31-rev** Orden: selección → calibración (Platt o isotónica, elegida por Brier en validación interna) con los
-      mismos pliegues → umbral → reentrenamiento → evaluación única en prueba. Con `CalibratedClassifierCV` usar
-      `cv=<splits agrupados>` y `ensemble=False`: así hay un único modelo base reentrenado (sobre el que se calcula SHAP,
-      D32) y un calibrador ajustado con predicciones *out-of-fold*.
+- [ ] **D31-rev** Orden: selección → calibración → umbral → reentrenamiento → evaluación única en prueba (Entrega 3).
+- [ ] **Calibración anidada (2026-10-23).** Para cada pliegue externo *f*: modelo y calibrador (Platt e isotónica) se
+      ajustan solo con los otros 4 pliegues, con `CalibratedClassifierCV(cv=<divisiones internas agrupadas por
+      presentación>)` (nunca `cv=5` sin grupos), y se predice *f*. Ninguna probabilidad calibrada *out-of-fold* procede de un
+      calibrador que vio esa matrícula. Método elegido por Brier sobre esas predicciones. **No es válido** calibrar con los
+      5 pliegues y fijar el umbral sobre esas mismas probabilidades.
 - [ ] **D6/D31** Umbral = el que alcanza sensibilidad ≥ 0,70 con máxima precisión sobre las probabilidades calibradas
-      *out-of-fold*. Nunca se ajusta con prueba.
+      *out-of-fold* anidadas. Nunca se ajusta con prueba.
+- [ ] Modelo final (desplegado y, en la Entrega 3, evaluado en prueba): reentrenado con las 15 presentaciones y calibrado
+      con `CalibratedClassifierCV` sobre los 5 pliegues agrupados; se le aplica el umbral anterior. SHAP sobre su modelo base
+      sin calibrar (D32). Se declara que umbral y modelo final proceden de ajustes distintos.
 - [ ] **D21** En prueba, la sensibilidad se informa literalmente junto con umbral, precisión y **tasa de alerta** (D19).
 - [ ] **D4/D22** Umbrales congelados: ROC-AUC ≥ 0,75 y sensibilidad ≥ 0,70 en las semanas 8 y 12, cada una por separado,
       sobre 2014J global. Superar a las referencias en **todos** los momentos.
@@ -87,15 +99,19 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 
 ## 5. Comparación estadística
 
+- [ ] **ROC-AUC informado:** media ± desviación entre pliegues **y** ROC-AUC de las predicciones *out-of-fold* agrupadas
+      (sobre esta se calculan DeLong y Holm). Se declara que esas predicciones proceden de 5 modelos distintos.
 - [ ] **D5/F3** Por momento: prueba de **DeLong** (pareada, mismas observaciones) e **IC 95 % *bootstrap*** de la diferencia
-      de ROC-AUC entre el mejor AutoML y la RL optimizada. Implementación propia con prueba unitaria contra un caso conocido.
-- [ ] **F3** Ablación por grupos de variables (demográficas, actividad, evaluaciones) y por momento.
-- [ ] **D20** Sensibilidad a la fuga: repetir cada momento **sin** excluir a los ya retirados e informar la diferencia de
-      ROC-AUC (figura por semana). Es un análisis, no un criterio de éxito.
-- [ ] **D33** Parsimonia: la plataforma despliega el modelo más simple cuya diferencia con el mejor no sea significativa
-      (DeLong). `[DECIDIR con el estudiante antes de implementar]`: (i) el orden de complejidad entre familias,
-      fijado de antemano; (ii) que la comparación se haga con predicciones *out-of-fold* y no con prueba (si se hace con
-      prueba, la prueba decide qué se despliega, en conflicto con la regla 3).
+      de ROC-AUC entre el mejor AutoML y la RL optimizada; *p* sin corregir y **corregido por Holm** sobre los 4 momentos.
+      Implementación propia con prueba unitaria contra un caso conocido.
+- [ ] **F3** Ablación (solo en validación cruzada) por momento con 4 grupos: (1) demográficas y matrícula; (2) aula virtual;
+      (3) evaluaciones; (4) contexto del módulo (módulo, B/J, duración).
+- [ ] **D20** Sensibilidad a la fuga: repetir cada momento **sin** excluir a los ya retirados (salvo las bajas anteriores al
+      día 0) e informar la diferencia de ROC-AUC (figura por semana). Se mantienen la exclusión por matrícula tardía y
+      D26/D27, para que solo cambie la exclusión de los ya retirados. Es un análisis, no un criterio de éxito.
+- [ ] **D33** Parsimonia: se despliega el modelo más simple (RL < árboles < MLP < apilamiento) sin diferencia significativa
+      de ROC-AUC con el mejor según DeLong sobre predicciones **out-of-fold** (nunca prueba). Dentro de "árboles" (RF, GB,
+      XGBoost, LightGBM, CatBoost), si varios no difieren del mejor, el de mayor ROC-AUC *out-of-fold*.
 
 ## 6. Explicabilidad y equidad
 
@@ -107,6 +123,8 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - [ ] **D8** Variables sensibles (`gender`, `disability`, `age_band`, `imd_band`): entrenar con y sin ellas. Si quitarlas
       cuesta < 0,02 de ROC-AUC **en validación cruzada**, el defecto es sin ellas. Sensibilidad y tasa de falsos
       positivos por subgrupo. En prueba se informan ambas variantes, sin usarlas para elegir.
+- [ ] Entrega 2: estabilidad de SHAP (D9) y auditoría de equidad *out-of-fold* con el umbral elegido, con el tamaño de
+      cada subgrupo (incluidos los faltantes de `imd_band`).
 
 ## 7. Reproducibilidad
 
@@ -115,6 +133,8 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 
 ## Limitaciones conocidas que se declaran (no se "arreglan" en silencio)
 
-- La selección y el umbral usan las mismas predicciones *out-of-fold*: ligero optimismo de las métricas de validación.
+- Optuna selecciona con los mismos pliegues con los que se informan las métricas *out-of-fold*: ligero optimismo de las
+  métricas de validación (sin búsqueda anidada, por coste).
+- Las variantes (D8, ablación, D20) reutilizan los hiperparámetros de la configuración principal.
 - CCC solo tiene una presentación de entrenamiento (2014B): en el pliegue que la contiene, CCC no se ve al entrenar.
 - Withdrawn como aproximación a la deserción (D2).

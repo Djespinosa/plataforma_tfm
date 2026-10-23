@@ -5,7 +5,7 @@ description: Cómo exportar a evidencias/ cualquier resultado que vaya a usar la
 
 # Contrato de evidencias
 
-La norma es `evidencias/CONTRATO.md` (incluida su sección de ampliaciones). Esta skill dice **cómo** cumplirla.
+La norma es `evidencias/CONTRATO.md`. Esta skill dice **cómo** cumplirla.
 La memoria (`../memoria`) solo lee `evidencias/` con `/importar-evidencias`; su agente `analista-resultados`
 rechaza como bloqueante cualquier experimento sin partición, semilla o control de fuga verificables.
 
@@ -36,7 +36,7 @@ cada biblioteca que use el script (scikit-learn, xgboost, lightgbm, catboost, op
 ## Campos obligatorios por tipo
 
 Todos: `id`, `tipo`, `fecha`, `commit`, `descripcion`, `entorno`, `tiempo_ejecucion_s`, `figuras`, y en `dataset`
-el `sha256` de cada archivo de entrada. Los campos de cada tipo están en la sección de ampliaciones de `CONTRATO.md`.
+el `sha256` de cada archivo de entrada. Los campos de cada tipo están en `CONTRATO.md`.
 
 ## Comprobaciones antes de dar una exportación por buena
 

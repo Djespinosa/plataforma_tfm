@@ -58,17 +58,18 @@ Detalle de capas, convenciones, API y modelo de datos: skill `arquitectura`.
 | Comando | `/cortes`, `/experimento`, `/comparar` | Construir cortes, ejecutar un experimento, comparar modelos |
 | Comando | `/auditar-fuga`, `/exportar-evidencias`, `/test`, `/estado` | Auditar, validar evidencias, probar, ver el avance |
 
-## Estado actual (2026-10-17)
+## Estado actual (2026-10-23)
 
-- Hecho: exploración de OULAD con calidad de datos, versiones y SHA-256 (exp-2026-10-05-02); infraestructura de Claude Code.
-- Pendiente para la memoria (`decisiones.md`, 2026-10-05): bajas en el día 0 exacto; población y prevalencia por corte
-  y partición; definición de `n_variables`. Se resuelve con `/cortes`.
-- Decisiones abiertas que bloquean código: parsimonia D33 (orden de complejidad y si se compara con *out-of-fold* o
-  con prueba), `rigor-ml` §5.
+- Hecho: exploración de OULAD con calidad de datos, versiones y SHA-256 (exp-2026-10-05-02); infraestructura de Claude Code
+  (e1da870); F0 del plan de evidencias de la Entrega 2 (entorno, `rigor-ml` y `CONTRATO.md` al diseño vigente).
+- Encargo vigente de la memoria: `../memoria/revisiones/prompt-plataforma-evidencias-e2.md` (puntos 1-38).
+- Siguiente: F1 (datos y población: `ml/cortes_oulad.py`, pruebas anti-fuga, experimento `cortes`).
 - **Pendiente de registrar en `../memoria/plan/decisiones.md`** (la próxima vez que se trabaje en la memoria; desde aquí
   no se escribe allí): matrícula tardía (a) y evaluaciones (b), confirmadas el 2026-10-17, con el tratamiento de
-  `is_banked`; texto en `rigor-ml` §1.
-- Entorno: faltan xgboost, lightgbm, catboost, optuna, shap y pytest.
+  `is_banked`; variantes con hiperparámetros reutilizados y salvaguarda D8; población de D20 con matrícula tardía y
+  D26/D27; desempate D33 dentro de "árboles"; licencia MIT del código (2026-10-23). Texto en `rigor-ml`.
+- Entorno: `~/.venvs/plataforma_tfm` (fuera de OneDrive), versiones exactas en `requirements.txt`. Ejecutar con
+  `~/.venvs/plataforma_tfm/Scripts/python`. La exploración reproduce exp-2026-10-05-02 idéntica con pandas 3.1.
 
 ## Plan hacia la Entrega 2 (09/11/2026, D17)
 

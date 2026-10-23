@@ -1,50 +1,106 @@
 # Contrato de evidencias plataforma → memoria
 
 La memoria solo usa lo que está en esta carpeta. Cada evidencia debe poder rastrearse hasta un commit.
+Revisado el 2026-10-23 al diseño vigente (`../memoria/plan/decisiones.md`; checklist en `.claude/skills/rigor-ml`).
 
 ## Estructura
 
 ```
 evidencias/
 ├── manifest.json            # Índice de todo lo exportado (obligatorio)
-├── experimentos/<id>.json   # Un archivo por experimento (esquema abajo)
-├── figuras/                 # PNG/SVG a 300 ppp: ROC, PR, matrices de confusión, SHAP global/local, comparativas
+├── experimentos/<id>.json   # Un archivo por experimento (esquemas abajo)
+├── figuras/                 # PNG/SVG a 300 ppp: ROC, PR, calibración, SHAP global/local, comparativas
 ├── capturas/                # Capturas de pantalla de la interfaz (PNG), nombre descriptivo
 ├── arquitectura/            # Diagramas (PNG/SVG + fuente .mmd/.puml/.drawio)
 ├── pruebas/                 # Informes de pruebas y cobertura (JUnit XML, HTML o resumen JSON)
 └── usabilidad/              # Resultados anonimizados (CSV) + instrumento utilizado (cuestionario)
 ```
 
-## Esquema de `experimentos/<id>.json`
+## Campos comunes a todo experimento
 
 ```json
 {
-  "id": "exp-2026-11-03-01",
-  "fecha": "2026-11-03T10:15:00",
+  "id": "exp-2026-10-27-01",
+  "tipo": "cortes",
+  "fecha": "2026-10-27T10:15:00",
   "commit": "a1b2c3d",
-  "descripcion": "AutoML sobre OULAD, ventana de 4 semanas, métrica objetivo F1",
-  "dataset": {
-    "nombre": "OULAD",
-    "version": "2017",
-    "n_registros": 0,
-    "n_variables": 0,
-    "ventana_prediccion": "semana 4 de 39",
-    "distribucion_clases": {"no_desercion": 0, "desercion": 0}
-  },
-  "particion": {"estrategia": "estratificada", "test_size": 0.2, "semilla": 42, "validacion": "5-fold CV estratificada sobre entrenamiento"},
-  "automl": {"optimizador": "Optuna", "n_trials": 100, "metrica_objetivo": "f1", "modelos_candidatos": ["logreg", "rf", "gb", "xgb", "lgbm"]},
-  "tratamiento_desbalance": "class_weight=balanced",
-  "modelo_seleccionado": {"tipo": "lgbm", "hiperparametros": {}},
-  "metricas_cv": {"f1_media": 0.0, "f1_desv": 0.0},
-  "metricas_test": {
-    "accuracy": 0.0, "precision": 0.0, "recall": 0.0, "f1": 0.0, "roc_auc": 0.0, "pr_auc": 0.0,
-    "matriz_confusion": [[0, 0], [0, 0]], "umbral": 0.5
-  },
-  "comparativa_candidatos": [{"modelo": "logreg", "f1_cv": 0.0, "roc_auc_cv": 0.0}],
+  "descripcion": "…",
+  "dataset": {"nombre": "OULAD", "version": "2017", "tablas_usadas": ["…"], "sha256": {"courses.csv": "…"}},
+  "entorno": {"python": "…", "pandas": "…", "scikit-learn": "…"},
   "tiempo_ejecucion_s": 0,
-  "figuras": ["figuras/exp-2026-11-03-01_roc.png", "figuras/exp-2026-11-03-01_shap_global.png"]
+  "figuras": ["figuras/exp-2026-10-27-01_….png"]
 }
 ```
+
+- `tipo`: `exploracion`, `cortes`, `modelado` o `comparacion`. Si falta (exp-2026-10-05-01 y -02), es `exploracion`.
+- `entorno`: versión de Python y de **cada** biblioteca que usa el script. `dataset.sha256`: de cada archivo de entrada.
+- Un valor que no se puede calcular se deja en `null` y se añade su motivo en `motivos_null: {"<ruta.del.campo>": "…"}`.
+
+## `tipo: "exploracion"`
+
+Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribucion_final_result`), `exploracion`,
+`calidad_datos`.
+
+## `tipo: "cortes"` (preparación de datos; sin modelos)
+
+| Campo | Contenido |
+|---|---|
+| `reglas` | Decisiones aplicadas (D2, D24-D28, matrícula tardía, evaluaciones, `is_banked`) con su texto |
+| `eliminaciones` | Por regla (D26, D27) y partición: matrículas eliminadas |
+| `bajas_dia_0` | Bajas con `date_unregistration == 0`, total y por partición |
+| `particion` | `{entrenamiento: [presentaciones], prueba: [presentaciones], n_matriculas, n_estudiantes_unicos}` por partición |
+| `pliegues` | Composición de los 5 pliegues (presentaciones) y, por corte, `n` y prevalencia de cada uno |
+| `solapamiento` | Estudiantes en más de un pliegue; estudiantes a la vez en entrenamiento y en 2014J |
+| `cortes` | Por semana: `{semana, dia_corte, proporcion_curso: {B, J}, n_variables, variables_por_grupo, por_particion: {entrenamiento, prueba}}`; cada partición con `{n, desercion, no_desercion, prevalencia, excluidos_baja, excluidos_matricula_tardia}` y el mismo desglose para `CCC` y `resto` |
+| `cortes_sin_exclusion_retirados` | Igual que `cortes`, para la población de D20 |
+| `subgrupos` | Por corte, partición, variable sensible y valor (incluido faltante): `{n, prevalencia}` |
+| `evaluaciones` | Recuentos afectados por las reglas: filas y estudiantes `is_banked`, exámenes excluidos, notas TMA descartadas |
+| `catalogo_variables` | Ruta a un CSV en `experimentos/` con nombre, tabla de origen, tipo, momento desde el que existe, cálculo, grupo de ablación y motivo de exclusión |
+| `pruebas_antifuga` | Ruta al informe de pruebas en `pruebas/` y resumen `{superadas, fallidas}` |
+
+`n_variables` = columnas de entrada del modelo, sin identificadores ni etiqueta.
+
+## `tipo: "modelado"` (una variante, los 4 momentos; solo validación en la Entrega 2)
+
+```json
+{
+  "variante": "principal",
+  "experimento_cortes": "exp-…",
+  "particion": {"estrategia": "temporal", "entrenamiento": "presentaciones anteriores a 2014J (15)", "prueba": "2014J (7)",
+                "validacion": "5 pliegues agrupados por presentación", "semillas": {"optuna": 42, "modelos": 42, "bootstrap": 42}},
+  "automl": {"optimizador": "Optuna", "muestreador": "TPE", "podador": "…", "metrica_objetivo": "roc_auc",
+             "n_trials_por_familia": 0, "espacios_busqueda": {"lgbm": {"…": "…"}}, "apilamiento": {"base": [], "metamodelo": "…"}},
+  "tratamiento_desbalance": "class_weight como hiperparámetro",
+  "evaluado_en_prueba": false,
+  "momentos": [{
+    "semana": 8,
+    "familias": [{"modelo": "lgbm", "hiperparametros": {}, "tiempo_s": 0,
+                  "por_pliegue": [{"pliegue": 1, "roc_auc": 0.0, "pr_auc": 0.0, "brier": 0.0}],
+                  "roc_auc_media": 0.0, "roc_auc_desv": 0.0, "roc_auc_oof": 0.0, "pr_auc_oof": 0.0}],
+    "referencias": [{"modelo": "mayoritaria"}, {"modelo": "rl_defecto"}, {"modelo": "rl_optimizada"}],
+    "modelo_seleccionado": "lgbm",
+    "modelo_desplegado": {"modelo": "…", "motivo": "D33: …"},
+    "calibracion": {"metodo": "isotonica", "brier_sin_calibrar": 0.0, "brier_calibrado": 0.0, "anidada": true},
+    "punto_operacion_oof": {"umbral": 0.0, "sensibilidad": 0.0, "precision": 0.0, "tasa_alerta": 0.0, "matriz_confusion": [[0, 0], [0, 0]]},
+    "desglose": {"CCC": {}, "resto": {}},
+    "shap": {"explicador": "tree", "coste_s": 0, "estabilidad": {"spearman_media": 0.0, "spearman_rango": [0.0, 0.0], "top10_solape_media": 0.0, "top10_solape_rango": [0.0, 0.0]}},
+    "equidad_oof": {"gender": {"F": {"n": 0, "sensibilidad": 0.0, "tasa_falsos_positivos": 0.0}}}
+  }],
+  "metricas_test": null
+}
+```
+
+- `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion_<grupo>`.
+  Las variantes que reutilizan hiperparámetros indican `hiperparametros_de: "<id del experimento principal>"`.
+- Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros).
+- `metricas_test` es `null` mientras `evaluado_en_prueba` sea `false`. En la Entrega 3 llevará por momento las mismas
+  métricas, el punto de operación en prueba y `plan_evaluacion` (ruta y commit del archivo que declaraba la configuración).
+
+## `tipo: "comparacion"`
+
+`experimentos` (ids comparados), `origen_predicciones` (`oof` o `prueba`) y `contrastes`: por semana
+`{modelo_a, modelo_b, roc_auc_a, roc_auc_b, diferencia, delong_p, delong_p_holm, ic95_bootstrap: [inf, sup], n_bootstrap, semilla}`.
+Holm se aplica sobre los 4 momentos de cada par de modelos comparado.
 
 ## `manifest.json`
 
@@ -63,55 +119,8 @@ evidencias/
 
 ## Reglas
 - Exportar siempre desde un árbol de trabajo limpio (sin cambios sin confirmar); registrar el commit.
-- Los valores `0` del ejemplo son marcadores: se rellenan con resultados reales, nunca a mano.
+- Los valores `0` de los ejemplos son marcadores: se rellenan con resultados reales, nunca a mano.
 - No borrar experimentos antiguos citados en la memoria; añadir nuevos con otro `id`.
-
-## Ampliaciones (2026-10-17)
-
-Estas ampliaciones **añaden** campos; no cambian los anteriores. El ejemplo de arriba es ilustrativo: en los
-experimentos de modelado, la partición y la métrica siguen las decisiones D7-rev, D29-rev y D6
-(`../memoria/plan/decisiones.md`).
-
-### Campos comunes a todo experimento
-
-| Campo | Contenido |
-|---|---|
-| `tipo` | `exploracion`, `cortes`, `modelado` o `comparacion`. Si falta (exp-2026-10-05-01 y -02), es `exploracion` |
-| `entorno` | Versión de Python y de cada biblioteca usada (ya presente en exp-2026-10-05-02) |
-| `dataset.sha256` | SHA-256 de cada archivo de entrada (ya presente en exp-2026-10-05-02) |
-| `calidad_datos` | Recuentos de anomalías detectadas (ya presente en exp-2026-10-05-02) |
-
-### `tipo: "cortes"`
-
-`cortes`: lista con una entrada por semana `{semana, dia_corte, n_variables, variables_por_grupo, exclusiones,
-entrenamiento: {n, desercion, no_desercion, prevalencia}, prueba: {…}}`; `bajas_dia_0` (bajas con
-`date_unregistration == 0`); `catalogo_variables` (nombre, grupo, origen, fecha máxima usada).
-`n_variables` = columnas de entrada del modelo, sin identificadores ni etiqueta.
-
-### `tipo: "modelado"` (una configuración en un momento)
-
-Además de los campos del esquema base (`particion`, `automl`, `modelo_seleccionado`, `metricas_cv`, `metricas_test`,
-`comparativa_candidatos`):
-
-| Campo | Contenido |
-|---|---|
-| `semana` | 0, 4, 8 o 12 |
-| `variante` | `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion_<grupo>` |
-| `evaluado_en_prueba` | `true` / `false`. Si es `false`, `metricas_test` es `null` |
-| `plan_evaluacion` | Ruta y commit del archivo que declaraba la configuración antes de evaluarla en prueba |
-| `referencias` | Métricas de clase mayoritaria, RL por defecto y RL optimizada, con el mismo formato |
-| `calibracion` | `{metodo, brier_cv, brier_test, figura}` |
-| `punto_operacion` | `{umbral, sensibilidad, precision, tasa_alerta}` en *out-of-fold* y en prueba |
-| `desglose` | Métricas de CCC frente al resto y por módulo (informativas) |
-| `shap` | `{explicador, coste_s, estabilidad: {spearman_media, spearman_rango, top10_solape_media, top10_solape_rango}}` |
-| `equidad` | Por variable sensible y subgrupo: `{n, sensibilidad, tasa_falsos_positivos}` |
-| `semillas` | Semillas de partición, Optuna, modelos y *bootstrap* |
-
-### `tipo: "comparacion"`
-
-`experimentos` (ids comparados), `origen_predicciones` (`oof` o `prueba`) y, por semana, `{modelo_a, modelo_b,
-roc_auc_a, roc_auc_b, diferencia, delong_p, ic95_bootstrap: [inf, sup], n_bootstrap, semilla}`.
-
-### Regla adicional
-
+- De 2014J, hasta la evaluación final de la Entrega 3, solo se exportan recuentos descriptivos: nunca predicciones ni métricas.
 - Ningún experimento con `evaluado_en_prueba: true` sin `plan_evaluacion` cuyo commit sea anterior al del experimento.
+- Sin datos personales del autor en ningún archivo exportado.
