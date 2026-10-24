@@ -284,6 +284,14 @@ def test_columnas_coinciden_con_el_catalogo():
     assert not variables & {"date_unregistration", "final_result"}
 
 
+def test_cada_variable_tiene_uno_de_los_cinco_grupos_de_ablacion():
+    tablas = tablas_sinteticas()
+    catalogo = co.catalogo_variables(co.tipos_actividad(tablas["vle"]))
+    grupos = catalogo.loc[catalogo["motivo_exclusion"] == "", "grupo_ablacion"]
+    assert len(co.GRUPOS) == 5
+    assert set(grupos) == set(co.GRUPOS)
+
+
 def test_pliegues_tres_presentaciones_por_pliegue_y_reproducibles():
     presentaciones = [f"M{i:02d}_2013J" for i in range(15)] + ["M00_2014J"]
     base = pd.DataFrame({"presentacion": presentaciones,

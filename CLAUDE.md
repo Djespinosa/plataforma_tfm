@@ -61,13 +61,14 @@ Detalle de capas, convenciones, API y modelo de datos: skill `arquitectura`.
 ## Estado actual (2026-10-23)
 
 - Hecho: exploración de OULAD con calidad de datos, versiones y SHA-256 (exp-2026-10-05-02); infraestructura de Claude Code
-  (e1da870); F0 del plan de evidencias de la Entrega 2 (entorno, `rigor-ml` y `CONTRATO.md` al diseño vigente).
-- Encargo vigente de la memoria: `../memoria/revisiones/prompt-plataforma-evidencias-e2.md` (puntos 1-38).
-- Siguiente: F1 (datos y población: `ml/cortes_oulad.py`, pruebas anti-fuga, experimento `cortes`).
-- **Pendiente de registrar en `../memoria/plan/decisiones.md`** (la próxima vez que se trabaje en la memoria; desde aquí
-  no se escribe allí): matrícula tardía (a) y evaluaciones (b), confirmadas el 2026-10-17, con el tratamiento de
-  `is_banked`; variantes con hiperparámetros reutilizados y salvaguarda D8; población de D20 con matrícula tardía y
-  D26/D27; desempate D33 dentro de "árboles"; licencia MIT del código (2026-10-23). Texto en `rigor-ml`.
+  (e1da870); F0 del plan de evidencias de la Entrega 2 (entorno, `rigor-ml` y `CONTRATO.md` al diseño vigente); F1, cortes
+  de OULAD con 52 pruebas anti-fuga (exp-2026-10-23-01, 99a3e1a); anexo D44-D50 incorporado a `rigor-ml` y `CONTRATO.md`,
+  con 5 grupos de ablación en el catálogo (D46; se exporta en el próximo experimento `cortes`).
+- Encargo vigente de la memoria: `../memoria/revisiones/prompt-plataforma-evidencias-e2.md` (puntos 1-38) y su anexo D48-D50.
+- Siguiente: F2 (núcleo `ml/automl/`: pliegues, Pipeline con D28, Optuna con poda, calibración anidada, umbral, apilamiento
+  D48, DeLong, Holm y *bootstrap*, equidad D50), con ensayo cronometrado y parada para confirmar el presupuesto.
+- Las decisiones (a), (b), `is_banked`, variantes y D20 ya están en `decisiones.md` (D34-D39). **Pendiente de registrar:**
+  licencia MIT del código (2026-10-23).
 - Entorno: `~/.venvs/plataforma_tfm` (fuera de OneDrive), versiones exactas en `requirements.txt`. Ejecutar con
   `~/.venvs/plataforma_tfm/Scripts/python`. La exploración reproduce exp-2026-10-05-02 idéntica con pandas 3.1.
 

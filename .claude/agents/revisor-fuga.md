@@ -14,7 +14,8 @@ Lee `CLAUDE.md` y la skill `rigor-ml`. Si hay un experimento concreto que revisa
 1. **Fuga temporal:** cada uso de `date`, `date_submitted`, `date_unregistration`, `final_result`, `score`; que el filtro
    `≤ 7k` se aplique antes de agregar; notas de TMA; `is_banked`; estadísticos de cohorte; variables derivadas de la etiqueta.
 2. **Fuga entre pliegues:** preprocesamiento fuera del `Pipeline`; imputación o escalado ajustados con todo el entrenamiento;
-   pliegues no agrupados por presentación; calibración, apilamiento o umbral con pliegues distintos de los de D29-rev.
+   pliegues no agrupados por presentación; calibración, apilamiento o umbral con pliegues distintos de los de D29-rev;
+   metamodelo del apilamiento entrenado con predicciones de datos que vieron sus modelos base o del pliegue evaluado (D48).
 3. **Uso de la prueba:** toda lectura de 2014J o de sus etiquetas; que solo ocurra en la evaluación final de configuraciones
    declaradas en un commit anterior (`git log` del archivo de configuración frente a la fecha del experimento); que
    ningún umbral, hiperparámetro, selección de variables o elección de modelo dependa de ella.

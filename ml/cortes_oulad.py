@@ -61,7 +61,8 @@ NO_VARIABLES = ["code_presentation", "id_student", "presentacion", "particion", 
 SENSIBLES = ["gender", "disability", "age_band", "imd_band"]
 DPI = 300
 
-GRUPOS = ["demograficas_matricula", "aula_virtual", "evaluaciones", "contexto_modulo"]
+# Cinco grupos de ablación (D46): el aula virtual se divide en clics agregados y variables derivadas.
+GRUPOS = ["demograficas_matricula", "aula_virtual_clics", "aula_virtual_derivadas", "evaluaciones", "contexto_modulo"]
 EXCLUIDAS = [
     ("id_student", "studentInfo", "identificador"),
     ("code_presentation", "studentInfo", "identificador (la información útil está en tipo_presentacion)"),
@@ -295,19 +296,19 @@ def catalogo_variables(tipos: list[str]) -> pd.DataFrame:
              "día de matrícula relativo al inicio; faltantes imputados por la mediana del pliegue (D28, en el Pipeline)",
              "demograficas_matricula"),
         fila("falta_date_registration", "studentRegistration", "binaria", "1 si date_registration falta (D28)", "demograficas_matricula"),
-        fila("clics_total", "studentVle", "numérica", "suma de sum_click con date ≤ 7k (incluye días previos al inicio)", "aula_virtual"),
-        fila("dias_activos", "studentVle", "numérica", "días distintos con clics y date ≤ 7k", "aula_virtual"),
-        *[fila(f"clics_{t}", "studentVle + vle", "numérica", f"suma de sum_click en actividades {t} con date ≤ 7k", "aula_virtual")
+        fila("clics_total", "studentVle", "numérica", "suma de sum_click con date ≤ 7k (incluye días previos al inicio)", "aula_virtual_clics"),
+        fila("dias_activos", "studentVle", "numérica", "días distintos con clics y date ≤ 7k", "aula_virtual_clics"),
+        *[fila(f"clics_{t}", "studentVle + vle", "numérica", f"suma de sum_click en actividades {t} con date ≤ 7k", "aula_virtual_clics")
           for t in tipos],
         *[fila(f"clics_ventana_{j}", "studentVle", "numérica",
-               f"suma de sum_click con date en ({7}k − {7 * j}, 7k − {7 * (j - 1)}]", "aula_virtual") for j in range(1, 5)],
-        fila("proporcion_dias_activos_28d", "studentVle", "numérica", "días activos en (7k − 28, 7k] / 28 (regularidad)", "aula_virtual"),
-        fila("sin_actividad", "studentVle", "binaria", "1 si no hay clics con date ≤ 7k", "aula_virtual"),
-        fila("dias_desde_ultima_actividad", "studentVle", "numérica", "7k − última date con clics ≤ 7k; vacía si no hay", "aula_virtual"),
-        fila("tendencia_4s", "studentVle", "numérica", "pendiente MCO de clics_ventana_4..1 (tendencia semanal)", "aula_virtual"),
-        fila("cv_clics_4s", "studentVle", "numérica", "desviación / media de las 4 ventanas (regularidad); vacía si media 0", "aula_virtual"),
+               f"suma de sum_click con date en ({7}k − {7 * j}, 7k − {7 * (j - 1)}]", "aula_virtual_clics") for j in range(1, 5)],
+        fila("proporcion_dias_activos_28d", "studentVle", "numérica", "días activos en (7k − 28, 7k] / 28 (regularidad)", "aula_virtual_derivadas"),
+        fila("sin_actividad", "studentVle", "binaria", "1 si no hay clics con date ≤ 7k", "aula_virtual_derivadas"),
+        fila("dias_desde_ultima_actividad", "studentVle", "numérica", "7k − última date con clics ≤ 7k; vacía si no hay", "aula_virtual_derivadas"),
+        fila("tendencia_4s", "studentVle", "numérica", "pendiente MCO de clics_ventana_4..1 (tendencia semanal)", "aula_virtual_derivadas"),
+        fila("cv_clics_4s", "studentVle", "numérica", "desviación / media de las 4 ventanas (regularidad); vacía si media 0", "aula_virtual_derivadas"),
         *[fila(f"percentil_{c}_cohorte", "studentVle", "numérica",
-               f"percentil de {c} en la población elegible de la misma presentación en el corte (datos ≤ 7k)", "aula_virtual")
+               f"percentil de {c} en la población elegible de la misma presentación en el corte (datos ≤ 7k)", "aula_virtual_derivadas")
           for c in ("clics_total", "dias_activos", "clics_ventana_1")],
         fila("n_evaluaciones_vencidas", "assessments", "numérica",
              "evaluaciones no Exam con date ≤ 7k, sin contar las convalidadas del estudiante", "evaluaciones"),

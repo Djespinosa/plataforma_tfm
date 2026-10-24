@@ -1,7 +1,7 @@
 # Contrato de evidencias plataforma → memoria
 
 La memoria solo usa lo que está en esta carpeta. Cada evidencia debe poder rastrearse hasta un commit.
-Revisado el 2026-10-23 al diseño vigente (`../memoria/plan/decisiones.md`; checklist en `.claude/skills/rigor-ml`).
+Revisado el 2026-10-23 al diseño vigente, con D44-D50 (`../memoria/plan/decisiones.md`; checklist en `.claude/skills/rigor-ml`).
 
 ## Estructura
 
@@ -69,7 +69,8 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   "particion": {"estrategia": "temporal", "entrenamiento": "presentaciones anteriores a 2014J (15)", "prueba": "2014J (7)",
                 "validacion": "5 pliegues agrupados por presentación", "semillas": {"optuna": 42, "modelos": 42, "bootstrap": 42}},
   "automl": {"optimizador": "Optuna", "muestreador": "TPE", "podador": "…", "metrica_objetivo": "roc_auc",
-             "n_trials_por_familia": 0, "espacios_busqueda": {"lgbm": {"…": "…"}}, "apilamiento": {"base": [], "metamodelo": "…"}},
+             "n_trials_por_familia": 0, "espacios_busqueda": {"lgbm": {"…": "…"}},
+             "apilamiento": {"en_busqueda": false, "base": "mejor de cada familia (D48)", "metamodelo": "rl_regularizada", "cv_interna": "agrupada por presentación"}},
   "tratamiento_desbalance": "class_weight como hiperparámetro",
   "evaluado_en_prueba": false,
   "momentos": [{
@@ -77,14 +78,21 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
     "familias": [{"modelo": "lgbm", "hiperparametros": {}, "tiempo_s": 0,
                   "por_pliegue": [{"pliegue": 1, "roc_auc": 0.0, "pr_auc": 0.0, "brier": 0.0}],
                   "roc_auc_media": 0.0, "roc_auc_desv": 0.0, "roc_auc_oof": 0.0, "pr_auc_oof": 0.0}],
+    "apilamiento": {"base": ["rl", "lgbm", "…"], "tiempo_s": 0, "por_pliegue": [], "roc_auc_media": 0.0, "roc_auc_desv": 0.0, "roc_auc_oof": 0.0, "pr_auc_oof": 0.0},
     "referencias": [{"modelo": "mayoritaria"}, {"modelo": "rl_defecto"}, {"modelo": "rl_optimizada"}],
-    "modelo_seleccionado": "lgbm",
-    "modelo_desplegado": {"modelo": "…", "motivo": "D33: …"},
+    "mejor_automl": "lgbm",
+    "contraste_central": {"modelo_a": "lgbm", "modelo_b": "rl_optimizada", "diferencia": 0.0, "ic95_bootstrap": [0.0, 0.0], "delong_p": 0.0, "delong_p_holm": 0.0, "lectura": "…"},
+    "parsimonia": {"mejor": "lgbm", "diferencia_minima": 0.02, "alfa": 0.05,
+                   "candidatos": [{"modelo": "rl", "diferencia": 0.0, "ic95_bootstrap": [0.0, 0.0], "delong_p": 0.0, "no_significativa": true, "menor_que_minima": true, "cumple": true}]},
+    "modelo_desplegado": {"modelo": "…", "motivo": "D33/D49: …"},
     "calibracion": {"metodo": "isotonica", "brier_sin_calibrar": 0.0, "brier_calibrado": 0.0, "anidada": true},
     "punto_operacion_oof": {"umbral": 0.0, "sensibilidad": 0.0, "precision": 0.0, "tasa_alerta": 0.0, "matriz_confusion": [[0, 0], [0, 0]]},
     "desglose": {"CCC": {}, "resto": {}},
     "shap": {"explicador": "tree", "coste_s": 0, "estabilidad": {"spearman_media": 0.0, "spearman_rango": [0.0, 0.0], "top10_solape_media": 0.0, "top10_solape_rango": [0.0, 0.0]}},
-    "equidad_oof": {"gender": {"F": {"n": 0, "sensibilidad": 0.0, "tasa_falsos_positivos": 0.0}}}
+    "equidad_oof": {"gender": {"subgrupos": {"F": {"n": 0, "retiros": 0, "retiros_prueba": 0, "sensibilidad": 0.0, "sensibilidad_ic95": [0.0, 0.0],
+                                             "tasa_falsos_positivos": 0.0, "tasa_falsos_positivos_ic95": [0.0, 0.0], "solo_descriptiva": false}},
+                               "diferencia_sensibilidad": 0.0, "diferencia_sensibilidad_ic95": [0.0, 0.0],
+                               "diferencia_tasa_falsos_positivos": 0.0, "diferencia_tasa_falsos_positivos_ic95": [0.0, 0.0]}}
   }],
   "metricas_test": null
 }
@@ -93,13 +101,21 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 - `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion_<grupo>`.
   Las variantes que reutilizan hiperparámetros indican `hiperparametros_de: "<id del experimento principal>"`.
 - Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros).
+- `ablacion_<grupo>`: uno de los 5 grupos de `grupo_ablacion` del catálogo (D46), sobre el modelo `mejor_automl`.
+- `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
+  candidato de mayor `roc_auc_oof`, RL incluida. `cumple` = `no_significativa` y `menor_que_minima` (D33/D49).
+- `lectura` (D49): `ventaja_relevante`, `detectable_sin_relevancia`, `equivalencia_practica` o `no_concluyente`.
+  Los IC *bootstrap* son del 95 % sin ajustar; la significación usa `delong_p_holm`.
+- `equidad_oof` (D50): `gender`, `disability`, `age_band`, `imd_band` (con `faltante`); métricas en el umbral de
+  decisión; diferencia = máxima entre subgrupos si hay más de dos. `retiros_prueba` es un recuento descriptivo de 2014J;
+  `solo_descriptiva` = `retiros_prueba < 30`.
 - `metricas_test` es `null` mientras `evaluado_en_prueba` sea `false`. En la Entrega 3 llevará por momento las mismas
   métricas, el punto de operación en prueba y `plan_evaluacion` (ruta y commit del archivo que declaraba la configuración).
 
 ## `tipo: "comparacion"`
 
 `experimentos` (ids comparados), `origen_predicciones` (`oof` o `prueba`) y `contrastes`: por semana
-`{modelo_a, modelo_b, roc_auc_a, roc_auc_b, diferencia, delong_p, delong_p_holm, ic95_bootstrap: [inf, sup], n_bootstrap, semilla}`.
+`{modelo_a, modelo_b, roc_auc_a, roc_auc_b, diferencia, delong_p, delong_p_holm, ic95_bootstrap: [inf, sup], n_bootstrap, semilla, lectura}`.
 Holm se aplica sobre los 4 momentos de cada par de modelos comparado.
 
 ## `manifest.json`
