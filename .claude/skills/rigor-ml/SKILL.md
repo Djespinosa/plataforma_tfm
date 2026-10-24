@@ -36,7 +36,7 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       - Notas **solo de CMA** entregadas hasta el corte; **ninguna nota de TMA**.
       - Exámenes (`assessment_type == "Exam"`) fuera, filtrados por tipo (11 tienen `date` vacía).
       - **`is_banked` (decidido 2026-10-17 tras revisar los datos; el estudiante puede revocarlo):** las 1909 filas
-        convalidadas (526 estudiantes, todos con `num_of_prev_attempts ≥ 1`) tienen `date_submitted = -1`: son notas de
+        convalidadas (526 matrículas de 523 estudiantes, todas con `num_of_prev_attempts ≥ 1`) tienen `date_submitted = -1`: son notas de
         un intento previo, conocidas desde el día 0. Se excluyen del comportamiento de entrega y de las notas CMA, y
         forman variables propias disponibles desde la semana 0: nº de evaluaciones convalidadas y nota media
         convalidada (CMA y TMA: el retraso de corrección no aplica a un intento previo). 1 nota convalidada vacía.
@@ -120,18 +120,20 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       con prueba unitaria contra un caso conocido.
 - [ ] **D46** Ablación (solo en validación cruzada) sobre el **mejor modelo del motor** (D44), reutilizando sus
       hiperparámetros (la pérdida es una cota superior de la contribución), por momento, con los 5 grupos de `GRUPOS` en
-      `ml/cortes_oulad.py` (columna `grupo_ablacion` del catálogo): (1) demográficas y matrícula; (2) aula virtual, clics
-      agregados (totales, por tipo de actividad, por ventana semanal, días activos); (3) aula virtual, variables derivadas
-      (regularidad, tendencia, recencia, inactividad, percentiles de cohorte); (4) evaluaciones; (5) contexto del módulo.
+      `ml/cortes_oulad.py` (columna `grupo_ablacion` del catálogo; reparto de D51-rev): (1) demográficas y matrícula;
+      (2) aula virtual, clics agregados, 25 (totales, por tipo de actividad, por ventana semanal, días activos); (3) aula
+      virtual, variables derivadas, 8 (regularidad, tendencia, recencia, inactividad, percentiles de cohorte);
+      (4) evaluaciones, incluidas las convalidadas; (5) contexto del módulo.
 - [ ] **D20** Sensibilidad a la fuga: repetir cada momento **sin** excluir a los ya retirados (salvo las bajas anteriores al
       día 0) e informar la diferencia de ROC-AUC (figura por semana). Se mantienen la exclusión por matrícula tardía y
       D26/D27, para que solo cambie la exclusión de los ya retirados. Es un análisis, no un criterio de éxito.
-- [ ] **D33/D49** Parsimonia: "el mejor" es el candidato de mayor ROC-AUC *out-of-fold* (incluida la RL). Se despliega el
-      modelo más simple (RL < árboles < MLP < apilamiento) cuya diferencia con el mejor cumpla **las dos** condiciones:
-      (1) no significativa según DeLong *out-of-fold* (α = 0,05, *p* sin corregir: más conservador hacia el modelo complejo);
-      (2) diferencia de ROC-AUC *out-of-fold* < 0,02. Nunca con prueba. Dentro de "árboles" (RF, GB, XGBoost, LightGBM,
-      CatBoost), si varios cumplen, el de mayor ROC-AUC *out-of-fold*. Se exporta, por candidato frente al mejor:
-      diferencia, IC, *p* y si cumple cada condición y la regla.
+- [ ] **D33/D49-rev** Parsimonia por **no inferioridad**: "el mejor" es el candidato de mayor ROC-AUC *out-of-fold* (incluida
+      la RL). Se despliega el modelo más simple (RL < árboles < MLP < apilamiento) cuya pérdida de ROC-AUC *out-of-fold*
+      frente al mejor (mejor − candidato) tenga el **límite superior del IC *bootstrap* del 95 % < 0,02**. DeLong ya no decide
+      (con ≈ 21 000 predicciones declara significativas diferencias triviales); su *p* solo se informa. Nunca con prueba.
+      Dentro de "árboles" (RF, GB, XGBoost, LightGBM, CatBoost), si varios cumplen, el de mayor ROC-AUC *out-of-fold*. Se
+      exporta, por candidato frente al mejor: diferencia, IC, *p* de DeLong y si cumple la regla. La lectura en cuatro
+      casos de D49 se mantiene para el contraste central.
 
 ## 6. Explicabilidad y equidad
 

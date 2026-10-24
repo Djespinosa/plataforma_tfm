@@ -32,7 +32,7 @@ LightGBM, Optuna, SHAP (pipeline ML).
 ## Mapa del repositorio
 
 ```
-ml/                  Núcleo ML y scripts (exploracion_oulad.py; próximos: cortes_oulad.py, automl/, configs/, tests/)
+ml/                  Núcleo ML y scripts (exploracion_oulad.py, cortes_oulad.py, evidencias.py, automl/, tests/; próximo: configs/)
 api/                 API Flask + PostgreSQL (semana 2)
 web/                 Interfaz Angular (semana 3)
 data/raw/oulad/      7 CSV de OULAD, CC-BY 4.0 (no versionados)
@@ -62,8 +62,10 @@ Detalle de capas, convenciones, API y modelo de datos: skill `arquitectura`.
 
 - Hecho: exploración de OULAD con calidad de datos, versiones y SHA-256 (exp-2026-10-05-02); infraestructura de Claude Code
   (e1da870); F0 del plan de evidencias de la Entrega 2 (entorno, `rigor-ml` y `CONTRATO.md` al diseño vigente); F1, cortes
-  de OULAD con 52 pruebas anti-fuga (exp-2026-10-23-01, 99a3e1a); anexo D44-D50 incorporado a `rigor-ml` y `CONTRATO.md`,
-  con 5 grupos de ablación en el catálogo (D46; se exporta en el próximo experimento `cortes`).
+  de OULAD (exp-2026-10-23-01, 99a3e1a); anexo D44-D50, D49-rev y D51-rev incorporados a `rigor-ml` y `CONTRATO.md`;
+  correcciones de la importación (5 grupos de ablación, D28 en `ml/automl/preprocesado.py` con su prueba, conciliación
+  de bajas, recuentos de evaluaciones por estudiante y partición, tipos de actividad de 2014J), 59 pruebas, pendientes
+  de exportar en un experimento `cortes` nuevo.
 - Encargo vigente de la memoria: `../memoria/revisiones/prompt-plataforma-evidencias-e2.md` (puntos 1-38) y su anexo D48-D50.
 - Siguiente: F2 (núcleo `ml/automl/`: pliegues, Pipeline con D28, Optuna con poda, calibración anidada, umbral, apilamiento
   D48, DeLong, Holm y *bootstrap*, equidad D50), con ensayo cronometrado y parada para confirmar el presupuesto.

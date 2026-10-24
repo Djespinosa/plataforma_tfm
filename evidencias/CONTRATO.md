@@ -1,7 +1,7 @@
 # Contrato de evidencias plataforma → memoria
 
 La memoria solo usa lo que está en esta carpeta. Cada evidencia debe poder rastrearse hasta un commit.
-Revisado el 2026-10-23 al diseño vigente, con D44-D50 (`../memoria/plan/decisiones.md`; checklist en `.claude/skills/rigor-ml`).
+Revisado el 2026-10-23 al diseño vigente, con D44-D51-rev (`../memoria/plan/decisiones.md`; checklist en `.claude/skills/rigor-ml`).
 
 ## Estructura
 
@@ -47,14 +47,15 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 |---|---|
 | `reglas` | Decisiones aplicadas (D2, D24-D28, matrícula tardía, evaluaciones, `is_banked`) con su texto |
 | `eliminaciones` | Por regla (D26, D27) y partición: matrículas eliminadas |
-| `bajas_dia_0` | Bajas con `date_unregistration == 0`, total y por partición |
+| `bajas_dia_0`, `bajas_antes_dia_0` | Bajas con `date_unregistration == 0` y `< 0`: antes y después de D26-D27 y eliminadas por cada regla, total y por partición |
 | `particion` | `{entrenamiento: [presentaciones], prueba: [presentaciones], n_matriculas, n_estudiantes_unicos}` por partición |
 | `pliegues` | Composición de los 5 pliegues (presentaciones) y, por corte, `n` y prevalencia de cada uno |
 | `solapamiento` | Estudiantes en más de un pliegue; estudiantes a la vez en entrenamiento y en 2014J |
 | `cortes` | Por semana: `{semana, dia_corte, proporcion_curso: {B, J}, n_variables, variables_por_grupo, por_particion: {entrenamiento, prueba}}`; cada partición con `{n, desercion, no_desercion, prevalencia, excluidos_baja, excluidos_matricula_tardia}` y el mismo desglose para `CCC` y `resto` |
 | `cortes_sin_exclusion_retirados` | Igual que `cortes`, para la población de D20 |
 | `subgrupos` | Por corte, partición, variable sensible y valor (incluido faltante): `{n, prevalencia}` |
-| `evaluaciones` | Recuentos afectados por las reglas: filas y estudiantes `is_banked`, exámenes excluidos, notas TMA descartadas |
+| `evaluaciones` | Recuentos afectados por las reglas (`is_banked`, exámenes excluidos, notas TMA descartadas), cada uno en filas, matrículas y estudiantes, total y por partición, con su `definicion` |
+| `tipos_actividad` | Tipos con variable (solo entrenamiento) y tipos de 2014J sin variable, con sus clics y matrículas |
 | `catalogo_variables` | Ruta a un CSV en `experimentos/` con nombre, tabla de origen, tipo, momento desde el que existe, cálculo, grupo de ablación y motivo de exclusión |
 | `pruebas_antifuga` | Ruta al informe de pruebas en `pruebas/` y resumen `{superadas, fallidas}` |
 
@@ -82,9 +83,9 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
     "referencias": [{"modelo": "mayoritaria"}, {"modelo": "rl_defecto"}, {"modelo": "rl_optimizada"}],
     "mejor_automl": "lgbm",
     "contraste_central": {"modelo_a": "lgbm", "modelo_b": "rl_optimizada", "diferencia": 0.0, "ic95_bootstrap": [0.0, 0.0], "delong_p": 0.0, "delong_p_holm": 0.0, "lectura": "…"},
-    "parsimonia": {"mejor": "lgbm", "diferencia_minima": 0.02, "alfa": 0.05,
-                   "candidatos": [{"modelo": "rl", "diferencia": 0.0, "ic95_bootstrap": [0.0, 0.0], "delong_p": 0.0, "no_significativa": true, "menor_que_minima": true, "cumple": true}]},
-    "modelo_desplegado": {"modelo": "…", "motivo": "D33/D49: …"},
+    "parsimonia": {"regla": "no inferioridad (D49-rev)", "mejor": "lgbm", "margen": 0.02,
+                   "candidatos": [{"modelo": "rl", "perdida": 0.0, "ic95_bootstrap": [0.0, 0.0], "delong_p": 0.0, "cumple": true}]},
+    "modelo_desplegado": {"modelo": "…", "motivo": "D33/D49-rev: …"},
     "calibracion": {"metodo": "isotonica", "brier_sin_calibrar": 0.0, "brier_calibrado": 0.0, "anidada": true},
     "punto_operacion_oof": {"umbral": 0.0, "sensibilidad": 0.0, "precision": 0.0, "tasa_alerta": 0.0, "matriz_confusion": [[0, 0], [0, 0]]},
     "desglose": {"CCC": {}, "resto": {}},
@@ -103,7 +104,8 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 - Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros).
 - `ablacion_<grupo>`: uno de los 5 grupos de `grupo_ablacion` del catálogo (D46), sobre el modelo `mejor_automl`.
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
-  candidato de mayor `roc_auc_oof`, RL incluida. `cumple` = `no_significativa` y `menor_que_minima` (D33/D49).
+  candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
+  `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.
 - `lectura` (D49): `ventaja_relevante`, `detectable_sin_relevancia`, `equivalencia_practica` o `no_concluyente`.
   Los IC *bootstrap* son del 95 % sin ajustar; la significación usa `delong_p_holm`.
 - `equidad_oof` (D50): `gender`, `disability`, `age_band`, `imd_band` (con `faltante`); métricas en el umbral de

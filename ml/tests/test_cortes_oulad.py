@@ -183,6 +183,28 @@ def test_tipos_de_actividad_solo_de_entrenamiento():
     assert fila(datos, 3, co.PRESENTACION_PRUEBA)["clics_total"] == 80  # sus clics cuentan en el total
 
 
+def test_recuento_de_tipos_de_la_prueba_sin_variable():
+    tablas = tablas_sinteticas()
+    recuento = co.recuento_tipos_actividad(tablas, co.tipos_actividad(tablas["vle"]))
+    assert recuento["prueba_sin_variable"] == ["htmlactivity"]
+    assert recuento["clics_prueba_sin_variable"] == 50
+    assert recuento["matriculas_prueba_con_clics_sin_variable"] == 1
+
+
+def test_conciliacion_de_bajas_antes_y_en_el_dia_0():
+    tablas = tablas_sinteticas()
+    registro = tablas["studentRegistration"]
+    registro.loc[registro["id_student"] == 8, "date_unregistration"] = -2.0  # D27 con baja antes del día 0
+    union = co.matriculas(tablas)
+    antes = co.conciliacion_bajas(union, union["date_unregistration"] < 0)
+    assert antes["antes_de_eliminaciones"] == {"total": 4, "entrenamiento": 2, "prueba": 2}
+    assert antes["eliminadas_D27"] == {"total": 2, "entrenamiento": 1, "prueba": 1}
+    assert antes["eliminadas_D26"]["total"] == 0
+    assert antes["tras_eliminaciones"] == {"total": 2, "entrenamiento": 1, "prueba": 1}
+    dia_0 = co.conciliacion_bajas(union, union["date_unregistration"].eq(0))
+    assert dia_0["antes_de_eliminaciones"]["total"] == dia_0["tras_eliminaciones"]["total"] == 2
+
+
 def test_percentil_de_cohorte_exacto_y_por_presentacion():
     """Cohorte de 2013J en la semana 4: 1, 2, 3 y las matrículas 7 y 8 (que D26/D27 eliminan después, pero que
     en despliegue estarían). Clics: 1 → 20, 2 → 3, 3, 7 y 8 → 0 (empate: rango medio 2 de 5)."""

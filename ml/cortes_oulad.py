@@ -3,7 +3,8 @@
 Reglas (skill rigor-ml §1-2): etiqueta Withdrawn (D2); corte k = día 7k inclusive (D3, D25); población sin
 bajas ≤ 7k (D24-D25) ni matrícula tardía (date_registration > 7k); eliminación de D26 y D27; clics y entregas
 solo con fecha ≤ 7k; notas solo de CMA; sin notas de TMA ni exámenes; is_banked en variables propias.
-La imputación de date_registration (D28) no se hace aquí: va dentro del Pipeline de cada pliegue (ml/automl).
+La imputación de date_registration (D28) no se hace aquí: va dentro del Pipeline de cada pliegue
+(ml/automl/preprocesado.py).
 
 Genera:
   - data/procesado/cortes/semana_<k>.parquet y semana_<k>_sin_exclusion_retirados.parquet (D20), no versionados.
@@ -59,6 +60,8 @@ CLAVES = ["code_module", "code_presentation", "id_student"]
 # Columnas del corte que no son entrada del modelo (code_module es clave y también variable).
 NO_VARIABLES = ["code_presentation", "id_student", "presentacion", "particion", "pliegue", "etiqueta"]
 SENSIBLES = ["gender", "disability", "age_band", "imd_band"]
+# D28: se imputan por la mediana dentro del Pipeline de cada pliegue (ml/automl/preprocesado.py).
+IMPUTAR_MEDIANA = ["date_registration"]
 DPI = 300
 
 # Cinco grupos de ablación (D46): el aula virtual se divide en clics agregados y variables derivadas.
@@ -378,19 +381,77 @@ def subgrupos(corte: pd.DataFrame) -> list[dict]:
     return filas
 
 
-def recuentos_evaluaciones(tablas: dict[str, pd.DataFrame]) -> dict:
+def por_particion(mascara: pd.Series, particion: pd.Series) -> dict:
+    return {"total": int(mascara.sum()), **{p: int((mascara & (particion == p)).sum()) for p in ("entrenamiento", "prueba")}}
+
+
+def recuento(filas: pd.DataFrame) -> dict:
+    """Filas, matrículas y estudiantes distintos, total y por partición (un estudiante puede estar en las dos)."""
+    particion = np.where(filas["code_presentation"] == PRESENTACION_PRUEBA, "prueba", "entrenamiento")
+    salida = {}
+    for nombre, datos in (("total", filas), *((p, filas[particion == p]) for p in ("entrenamiento", "prueba"))):
+        salida[nombre] = {"filas": int(len(datos)), "matriculas": int(datos[CLAVES].drop_duplicates().shape[0]),
+                          "estudiantes": int(datos["id_student"].nunique())}
+    return salida
+
+
+def notas_tma(tablas: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    todas = tablas["studentAssessment"].merge(tablas["assessments"], on="id_assessment", validate="m:1")
+    return todas[(todas["is_banked"] == 0) & (todas["assessment_type"] == "TMA") & todas["score"].notna()]
+
+
+def tma_descartadas_en_corte(tma: pd.DataFrame, corte: pd.DataFrame, dia: int) -> dict:
+    """Notas de TMA que existirían como entrada del corte (población del corte, date_submitted ≤ 7k) y no se usan."""
+    return recuento(tma[tma["date_submitted"] <= dia].merge(corte[CLAVES], on=CLAVES))
+
+
+def recuentos_evaluaciones(tablas: dict[str, pd.DataFrame], tma_por_corte: dict[str, dict]) -> dict:
     todas = tablas["studentAssessment"].merge(tablas["assessments"], on="id_assessment", validate="m:1")
     convalidadas = todas[todas["is_banked"] == 1]
-    tma_propias = todas[(todas["is_banked"] == 0) & (todas["assessment_type"] == "TMA") & todas["score"].notna()]
     return {
-        "filas_is_banked": int(len(convalidadas)),
-        "matriculas_is_banked": int(convalidadas[CLAVES].drop_duplicates().shape[0]),
-        "date_submitted_is_banked": sorted(int(v) for v in convalidadas["date_submitted"].unique()),
-        "filas_examen_excluidas": int((todas["assessment_type"] == "Exam").sum()),
-        "notas_tma_descartadas_total": int(len(tma_propias)),
-        "notas_tma_descartadas_por_corte": {
-            str(s): int((tma_propias["date_submitted"] <= 7 * s).sum()) for s in SEMANAS
+        "definicion": "recuentos sobre studentAssessment completo (todas las matrículas, antes de cualquier exclusión "
+                      "o eliminación), salvo notas_tma_descartadas.por_corte; partición por code_presentation; un "
+                      "estudiante con matrículas en las dos particiones cuenta en cada una y una vez en el total",
+        "is_banked": recuento(convalidadas) | {
+            "date_submitted": sorted(int(v) for v in convalidadas["date_submitted"].unique()),
         },
+        "examenes_excluidos": recuento(todas[todas["assessment_type"] == "Exam"]),
+        "notas_tma_descartadas": {
+            "definicion": "filas no convalidadas de TMA con nota. total: toda la tabla, cualquier fecha. por_corte: "
+                          "solo las de la población en riesgo del corte (tras D26-D27) con date_submitted ≤ 7k, es "
+                          "decir, las que el corte tendría disponibles y no usa; son acumuladas (cada corte incluye "
+                          "las de los anteriores para quien sigue en riesgo) y no se suman entre cortes",
+            "total": recuento(notas_tma(tablas)),
+            "por_corte": tma_por_corte,
+        },
+    }
+
+
+def recuento_tipos_actividad(tablas: dict[str, pd.DataFrame], tipos: list[str]) -> dict:
+    """Tipos de 2014J sin variable propia (los tipos se definen solo con el entrenamiento)."""
+    vle = tablas["vle"]
+    de_prueba = sorted(vle.loc[vle["code_presentation"] == PRESENTACION_PRUEBA, "activity_type"].unique())
+    sin_variable = [t for t in de_prueba if t not in tipos]
+    clics = tablas["studentVle"].merge(vle[["id_site", "activity_type"]], on="id_site", validate="m:1")
+    afectados = clics[(clics["code_presentation"] == PRESENTACION_PRUEBA) & clics["activity_type"].isin(sin_variable)]
+    return {
+        "con_variable": tipos,
+        "prueba_sin_variable": sin_variable,
+        "entrenamiento_ausentes_en_prueba": [t for t in tipos if t not in de_prueba],
+        "clics_prueba_sin_variable": int(afectados["sum_click"].sum()),
+        "matriculas_prueba_con_clics_sin_variable": int(afectados[CLAVES].drop_duplicates().shape[0]),
+        "tratamiento": "los clics de tipos sin variable cuentan en clics_total, dias_activos y las ventanas, pero no "
+                       "tienen columna clics_<tipo>; los tipos ausentes en prueba valen 0 en 2014J",
+    }
+
+
+def conciliacion_bajas(union: pd.DataFrame, mascara: pd.Series) -> dict:
+    reglas = reglas_eliminacion(union)
+    eliminar = np.logical_or.reduce(list(reglas.values()))
+    return {
+        "antes_de_eliminaciones": por_particion(mascara, union["particion"]),
+        **{f"eliminadas_{regla.split('_')[0]}": por_particion(mascara & m, union["particion"]) for regla, m in reglas.items()},
+        "tras_eliminaciones": por_particion(mascara & ~eliminar, union["particion"]),
     }
 
 
@@ -483,6 +544,7 @@ def main() -> None:
     procesado.mkdir(parents=True, exist_ok=True)
     salidas_sha256 = {}
     resumen_cortes, resumen_d20, tabla_subgrupos, tamano_pliegues = [], [], [], []
+    tma, tma_por_corte = notas_tma(tablas), {}
     for semana in SEMANAS:
         dia = 7 * semana
         for excluir, sufijo in ((True, ""), (False, "_sin_exclusion_retirados")):
@@ -493,6 +555,7 @@ def main() -> None:
             corte.to_parquet(ruta_corte, index=False)
             salidas_sha256[ruta_corte.name] = sha256(ruta_corte)
             if excluir:
+                tma_por_corte[str(semana)] = tma_descartadas_en_corte(tma, corte, dia)
                 tabla_subgrupos += [{"semana": semana} | f for f in subgrupos(corte)]
                 entrenamiento = corte[corte["particion"] == "entrenamiento"]
                 tamano_pliegues += [
@@ -518,6 +581,7 @@ def main() -> None:
     pliegue_estudiante = entrenamiento.assign(pliegue=entrenamiento["presentacion"].map(pliegues))
     estudiantes_por_pliegues = pliegue_estudiante.groupby("id_student")["pliegue"].nunique()
     reglas = reglas_eliminacion(union)
+    baja = union["date_unregistration"]
 
     experimento = {
         "id": id_exp,
@@ -543,7 +607,8 @@ def main() -> None:
             "exclusion_matricula_tardia": "se excluye date_registration > 7k; sin date_registration = matriculado antes del inicio",
             "orden_exclusiones": "disjuntas: primero baja; la matrícula tardía se cuenta entre los no excluidos por baja",
             "eliminaciones": "D26: Withdrawn sin date_unregistration; D27: Fail con date_unregistration",
-            "imputacion": "D28: date_registration se imputa dentro del Pipeline de cada pliegue (ml/automl), no aquí",
+            "imputacion": "D28: date_registration se imputa por la mediana dentro del Pipeline de cada pliegue "
+                          "(ml/automl/preprocesado.py), no en los parquet; el indicador falta_date_registration sí está",
             "evaluaciones": "entrega solo de evaluaciones con date ≤ 7k y date_submitted ≤ 7k; notas solo de CMA "
                             "entregadas hasta el corte; ninguna nota de TMA; exámenes fuera por tipo",
             "is_banked": "filas convalidadas fuera de entrega y notas CMA; variables propias desde la semana 0",
@@ -556,14 +621,8 @@ def main() -> None:
             regla: {"total": int(m.sum()), **{p: int((m & (union["particion"] == p)).sum()) for p in ("entrenamiento", "prueba")}}
             for regla, m in reglas.items()
         },
-        "bajas_dia_0": {
-            momento: {
-                "total": int(datos["date_unregistration"].eq(0).sum()),
-                **{p: int((datos["date_unregistration"].eq(0) & (datos["particion"] == p)).sum())
-                   for p in ("entrenamiento", "prueba")},
-            }
-            for momento, datos in (("antes_de_eliminaciones", union), ("tras_eliminaciones", base))
-        },
+        "bajas_dia_0": conciliacion_bajas(union, baja.eq(0)),
+        "bajas_antes_dia_0": conciliacion_bajas(union, baja < 0),
         "particion": {
             p: {
                 "presentaciones": sorted(base.loc[base["particion"] == p, "presentacion"].unique()),
@@ -584,22 +643,26 @@ def main() -> None:
                 len(set(entrenamiento["id_student"]) & set(base.loc[base["particion"] == "prueba", "id_student"]))
             ),
         },
+        "proporcion_curso_definicion": "7k / module_presentation_length por presentación; media, mínimo y máximo no "
+                                       "ponderados sobre todas las presentaciones de cada tipo (B o J) de courses.csv, "
+                                       "incluidas las de 2014J",
         "cortes": resumen_cortes,
         "cortes_sin_exclusion_retirados": resumen_d20,
         "subgrupos": tabla_subgrupos,
-        "evaluaciones": recuentos_evaluaciones(tablas),
+        "evaluaciones": recuentos_evaluaciones(tablas, tma_por_corte),
+        "tipos_actividad": recuento_tipos_actividad(tablas, tipos),
         "n_variables_definicion": "columnas de entrada del modelo (catálogo sin motivo de exclusión), sin "
                                   "identificadores, partición, pliegue ni etiqueta",
         "catalogo_variables": archivo_catalogo,
         "pruebas_antifuga": {"informe": archivo_pruebas} | resultado_pruebas | {
-            "pendiente": "imputación de date_registration (D28) ajustada dentro de cada pliegue: se implementa y "
-                         "prueba en F2 (Pipeline de ml/automl), no en este experimento",
+            "d28": "mediana de date_registration ajustada solo con el entrenamiento de cada pliegue y, en el modelo "
+                   "final, con todo el entrenamiento sin 2014J (ml/automl/preprocesado.py; ml/tests/test_preprocesado.py)",
         },
         "salidas_sha256": {"carpeta": PROCESADO.relative_to(RAIZ).as_posix()} | salidas_sha256,
         "referencia_calidad": {
             "experimento": EXPLORACION_REFERENCIA.stem, "sha256": sha256(EXPLORACION_REFERENCIA),
         },
-        "entorno": versiones_entorno("pandas", "numpy", "matplotlib", "pyarrow", "pytest"),
+        "entorno": versiones_entorno("pandas", "numpy", "matplotlib", "pyarrow", "pytest", "sklearn"),
         "tiempo_ejecucion_s": round(time.perf_counter() - inicio, 2),
         "figuras": [archivo for archivo, _ in figuras],
     }
