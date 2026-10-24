@@ -1,0 +1,2492 @@
+{
+  "id": "exp-2026-10-23-02",
+  "tipo": "cortes",
+  "fecha": "2026-10-23T21:20:34",
+  "commit": "416ccb1",
+  "descripcion": "Preparación de los conjuntos de OULAD por momento de predicción (semanas 0, 4, 8 y 12): población en riesgo, prevalencia y exclusiones por corte y partición, pliegues, solapamiento, subgrupos sensibles, recuentos de evaluaciones, catálogo de variables y pruebas anti-fuga. Sin modelos.",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    }
+  },
+  "reglas": {
+    "etiqueta": "D2: final_result == Withdrawn es positivo; Fail, Pass y Distinction negativos",
+    "corte": "D3/D25: corte k = día 7k; información hasta ese día inclusive",
+    "exclusion_baja": "D24/D25: se excluye date_unregistration ≤ 7k (incluye bajas antes del día 0)",
+    "exclusion_matricula_tardia": "se excluye date_registration > 7k; sin date_registration = matriculado antes del inicio",
+    "orden_exclusiones": "disjuntas: primero baja; la matrícula tardía se cuenta entre los no excluidos por baja",
+    "eliminaciones": "D26: Withdrawn sin date_unregistration; D27: Fail con date_unregistration",
+    "imputacion": "D28: date_registration se imputa por la mediana dentro del Pipeline de cada pliegue (ml/automl/preprocesado.py), no en los parquet; el indicador falta_date_registration sí está",
+    "evaluaciones": "entrega solo de evaluaciones con date ≤ 7k y date_submitted ≤ 7k; notas solo de CMA entregadas hasta el corte; ninguna nota de TMA; exámenes fuera por tipo",
+    "is_banked": "filas convalidadas fuera de entrega y notas CMA; variables propias desde la semana 0",
+    "supuesto_notas": "OULAD no registra la publicación de las notas; CMA (automática) / TMA (tutor) según kuzilek2017; la disponibilidad inmediata de las CMA es una suposición",
+    "d20": "sensibilidad a la fuga: solo se excluye date_unregistration < 0; se mantienen matrícula tardía y D26/D27",
+    "imd_band": "el tramo '10-20' se normaliza a '10-20%'"
+  },
+  "eliminaciones": {
+    "D26_withdrawn_sin_fecha_baja": {
+      "total": 93,
+      "entrenamiento": 6,
+      "prueba": 87
+    },
+    "D27_fail_con_fecha_baja": {
+      "total": 9,
+      "entrenamiento": 9,
+      "prueba": 0
+    }
+  },
+  "bajas_dia_0": {
+    "antes_de_eliminaciones": {
+      "total": 419,
+      "entrenamiento": 417,
+      "prueba": 2
+    },
+    "eliminadas_D26": {
+      "total": 0,
+      "entrenamiento": 0,
+      "prueba": 0
+    },
+    "eliminadas_D27": {
+      "total": 6,
+      "entrenamiento": 6,
+      "prueba": 0
+    },
+    "tras_eliminaciones": {
+      "total": 413,
+      "entrenamiento": 411,
+      "prueba": 2
+    }
+  },
+  "bajas_antes_dia_0": {
+    "antes_de_eliminaciones": {
+      "total": 2678,
+      "entrenamiento": 1783,
+      "prueba": 895
+    },
+    "eliminadas_D26": {
+      "total": 0,
+      "entrenamiento": 0,
+      "prueba": 0
+    },
+    "eliminadas_D27": {
+      "total": 2,
+      "entrenamiento": 2,
+      "prueba": 0
+    },
+    "tras_eliminaciones": {
+      "total": 2676,
+      "entrenamiento": 1781,
+      "prueba": 895
+    }
+  },
+  "particion": {
+    "entrenamiento": {
+      "presentaciones": [
+        "AAA_2013J",
+        "BBB_2013B",
+        "BBB_2013J",
+        "BBB_2014B",
+        "CCC_2014B",
+        "DDD_2013B",
+        "DDD_2013J",
+        "DDD_2014B",
+        "EEE_2013J",
+        "EEE_2014B",
+        "FFF_2013B",
+        "FFF_2013J",
+        "FFF_2014B",
+        "GGG_2013J",
+        "GGG_2014B"
+      ],
+      "n_matriculas": 21318,
+      "n_estudiantes_unicos": 19705
+    },
+    "prueba": {
+      "presentaciones": [
+        "AAA_2014J",
+        "BBB_2014J",
+        "CCC_2014J",
+        "DDD_2014J",
+        "EEE_2014J",
+        "FFF_2014J",
+        "GGG_2014J"
+      ],
+      "n_matriculas": 11173,
+      "n_estudiantes_unicos": 10589
+    }
+  },
+  "pliegues": {
+    "estrategia": "permutación con semilla 42 de las presentaciones de entrenamiento, 3 por pliegue (D29-rev)",
+    "composicion": {
+      "1": [
+        "DDD_2013J",
+        "DDD_2014B",
+        "EEE_2014B"
+      ],
+      "2": [
+        "AAA_2013J",
+        "BBB_2014B",
+        "FFF_2013J"
+      ],
+      "3": [
+        "DDD_2013B",
+        "FFF_2013B",
+        "GGG_2014B"
+      ],
+      "4": [
+        "BBB_2013J",
+        "CCC_2014B",
+        "FFF_2014B"
+      ],
+      "5": [
+        "BBB_2013B",
+        "EEE_2013J",
+        "GGG_2013J"
+      ]
+    },
+    "por_corte": [
+      {
+        "semana": 0,
+        "pliegue": 1,
+        "n": 3404,
+        "desercion": 902,
+        "no_desercion": 2502,
+        "prevalencia": 0.265
+      },
+      {
+        "semana": 0,
+        "pliegue": 2,
+        "n": 3710,
+        "desercion": 678,
+        "no_desercion": 3032,
+        "prevalencia": 0.1827
+      },
+      {
+        "semana": 0,
+        "pliegue": 3,
+        "n": 3539,
+        "desercion": 748,
+        "no_desercion": 2791,
+        "prevalencia": 0.2114
+      },
+      {
+        "semana": 0,
+        "pliegue": 4,
+        "n": 4853,
+        "desercion": 1214,
+        "no_desercion": 3639,
+        "prevalencia": 0.2502
+      },
+      {
+        "semana": 0,
+        "pliegue": 5,
+        "n": 3517,
+        "desercion": 569,
+        "no_desercion": 2948,
+        "prevalencia": 0.1618
+      },
+      {
+        "semana": 4,
+        "pliegue": 1,
+        "n": 3277,
+        "desercion": 766,
+        "no_desercion": 2511,
+        "prevalencia": 0.2338
+      },
+      {
+        "semana": 4,
+        "pliegue": 2,
+        "n": 3629,
+        "desercion": 581,
+        "no_desercion": 3048,
+        "prevalencia": 0.1601
+      },
+      {
+        "semana": 4,
+        "pliegue": 3,
+        "n": 3388,
+        "desercion": 583,
+        "no_desercion": 2805,
+        "prevalencia": 0.1721
+      },
+      {
+        "semana": 4,
+        "pliegue": 4,
+        "n": 4631,
+        "desercion": 967,
+        "no_desercion": 3664,
+        "prevalencia": 0.2088
+      },
+      {
+        "semana": 4,
+        "pliegue": 5,
+        "n": 3379,
+        "desercion": 423,
+        "no_desercion": 2956,
+        "prevalencia": 0.1252
+      },
+      {
+        "semana": 8,
+        "pliegue": 1,
+        "n": 3130,
+        "desercion": 619,
+        "no_desercion": 2511,
+        "prevalencia": 0.1978
+      },
+      {
+        "semana": 8,
+        "pliegue": 2,
+        "n": 3525,
+        "desercion": 476,
+        "no_desercion": 3049,
+        "prevalencia": 0.135
+      },
+      {
+        "semana": 8,
+        "pliegue": 3,
+        "n": 3281,
+        "desercion": 475,
+        "no_desercion": 2806,
+        "prevalencia": 0.1448
+      },
+      {
+        "semana": 8,
+        "pliegue": 4,
+        "n": 4399,
+        "desercion": 733,
+        "no_desercion": 3666,
+        "prevalencia": 0.1666
+      },
+      {
+        "semana": 8,
+        "pliegue": 5,
+        "n": 3294,
+        "desercion": 338,
+        "no_desercion": 2956,
+        "prevalencia": 0.1026
+      },
+      {
+        "semana": 12,
+        "pliegue": 1,
+        "n": 3027,
+        "desercion": 515,
+        "no_desercion": 2512,
+        "prevalencia": 0.1701
+      },
+      {
+        "semana": 12,
+        "pliegue": 2,
+        "n": 3436,
+        "desercion": 385,
+        "no_desercion": 3051,
+        "prevalencia": 0.112
+      },
+      {
+        "semana": 12,
+        "pliegue": 3,
+        "n": 3184,
+        "desercion": 378,
+        "no_desercion": 2806,
+        "prevalencia": 0.1187
+      },
+      {
+        "semana": 12,
+        "pliegue": 4,
+        "n": 4273,
+        "desercion": 607,
+        "no_desercion": 3666,
+        "prevalencia": 0.1421
+      },
+      {
+        "semana": 12,
+        "pliegue": 5,
+        "n": 3226,
+        "desercion": 269,
+        "no_desercion": 2957,
+        "prevalencia": 0.0834
+      }
+    ]
+  },
+  "solapamiento": {
+    "estudiantes_en_mas_de_un_pliegue": 1421,
+    "estudiantes_en_entrenamiento_y_prueba": 1584
+  },
+  "proporcion_curso_definicion": "7k / module_presentation_length por presentación; media, mínimo y máximo no ponderados sobre todas las presentaciones de cada tipo (B o J) de courses.csv, incluidas las de 2014J",
+  "cortes": [
+    {
+      "semana": 0,
+      "dia_corte": 0,
+      "proporcion_curso": {
+        "B": {
+          "media": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "J": {
+          "media": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        }
+      },
+      "n_variables": 55,
+      "variables_por_grupo": {
+        "aula_virtual_clics": 25,
+        "aula_virtual_derivadas": 8,
+        "contexto_modulo": 3,
+        "demograficas_matricula": 10,
+        "evaluaciones": 9
+      },
+      "por_particion": {
+        "entrenamiento": {
+          "n": 19023,
+          "desercion": 4111,
+          "no_desercion": 14912,
+          "prevalencia": 0.2161,
+          "excluidos_baja": 2192,
+          "excluidos_matricula_tardia": 103,
+          "CCC": {
+            "n": 1646,
+            "desercion": 612,
+            "no_desercion": 1034,
+            "prevalencia": 0.3718,
+            "excluidos_baja": 286,
+            "excluidos_matricula_tardia": 4
+          },
+          "resto": {
+            "n": 17377,
+            "desercion": 3499,
+            "no_desercion": 13878,
+            "prevalencia": 0.2014,
+            "excluidos_baja": 1906,
+            "excluidos_matricula_tardia": 99
+          }
+        },
+        "prueba": {
+          "n": 10147,
+          "desercion": 2816,
+          "no_desercion": 7331,
+          "prevalencia": 0.2775,
+          "excluidos_baja": 897,
+          "excluidos_matricula_tardia": 129,
+          "CCC": {
+            "n": 2244,
+            "desercion": 831,
+            "no_desercion": 1413,
+            "prevalencia": 0.3703,
+            "excluidos_baja": 213,
+            "excluidos_matricula_tardia": 13
+          },
+          "resto": {
+            "n": 7903,
+            "desercion": 1985,
+            "no_desercion": 5918,
+            "prevalencia": 0.2512,
+            "excluidos_baja": 684,
+            "excluidos_matricula_tardia": 116
+          }
+        }
+      }
+    },
+    {
+      "semana": 4,
+      "dia_corte": 28,
+      "proporcion_curso": {
+        "B": {
+          "media": 0.1167,
+          "min": 0.1162,
+          "max": 0.1197
+        },
+        "J": {
+          "media": 0.1051,
+          "min": 0.1041,
+          "max": 0.1073
+        }
+      },
+      "n_variables": 55,
+      "variables_por_grupo": {
+        "aula_virtual_clics": 25,
+        "aula_virtual_derivadas": 8,
+        "contexto_modulo": 3,
+        "demograficas_matricula": 10,
+        "evaluaciones": 9
+      },
+      "por_particion": {
+        "entrenamiento": {
+          "n": 18304,
+          "desercion": 3320,
+          "no_desercion": 14984,
+          "prevalencia": 0.1814,
+          "excluidos_baja": 3003,
+          "excluidos_matricula_tardia": 11,
+          "CCC": {
+            "n": 1498,
+            "desercion": 460,
+            "no_desercion": 1038,
+            "prevalencia": 0.3071,
+            "excluidos_baja": 438,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 16806,
+            "desercion": 2860,
+            "no_desercion": 13946,
+            "prevalencia": 0.1702,
+            "excluidos_baja": 2565,
+            "excluidos_matricula_tardia": 11
+          }
+        },
+        "prueba": {
+          "n": 9124,
+          "desercion": 1693,
+          "no_desercion": 7431,
+          "prevalencia": 0.1856,
+          "excluidos_baja": 2044,
+          "excluidos_matricula_tardia": 5,
+          "CCC": {
+            "n": 1991,
+            "desercion": 570,
+            "no_desercion": 1421,
+            "prevalencia": 0.2863,
+            "excluidos_baja": 477,
+            "excluidos_matricula_tardia": 2
+          },
+          "resto": {
+            "n": 7133,
+            "desercion": 1123,
+            "no_desercion": 6010,
+            "prevalencia": 0.1574,
+            "excluidos_baja": 1567,
+            "excluidos_matricula_tardia": 3
+          }
+        }
+      }
+    },
+    {
+      "semana": 8,
+      "dia_corte": 56,
+      "proporcion_curso": {
+        "B": {
+          "media": 0.2335,
+          "min": 0.2324,
+          "max": 0.2393
+        },
+        "J": {
+          "media": 0.2103,
+          "min": 0.2082,
+          "max": 0.2146
+        }
+      },
+      "n_variables": 55,
+      "variables_por_grupo": {
+        "aula_virtual_clics": 25,
+        "aula_virtual_derivadas": 8,
+        "contexto_modulo": 3,
+        "demograficas_matricula": 10,
+        "evaluaciones": 9
+      },
+      "por_particion": {
+        "entrenamiento": {
+          "n": 17629,
+          "desercion": 2641,
+          "no_desercion": 14988,
+          "prevalencia": 0.1498,
+          "excluidos_baja": 3682,
+          "excluidos_matricula_tardia": 7,
+          "CCC": {
+            "n": 1359,
+            "desercion": 321,
+            "no_desercion": 1038,
+            "prevalencia": 0.2362,
+            "excluidos_baja": 577,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 16270,
+            "desercion": 2320,
+            "no_desercion": 13950,
+            "prevalencia": 0.1426,
+            "excluidos_baja": 3105,
+            "excluidos_matricula_tardia": 7
+          }
+        },
+        "prueba": {
+          "n": 8790,
+          "desercion": 1358,
+          "no_desercion": 7432,
+          "prevalencia": 0.1545,
+          "excluidos_baja": 2381,
+          "excluidos_matricula_tardia": 2,
+          "CCC": {
+            "n": 1852,
+            "desercion": 431,
+            "no_desercion": 1421,
+            "prevalencia": 0.2327,
+            "excluidos_baja": 618,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 6938,
+            "desercion": 927,
+            "no_desercion": 6011,
+            "prevalencia": 0.1336,
+            "excluidos_baja": 1763,
+            "excluidos_matricula_tardia": 2
+          }
+        }
+      }
+    },
+    {
+      "semana": 12,
+      "dia_corte": 84,
+      "proporcion_curso": {
+        "B": {
+          "media": 0.3502,
+          "min": 0.3485,
+          "max": 0.359
+        },
+        "J": {
+          "media": 0.3154,
+          "min": 0.3123,
+          "max": 0.3218
+        }
+      },
+      "n_variables": 55,
+      "variables_por_grupo": {
+        "aula_virtual_clics": 25,
+        "aula_virtual_derivadas": 8,
+        "contexto_modulo": 3,
+        "demograficas_matricula": 10,
+        "evaluaciones": 9
+      },
+      "por_particion": {
+        "entrenamiento": {
+          "n": 17146,
+          "desercion": 2154,
+          "no_desercion": 14992,
+          "prevalencia": 0.1256,
+          "excluidos_baja": 4169,
+          "excluidos_matricula_tardia": 3,
+          "CCC": {
+            "n": 1299,
+            "desercion": 261,
+            "no_desercion": 1038,
+            "prevalencia": 0.2009,
+            "excluidos_baja": 637,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 15847,
+            "desercion": 1893,
+            "no_desercion": 13954,
+            "prevalencia": 0.1195,
+            "excluidos_baja": 3532,
+            "excluidos_matricula_tardia": 3
+          }
+        },
+        "prueba": {
+          "n": 8480,
+          "desercion": 1047,
+          "no_desercion": 7433,
+          "prevalencia": 0.1235,
+          "excluidos_baja": 2692,
+          "excluidos_matricula_tardia": 1,
+          "CCC": {
+            "n": 1753,
+            "desercion": 332,
+            "no_desercion": 1421,
+            "prevalencia": 0.1894,
+            "excluidos_baja": 717,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 6727,
+            "desercion": 715,
+            "no_desercion": 6012,
+            "prevalencia": 0.1063,
+            "excluidos_baja": 1975,
+            "excluidos_matricula_tardia": 1
+          }
+        }
+      }
+    }
+  ],
+  "cortes_sin_exclusion_retirados": [
+    {
+      "semana": 0,
+      "dia_corte": 0,
+      "por_particion": {
+        "entrenamiento": {
+          "n": 19434,
+          "desercion": 4522,
+          "no_desercion": 14912,
+          "prevalencia": 0.2327,
+          "excluidos_baja": 1781,
+          "excluidos_matricula_tardia": 103,
+          "CCC": {
+            "n": 1682,
+            "desercion": 648,
+            "no_desercion": 1034,
+            "prevalencia": 0.3853,
+            "excluidos_baja": 250,
+            "excluidos_matricula_tardia": 4
+          },
+          "resto": {
+            "n": 17752,
+            "desercion": 3874,
+            "no_desercion": 13878,
+            "prevalencia": 0.2182,
+            "excluidos_baja": 1531,
+            "excluidos_matricula_tardia": 99
+          }
+        },
+        "prueba": {
+          "n": 10149,
+          "desercion": 2818,
+          "no_desercion": 7331,
+          "prevalencia": 0.2777,
+          "excluidos_baja": 895,
+          "excluidos_matricula_tardia": 129,
+          "CCC": {
+            "n": 2244,
+            "desercion": 831,
+            "no_desercion": 1413,
+            "prevalencia": 0.3703,
+            "excluidos_baja": 213,
+            "excluidos_matricula_tardia": 13
+          },
+          "resto": {
+            "n": 7905,
+            "desercion": 1987,
+            "no_desercion": 5918,
+            "prevalencia": 0.2514,
+            "excluidos_baja": 682,
+            "excluidos_matricula_tardia": 116
+          }
+        }
+      }
+    },
+    {
+      "semana": 4,
+      "dia_corte": 28,
+      "por_particion": {
+        "entrenamiento": {
+          "n": 19526,
+          "desercion": 4542,
+          "no_desercion": 14984,
+          "prevalencia": 0.2326,
+          "excluidos_baja": 1781,
+          "excluidos_matricula_tardia": 11,
+          "CCC": {
+            "n": 1686,
+            "desercion": 648,
+            "no_desercion": 1038,
+            "prevalencia": 0.3843,
+            "excluidos_baja": 250,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 17840,
+            "desercion": 3894,
+            "no_desercion": 13946,
+            "prevalencia": 0.2183,
+            "excluidos_baja": 1531,
+            "excluidos_matricula_tardia": 11
+          }
+        },
+        "prueba": {
+          "n": 10273,
+          "desercion": 2842,
+          "no_desercion": 7431,
+          "prevalencia": 0.2766,
+          "excluidos_baja": 895,
+          "excluidos_matricula_tardia": 5,
+          "CCC": {
+            "n": 2255,
+            "desercion": 834,
+            "no_desercion": 1421,
+            "prevalencia": 0.3698,
+            "excluidos_baja": 213,
+            "excluidos_matricula_tardia": 2
+          },
+          "resto": {
+            "n": 8018,
+            "desercion": 2008,
+            "no_desercion": 6010,
+            "prevalencia": 0.2504,
+            "excluidos_baja": 682,
+            "excluidos_matricula_tardia": 3
+          }
+        }
+      }
+    },
+    {
+      "semana": 8,
+      "dia_corte": 56,
+      "por_particion": {
+        "entrenamiento": {
+          "n": 19530,
+          "desercion": 4542,
+          "no_desercion": 14988,
+          "prevalencia": 0.2326,
+          "excluidos_baja": 1781,
+          "excluidos_matricula_tardia": 7,
+          "CCC": {
+            "n": 1686,
+            "desercion": 648,
+            "no_desercion": 1038,
+            "prevalencia": 0.3843,
+            "excluidos_baja": 250,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 17844,
+            "desercion": 3894,
+            "no_desercion": 13950,
+            "prevalencia": 0.2182,
+            "excluidos_baja": 1531,
+            "excluidos_matricula_tardia": 7
+          }
+        },
+        "prueba": {
+          "n": 10276,
+          "desercion": 2844,
+          "no_desercion": 7432,
+          "prevalencia": 0.2768,
+          "excluidos_baja": 895,
+          "excluidos_matricula_tardia": 2,
+          "CCC": {
+            "n": 2257,
+            "desercion": 836,
+            "no_desercion": 1421,
+            "prevalencia": 0.3704,
+            "excluidos_baja": 213,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 8019,
+            "desercion": 2008,
+            "no_desercion": 6011,
+            "prevalencia": 0.2504,
+            "excluidos_baja": 682,
+            "excluidos_matricula_tardia": 2
+          }
+        }
+      }
+    },
+    {
+      "semana": 12,
+      "dia_corte": 84,
+      "por_particion": {
+        "entrenamiento": {
+          "n": 19534,
+          "desercion": 4542,
+          "no_desercion": 14992,
+          "prevalencia": 0.2325,
+          "excluidos_baja": 1781,
+          "excluidos_matricula_tardia": 3,
+          "CCC": {
+            "n": 1686,
+            "desercion": 648,
+            "no_desercion": 1038,
+            "prevalencia": 0.3843,
+            "excluidos_baja": 250,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 17848,
+            "desercion": 3894,
+            "no_desercion": 13954,
+            "prevalencia": 0.2182,
+            "excluidos_baja": 1531,
+            "excluidos_matricula_tardia": 3
+          }
+        },
+        "prueba": {
+          "n": 10277,
+          "desercion": 2844,
+          "no_desercion": 7433,
+          "prevalencia": 0.2767,
+          "excluidos_baja": 895,
+          "excluidos_matricula_tardia": 1,
+          "CCC": {
+            "n": 2257,
+            "desercion": 836,
+            "no_desercion": 1421,
+            "prevalencia": 0.3704,
+            "excluidos_baja": 213,
+            "excluidos_matricula_tardia": 0
+          },
+          "resto": {
+            "n": 8020,
+            "desercion": 2008,
+            "no_desercion": 6012,
+            "prevalencia": 0.2504,
+            "excluidos_baja": 682,
+            "excluidos_matricula_tardia": 1
+          }
+        }
+      }
+    }
+  ],
+  "subgrupos": [
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "F",
+      "n": 8803,
+      "desercion": 1796,
+      "no_desercion": 7007,
+      "prevalencia": 0.204
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "M",
+      "n": 10220,
+      "desercion": 2315,
+      "no_desercion": 7905,
+      "prevalencia": 0.2265
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "N",
+      "n": 17184,
+      "desercion": 3557,
+      "no_desercion": 13627,
+      "prevalencia": 0.207
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 1839,
+      "desercion": 554,
+      "no_desercion": 1285,
+      "prevalencia": 0.3013
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 13374,
+      "desercion": 2945,
+      "no_desercion": 10429,
+      "prevalencia": 0.2202
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 5538,
+      "desercion": 1147,
+      "no_desercion": 4391,
+      "prevalencia": 0.2071
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 111,
+      "desercion": 19,
+      "no_desercion": 92,
+      "prevalencia": 0.1712
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 1910,
+      "desercion": 479,
+      "no_desercion": 1431,
+      "prevalencia": 0.2508
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 2016,
+      "desercion": 467,
+      "no_desercion": 1549,
+      "prevalencia": 0.2316
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 2102,
+      "desercion": 540,
+      "no_desercion": 1562,
+      "prevalencia": 0.2569
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 2093,
+      "desercion": 448,
+      "no_desercion": 1645,
+      "prevalencia": 0.214
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 1871,
+      "desercion": 408,
+      "no_desercion": 1463,
+      "prevalencia": 0.2181
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 1831,
+      "desercion": 363,
+      "no_desercion": 1468,
+      "prevalencia": 0.1983
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 1686,
+      "desercion": 376,
+      "no_desercion": 1310,
+      "prevalencia": 0.223
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 1698,
+      "desercion": 344,
+      "no_desercion": 1354,
+      "prevalencia": 0.2026
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 1620,
+      "desercion": 310,
+      "no_desercion": 1310,
+      "prevalencia": 0.1914
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 1526,
+      "desercion": 266,
+      "no_desercion": 1260,
+      "prevalencia": 0.1743
+    },
+    {
+      "semana": 0,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 670,
+      "desercion": 110,
+      "no_desercion": 560,
+      "prevalencia": 0.1642
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "F",
+      "n": 4207,
+      "desercion": 1102,
+      "no_desercion": 3105,
+      "prevalencia": 0.2619
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "M",
+      "n": 5940,
+      "desercion": 1714,
+      "no_desercion": 4226,
+      "prevalencia": 0.2886
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "N",
+      "n": 9197,
+      "desercion": 2478,
+      "no_desercion": 6719,
+      "prevalencia": 0.2694
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 950,
+      "desercion": 338,
+      "no_desercion": 612,
+      "prevalencia": 0.3558
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 7068,
+      "desercion": 2052,
+      "no_desercion": 5016,
+      "prevalencia": 0.2903
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 2988,
+      "desercion": 742,
+      "no_desercion": 2246,
+      "prevalencia": 0.2483
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 91,
+      "desercion": 22,
+      "no_desercion": 69,
+      "prevalencia": 0.2418
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 962,
+      "desercion": 337,
+      "no_desercion": 625,
+      "prevalencia": 0.3503
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 1057,
+      "desercion": 353,
+      "no_desercion": 704,
+      "prevalencia": 0.334
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 1110,
+      "desercion": 360,
+      "no_desercion": 750,
+      "prevalencia": 0.3243
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 1074,
+      "desercion": 308,
+      "no_desercion": 766,
+      "prevalencia": 0.2868
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 1027,
+      "desercion": 295,
+      "no_desercion": 732,
+      "prevalencia": 0.2872
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 1001,
+      "desercion": 260,
+      "no_desercion": 741,
+      "prevalencia": 0.2597
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 965,
+      "desercion": 245,
+      "no_desercion": 720,
+      "prevalencia": 0.2539
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 919,
+      "desercion": 207,
+      "no_desercion": 712,
+      "prevalencia": 0.2252
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 868,
+      "desercion": 202,
+      "no_desercion": 666,
+      "prevalencia": 0.2327
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 791,
+      "desercion": 181,
+      "no_desercion": 610,
+      "prevalencia": 0.2288
+    },
+    {
+      "semana": 0,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 373,
+      "desercion": 68,
+      "no_desercion": 305,
+      "prevalencia": 0.1823
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "F",
+      "n": 8479,
+      "desercion": 1432,
+      "no_desercion": 7047,
+      "prevalencia": 0.1689
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "M",
+      "n": 9825,
+      "desercion": 1888,
+      "no_desercion": 7937,
+      "prevalencia": 0.1922
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "N",
+      "n": 16550,
+      "desercion": 2862,
+      "no_desercion": 13688,
+      "prevalencia": 0.1729
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 1754,
+      "desercion": 458,
+      "no_desercion": 1296,
+      "prevalencia": 0.2611
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 12855,
+      "desercion": 2383,
+      "no_desercion": 10472,
+      "prevalencia": 0.1854
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 5343,
+      "desercion": 923,
+      "no_desercion": 4420,
+      "prevalencia": 0.1727
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 106,
+      "desercion": 14,
+      "no_desercion": 92,
+      "prevalencia": 0.1321
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 1827,
+      "desercion": 389,
+      "no_desercion": 1438,
+      "prevalencia": 0.2129
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 1911,
+      "desercion": 359,
+      "no_desercion": 1552,
+      "prevalencia": 0.1879
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 2007,
+      "desercion": 437,
+      "no_desercion": 1570,
+      "prevalencia": 0.2177
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 2016,
+      "desercion": 356,
+      "no_desercion": 1660,
+      "prevalencia": 0.1766
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 1788,
+      "desercion": 318,
+      "no_desercion": 1470,
+      "prevalencia": 0.1779
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 1768,
+      "desercion": 294,
+      "no_desercion": 1474,
+      "prevalencia": 0.1663
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 1624,
+      "desercion": 306,
+      "no_desercion": 1318,
+      "prevalencia": 0.1884
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 1643,
+      "desercion": 286,
+      "no_desercion": 1357,
+      "prevalencia": 0.1741
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 1566,
+      "desercion": 253,
+      "no_desercion": 1313,
+      "prevalencia": 0.1616
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 1493,
+      "desercion": 227,
+      "no_desercion": 1266,
+      "prevalencia": 0.152
+    },
+    {
+      "semana": 4,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 661,
+      "desercion": 95,
+      "no_desercion": 566,
+      "prevalencia": 0.1437
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "F",
+      "n": 3836,
+      "desercion": 662,
+      "no_desercion": 3174,
+      "prevalencia": 0.1726
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "M",
+      "n": 5288,
+      "desercion": 1031,
+      "no_desercion": 4257,
+      "prevalencia": 0.195
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "N",
+      "n": 8284,
+      "desercion": 1474,
+      "no_desercion": 6810,
+      "prevalencia": 0.1779
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 840,
+      "desercion": 219,
+      "no_desercion": 621,
+      "prevalencia": 0.2607
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 6246,
+      "desercion": 1168,
+      "no_desercion": 5078,
+      "prevalencia": 0.187
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 2791,
+      "desercion": 508,
+      "no_desercion": 2283,
+      "prevalencia": 0.182
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 87,
+      "desercion": 17,
+      "no_desercion": 70,
+      "prevalencia": 0.1954
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 811,
+      "desercion": 172,
+      "no_desercion": 639,
+      "prevalencia": 0.2121
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 898,
+      "desercion": 182,
+      "no_desercion": 716,
+      "prevalencia": 0.2027
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 960,
+      "desercion": 203,
+      "no_desercion": 757,
+      "prevalencia": 0.2115
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 968,
+      "desercion": 185,
+      "no_desercion": 783,
+      "prevalencia": 0.1911
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 918,
+      "desercion": 175,
+      "no_desercion": 743,
+      "prevalencia": 0.1906
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 916,
+      "desercion": 168,
+      "no_desercion": 748,
+      "prevalencia": 0.1834
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 878,
+      "desercion": 151,
+      "no_desercion": 727,
+      "prevalencia": 0.172
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 864,
+      "desercion": 141,
+      "no_desercion": 723,
+      "prevalencia": 0.1632
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 805,
+      "desercion": 132,
+      "no_desercion": 673,
+      "prevalencia": 0.164
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 741,
+      "desercion": 127,
+      "no_desercion": 614,
+      "prevalencia": 0.1714
+    },
+    {
+      "semana": 4,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 365,
+      "desercion": 57,
+      "no_desercion": 308,
+      "prevalencia": 0.1562
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "F",
+      "n": 8196,
+      "desercion": 1147,
+      "no_desercion": 7049,
+      "prevalencia": 0.1399
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "M",
+      "n": 9433,
+      "desercion": 1494,
+      "no_desercion": 7939,
+      "prevalencia": 0.1584
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "N",
+      "n": 15958,
+      "desercion": 2266,
+      "no_desercion": 13692,
+      "prevalencia": 0.142
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 1671,
+      "desercion": 375,
+      "no_desercion": 1296,
+      "prevalencia": 0.2244
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 12369,
+      "desercion": 1895,
+      "no_desercion": 10474,
+      "prevalencia": 0.1532
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 5157,
+      "desercion": 735,
+      "no_desercion": 4422,
+      "prevalencia": 0.1425
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 103,
+      "desercion": 11,
+      "no_desercion": 92,
+      "prevalencia": 0.1068
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 1757,
+      "desercion": 318,
+      "no_desercion": 1439,
+      "prevalencia": 0.181
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 1849,
+      "desercion": 297,
+      "no_desercion": 1552,
+      "prevalencia": 0.1606
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 1920,
+      "desercion": 350,
+      "no_desercion": 1570,
+      "prevalencia": 0.1823
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 1937,
+      "desercion": 277,
+      "no_desercion": 1660,
+      "prevalencia": 0.143
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 1727,
+      "desercion": 256,
+      "no_desercion": 1471,
+      "prevalencia": 0.1482
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 1701,
+      "desercion": 227,
+      "no_desercion": 1474,
+      "prevalencia": 0.1335
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 1561,
+      "desercion": 243,
+      "no_desercion": 1318,
+      "prevalencia": 0.1557
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 1579,
+      "desercion": 221,
+      "no_desercion": 1358,
+      "prevalencia": 0.14
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 1513,
+      "desercion": 199,
+      "no_desercion": 1314,
+      "prevalencia": 0.1315
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 1447,
+      "desercion": 181,
+      "no_desercion": 1266,
+      "prevalencia": 0.1251
+    },
+    {
+      "semana": 8,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 638,
+      "desercion": 72,
+      "no_desercion": 566,
+      "prevalencia": 0.1129
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "F",
+      "n": 3714,
+      "desercion": 539,
+      "no_desercion": 3175,
+      "prevalencia": 0.1451
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "M",
+      "n": 5076,
+      "desercion": 819,
+      "no_desercion": 4257,
+      "prevalencia": 0.1613
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "N",
+      "n": 7993,
+      "desercion": 1182,
+      "no_desercion": 6811,
+      "prevalencia": 0.1479
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 797,
+      "desercion": 176,
+      "no_desercion": 621,
+      "prevalencia": 0.2208
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 6009,
+      "desercion": 931,
+      "no_desercion": 5078,
+      "prevalencia": 0.1549
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 2699,
+      "desercion": 415,
+      "no_desercion": 2284,
+      "prevalencia": 0.1538
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 82,
+      "desercion": 12,
+      "no_desercion": 70,
+      "prevalencia": 0.1463
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 780,
+      "desercion": 141,
+      "no_desercion": 639,
+      "prevalencia": 0.1808
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 862,
+      "desercion": 146,
+      "no_desercion": 716,
+      "prevalencia": 0.1694
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 929,
+      "desercion": 172,
+      "no_desercion": 757,
+      "prevalencia": 0.1851
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 932,
+      "desercion": 148,
+      "no_desercion": 784,
+      "prevalencia": 0.1588
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 876,
+      "desercion": 133,
+      "no_desercion": 743,
+      "prevalencia": 0.1518
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 883,
+      "desercion": 135,
+      "no_desercion": 748,
+      "prevalencia": 0.1529
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 849,
+      "desercion": 122,
+      "no_desercion": 727,
+      "prevalencia": 0.1437
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 831,
+      "desercion": 108,
+      "no_desercion": 723,
+      "prevalencia": 0.13
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 778,
+      "desercion": 105,
+      "no_desercion": 673,
+      "prevalencia": 0.135
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 712,
+      "desercion": 98,
+      "no_desercion": 614,
+      "prevalencia": 0.1376
+    },
+    {
+      "semana": 8,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 358,
+      "desercion": 50,
+      "no_desercion": 308,
+      "prevalencia": 0.1397
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "F",
+      "n": 7987,
+      "desercion": 935,
+      "no_desercion": 7052,
+      "prevalencia": 0.1171
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "gender",
+      "valor": "M",
+      "n": 9159,
+      "desercion": 1219,
+      "no_desercion": 7940,
+      "prevalencia": 0.1331
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "N",
+      "n": 15540,
+      "desercion": 1845,
+      "no_desercion": 13695,
+      "prevalencia": 0.1187
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 1606,
+      "desercion": 309,
+      "no_desercion": 1297,
+      "prevalencia": 0.1924
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 12023,
+      "desercion": 1547,
+      "no_desercion": 10476,
+      "prevalencia": 0.1287
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 5022,
+      "desercion": 598,
+      "no_desercion": 4424,
+      "prevalencia": 0.1191
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 101,
+      "desercion": 9,
+      "no_desercion": 92,
+      "prevalencia": 0.0891
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 1699,
+      "desercion": 260,
+      "no_desercion": 1439,
+      "prevalencia": 0.153
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 1796,
+      "desercion": 243,
+      "no_desercion": 1553,
+      "prevalencia": 0.1353
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 1849,
+      "desercion": 277,
+      "no_desercion": 1572,
+      "prevalencia": 0.1498
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 1897,
+      "desercion": 237,
+      "no_desercion": 1660,
+      "prevalencia": 0.1249
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 1669,
+      "desercion": 198,
+      "no_desercion": 1471,
+      "prevalencia": 0.1186
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 1653,
+      "desercion": 179,
+      "no_desercion": 1474,
+      "prevalencia": 0.1083
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 1520,
+      "desercion": 202,
+      "no_desercion": 1318,
+      "prevalencia": 0.1329
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 1544,
+      "desercion": 186,
+      "no_desercion": 1358,
+      "prevalencia": 0.1205
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 1483,
+      "desercion": 169,
+      "no_desercion": 1314,
+      "prevalencia": 0.114
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 1412,
+      "desercion": 146,
+      "no_desercion": 1266,
+      "prevalencia": 0.1034
+    },
+    {
+      "semana": 12,
+      "particion": "entrenamiento",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 624,
+      "desercion": 57,
+      "no_desercion": 567,
+      "prevalencia": 0.0913
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "F",
+      "n": 3601,
+      "desercion": 426,
+      "no_desercion": 3175,
+      "prevalencia": 0.1183
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "gender",
+      "valor": "M",
+      "n": 4879,
+      "desercion": 621,
+      "no_desercion": 4258,
+      "prevalencia": 0.1273
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "N",
+      "n": 7727,
+      "desercion": 915,
+      "no_desercion": 6812,
+      "prevalencia": 0.1184
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "disability",
+      "valor": "Y",
+      "n": 753,
+      "desercion": 132,
+      "no_desercion": 621,
+      "prevalencia": 0.1753
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "0-35",
+      "n": 5791,
+      "desercion": 713,
+      "no_desercion": 5078,
+      "prevalencia": 0.1231
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "35-55",
+      "n": 2609,
+      "desercion": 324,
+      "no_desercion": 2285,
+      "prevalencia": 0.1242
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "age_band",
+      "valor": "55<=",
+      "n": 80,
+      "desercion": 10,
+      "no_desercion": 70,
+      "prevalencia": 0.125
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "0-10%",
+      "n": 735,
+      "desercion": 96,
+      "no_desercion": 639,
+      "prevalencia": 0.1306
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "10-20%",
+      "n": 823,
+      "desercion": 107,
+      "no_desercion": 716,
+      "prevalencia": 0.13
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "20-30%",
+      "n": 889,
+      "desercion": 132,
+      "no_desercion": 757,
+      "prevalencia": 0.1485
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "30-40%",
+      "n": 894,
+      "desercion": 110,
+      "no_desercion": 784,
+      "prevalencia": 0.123
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "40-50%",
+      "n": 844,
+      "desercion": 101,
+      "no_desercion": 743,
+      "prevalencia": 0.1197
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "50-60%",
+      "n": 857,
+      "desercion": 109,
+      "no_desercion": 748,
+      "prevalencia": 0.1272
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "60-70%",
+      "n": 828,
+      "desercion": 101,
+      "no_desercion": 727,
+      "prevalencia": 0.122
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "70-80%",
+      "n": 812,
+      "desercion": 89,
+      "no_desercion": 723,
+      "prevalencia": 0.1096
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "80-90%",
+      "n": 755,
+      "desercion": 81,
+      "no_desercion": 674,
+      "prevalencia": 0.1073
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "90-100%",
+      "n": 692,
+      "desercion": 78,
+      "no_desercion": 614,
+      "prevalencia": 0.1127
+    },
+    {
+      "semana": 12,
+      "particion": "prueba",
+      "variable": "imd_band",
+      "valor": "faltante",
+      "n": 351,
+      "desercion": 43,
+      "no_desercion": 308,
+      "prevalencia": 0.1225
+    }
+  ],
+  "evaluaciones": {
+    "definicion": "recuentos sobre studentAssessment completo (todas las matrículas, antes de cualquier exclusión o eliminación), salvo notas_tma_descartadas.por_corte; partición por code_presentation; un estudiante con matrículas en las dos particiones cuenta en cada una y una vez en el total",
+    "is_banked": {
+      "total": {
+        "filas": 1909,
+        "matriculas": 526,
+        "estudiantes": 523
+      },
+      "entrenamiento": {
+        "filas": 1129,
+        "matriculas": 299,
+        "estudiantes": 299
+      },
+      "prueba": {
+        "filas": 780,
+        "matriculas": 227,
+        "estudiantes": 224
+      },
+      "date_submitted": [
+        -1
+      ]
+    },
+    "examenes_excluidos": {
+      "total": {
+        "filas": 4959,
+        "matriculas": 4959,
+        "estudiantes": 4633
+      },
+      "entrenamiento": {
+        "filas": 2841,
+        "matriculas": 2841,
+        "estudiantes": 2739
+      },
+      "prueba": {
+        "filas": 2118,
+        "matriculas": 2118,
+        "estudiantes": 2068
+      }
+    },
+    "notas_tma_descartadas": {
+      "definicion": "filas no convalidadas de TMA con nota. total: toda la tabla, cualquier fecha. por_corte: solo las de la población en riesgo del corte (tras D26-D27) con date_submitted ≤ 7k, es decir, las que el corte tendría disponibles y no usa; son acumuladas (cada corte incluye las de los anteriores para quien sigue en riesgo) y no se suman entre cortes",
+      "total": {
+        "total": {
+          "filas": 96916,
+          "matriculas": 24496,
+          "estudiantes": 22599
+        },
+        "entrenamiento": {
+          "filas": 65003,
+          "matriculas": 16186,
+          "estudiantes": 15492
+        },
+        "prueba": {
+          "filas": 31913,
+          "matriculas": 8310,
+          "estudiantes": 8041
+        }
+      },
+      "por_corte": {
+        "0": {
+          "total": {
+            "filas": 120,
+            "matriculas": 120,
+            "estudiantes": 120
+          },
+          "entrenamiento": {
+            "filas": 51,
+            "matriculas": 51,
+            "estudiantes": 51
+          },
+          "prueba": {
+            "filas": 69,
+            "matriculas": 69,
+            "estudiantes": 69
+          }
+        },
+        "4": {
+          "total": {
+            "filas": 16957,
+            "matriculas": 16922,
+            "estudiantes": 16583
+          },
+          "entrenamiento": {
+            "filas": 11837,
+            "matriculas": 11818,
+            "estudiantes": 11712
+          },
+          "prueba": {
+            "filas": 5120,
+            "matriculas": 5104,
+            "estudiantes": 5081
+          }
+        },
+        "8": {
+          "total": {
+            "filas": 36286,
+            "matriculas": 21998,
+            "estudiantes": 20432
+          },
+          "entrenamiento": {
+            "filas": 24657,
+            "matriculas": 14648,
+            "estudiantes": 14083
+          },
+          "prueba": {
+            "filas": 11629,
+            "matriculas": 7350,
+            "estudiantes": 7104
+          }
+        },
+        "12": {
+          "total": {
+            "filas": 43554,
+            "matriculas": 22785,
+            "estudiantes": 21259
+          },
+          "entrenamiento": {
+            "filas": 29522,
+            "matriculas": 15239,
+            "estudiantes": 14686
+          },
+          "prueba": {
+            "filas": 14032,
+            "matriculas": 7546,
+            "estudiantes": 7312
+          }
+        }
+      }
+    }
+  },
+  "tipos_actividad": {
+    "con_variable": [
+      "dataplus",
+      "dualpane",
+      "externalquiz",
+      "folder",
+      "forumng",
+      "glossary",
+      "homepage",
+      "oucollaborate",
+      "oucontent",
+      "ouelluminate",
+      "ouwiki",
+      "page",
+      "questionnaire",
+      "quiz",
+      "repeatactivity",
+      "resource",
+      "sharedsubpage",
+      "subpage",
+      "url"
+    ],
+    "prueba_sin_variable": [
+      "htmlactivity"
+    ],
+    "entrenamiento_ausentes_en_prueba": [
+      "folder",
+      "ouelluminate",
+      "sharedsubpage"
+    ],
+    "clics_prueba_sin_variable": 9239,
+    "matriculas_prueba_con_clics_sin_variable": 1918,
+    "tratamiento": "los clics de tipos sin variable cuentan en clics_total, dias_activos y las ventanas, pero no tienen columna clics_<tipo>; los tipos ausentes en prueba valen 0 en 2014J"
+  },
+  "n_variables_definicion": "columnas de entrada del modelo (catálogo sin motivo de exclusión), sin identificadores, partición, pliegue ni etiqueta",
+  "catalogo_variables": "experimentos/exp-2026-10-23-02_catalogo_variables.csv",
+  "pruebas_antifuga": {
+    "informe": "pruebas/exp-2026-10-23-02_antifuga.xml",
+    "superadas": 59,
+    "fallidas": 0,
+    "omitidas": 0,
+    "d28": "mediana de date_registration ajustada solo con el entrenamiento de cada pliegue y, en el modelo final, con todo el entrenamiento sin 2014J (ml/automl/preprocesado.py; ml/tests/test_preprocesado.py)"
+  },
+  "salidas_sha256": {
+    "carpeta": "data/procesado/cortes",
+    "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c",
+    "semana_0_sin_exclusion_retirados.parquet": "798274d4b635d2b1f62e8450c765a8e8f63edae78aa60e58d7201996e2b249fa",
+    "semana_4.parquet": "1678b4c811fc1e676d757cae2eb782c38214c8b1aca27ae5912e0744217ee1ee",
+    "semana_4_sin_exclusion_retirados.parquet": "c50ad926b1ee0f925ae02c2365daf09beea1bd424cd1a030a6758e71f05d77bc",
+    "semana_8.parquet": "1fba8c215aa58b96b49096c36c69c52fce38ca755995cceccdc287c545e4f76e",
+    "semana_8_sin_exclusion_retirados.parquet": "90c9ecb741e1bbcec6160ab28d2ceca401056fdf663c559c68276b6e54f5ce55",
+    "semana_12.parquet": "aea7eba703e29f0412746b681fa91226e88942059e0d75e890028640029ad8cf",
+    "semana_12_sin_exclusion_retirados.parquet": "62e25614364486baf1f643e5c5df3ad6bba959eb28eee5ee40f52fd5f3f54c68"
+  },
+  "referencia_calidad": {
+    "experimento": "exp-2026-10-05-02",
+    "sha256": "df837b10223570c4d957173933d54b94c914e86d7c8fc3797b5f06a682029df6"
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "matplotlib": "3.11.2",
+    "pyarrow": "26.0.0",
+    "pytest": "9.1.1",
+    "scikit-learn": "1.9.1"
+  },
+  "tiempo_ejecucion_s": 83.55,
+  "figuras": [
+    "figuras/exp-2026-10-23-02_poblacion_prevalencia_por_corte.png"
+  ]
+}

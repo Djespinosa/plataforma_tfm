@@ -1,10 +1,11 @@
 {
-  "generado": "2026-10-23T16:18:55",
-  "commit": "7008368",
+  "generado": "2026-10-23T21:20:34",
+  "commit": "416ccb1",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
-    "experimentos/exp-2026-10-23-01.json"
+    "experimentos/exp-2026-10-23-01.json",
+    "experimentos/exp-2026-10-23-02.json"
   ],
   "figuras": [
     {
@@ -41,6 +42,11 @@
       "archivo": "figuras/exp-2026-10-23-01_poblacion_prevalencia_por_corte.png",
       "descripcion": "Población en riesgo y prevalencia de Withdrawn por corte y partición en OULAD",
       "experimento": "exp-2026-10-23-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-23-02_poblacion_prevalencia_por_corte.png",
+      "descripcion": "Población en riesgo y prevalencia de Withdrawn por corte y partición en OULAD",
+      "experimento": "exp-2026-10-23-02"
     }
   ],
   "capturas": [],
@@ -50,6 +56,11 @@
       "archivo": "pruebas/exp-2026-10-23-01_antifuga.xml",
       "descripcion": "Pruebas automatizadas anti-fuga de los cortes",
       "experimento": "exp-2026-10-23-01"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-23-02_antifuga.xml",
+      "descripcion": "Pruebas automatizadas anti-fuga de los cortes",
+      "experimento": "exp-2026-10-23-02"
     }
   ],
   "usabilidad": []
