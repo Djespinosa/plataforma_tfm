@@ -78,12 +78,19 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       media en los pliegues de D29-rev; se registran `n_trials`, semilla, configuración del muestreador y del podador,
       espacio de búsqueda por modelo y tiempo. La RL optimizada recibe el mismo nº de ensayos que cada familia.
 - [ ] **D30** Desbalance: pesos de clase como hiperparámetro; sin sobremuestreo por defecto.
+- [ ] Implementación (F2, `ml/automl/busqueda.py`; se declara en el Anexo C): GB = `HistGradientBoostingClassifier`
+      (admite vacíos y es mucho más rápido que el clásico); RL con `liblinear` y L1 o L2 (`saga` con red elástica no
+      convergía); MLP y XGBoost reciben los pesos de clase como pesos por muestra. Entrada: one-hot con "faltante" en las
+      categóricas; RL y MLP imputan por la mediana con indicador y estandarizan; los árboles tratan los vacíos estructurales
+      de forma nativa y solo imputan `date_registration` (D28).
 - [ ] **D48 Apilamiento sin fuga**, paso posterior a la búsqueda: combina el mejor modelo de cada familia con sus
       hiperparámetros ya fijados (sin nueva búsqueda, como D38). Metamodelo: RL regularizada. Para cada pliegue externo
       *f*, el metamodelo se entrena con predicciones *out-of-fold* de una validación cruzada **interna** agrupada por
       presentación sobre los otros 4 pliegues; nunca ve predicciones de los datos con que se evalúa. Modelo final: igual
       sobre las 15 presentaciones (metamodelo con las predicciones *out-of-fold* de los 5 pliegues). `StackingClassifier`
       no recibe `groups`: pasar los *splits* precalculados como `cv`. Su coste computacional se informa por separado.
+      Sus probabilidades son la salida del metamodelo logístico, sin calibración anidada adicional (añadirla exigiría
+      una tercera validación cruzada anidada); se declara.
 
 ## 4. Métricas, calibración y umbral
 
