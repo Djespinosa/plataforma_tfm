@@ -15,7 +15,7 @@ from sklearn.metrics import roc_auc_score
 from scipy.stats import norm
 
 from automl.apilamiento import oof_apilamiento
-from automl.busqueda import ESPACIOS, FAMILIAS, buscar, construir, sugerir
+from automl.busqueda import ESPACIOS, FAMILIAS, PREDETERMINADOS, buscar, construir, sugerir
 from automl.calibracion import elegir_metodo, oof_anidado, punto_operacion, umbral
 from automl.comparacion import auc_bootstrap, delong, holm, intervalo, lectura, parsimonia
 from automl.equidad import auditar
@@ -198,6 +198,41 @@ def test_busqueda_reproducible_con_la_misma_semilla():
     b = buscar("rl", X, y, cv, 6, COLUMNAS, semilla=42)
     assert a["hiperparametros"] == b["hiperparametros"] and a["roc_auc_media_busqueda"] == b["roc_auc_media_busqueda"]
     assert a["n_completados"] + a["n_podados"] == 6
+
+
+@pytest.mark.parametrize("familia", FAMILIAS)
+def test_predeterminados_dentro_del_espacio(familia):
+    espacio, valores = ESPACIOS[familia], PREDETERMINADOS[familia]
+    assert set(valores) == set(espacio)
+    for nombre, (tipo, *rango) in espacio.items():
+        if tipo == "categorica":
+            assert valores[nombre] in rango[0]
+        else:
+            assert rango[0] <= valores[nombre] <= rango[1]
+
+
+def test_espacio_de_la_rl_incluye_c_1_con_l2():
+    tipo, minimo, maximo = ESPACIOS["rl"]["C"]
+    assert tipo == "float_log" and minimo <= 0.1 and maximo >= 10  # C alrededor de 1 en escala logarítmica
+    assert 0.0 in ESPACIOS["rl"]["l1_ratio"][1]  # l1_ratio 0 = L2
+    assert PREDETERMINADOS["rl"] == {"C": 1.0, "l1_ratio": 0.0, "class_weight": None}
+
+
+def test_rl_optimizada_nunca_por_debajo_de_la_rl_por_defecto():
+    """El primer ensayo es la RL por defecto (la misma Pipeline que la referencia rl_defecto), así que la mejor
+    configuración no puede quedar por debajo en la métrica objetivo; con un solo ensayo, es la configuración por defecto."""
+    from experimento import rl_defecto
+
+    X, y, pliegue = datos(400)
+    cv = divisiones(pliegue)
+    referencia = rl_defecto(COLUMNAS)
+    auc = [roc_auc_score(y.iloc[v], clone(referencia).fit(X.iloc[a], y.iloc[a]).predict_proba(X.iloc[v])[:, 1])
+           for a, v in cv]
+    for n_trials in (1, 6):
+        resultado = buscar("rl", X, y, cv, n_trials, COLUMNAS, semilla=42)
+        assert resultado["roc_auc_media_predeterminado"] == pytest.approx(np.mean(auc), abs=5e-5)
+        assert resultado["roc_auc_media_busqueda"] >= resultado["roc_auc_media_predeterminado"]
+    assert buscar("rl", X, y, cv, 1, COLUMNAS, semilla=42)["hiperparametros"] == PREDETERMINADOS["rl"]
 
 
 # --- Equidad ----------------------------------------------------------------------------------------------------------

@@ -77,6 +77,14 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - [ ] Optuna con TPE y poda (valor intermedio = media acumulada tras cada pliegue); métrica objetivo ROC-AUC (**D6**)
       media en los pliegues de D29-rev; se registran `n_trials`, semilla, configuración del muestreador y del podador,
       espacio de búsqueda por modelo y tiempo. La RL optimizada recibe el mismo nº de ensayos que cada familia.
+- [ ] **D53** Primer ensayo de cada familia = su configuración por defecto (`enqueue_trial`, `PREDETERMINADOS` de
+      `ml/automl/busqueda.py`), para que la optimizada nunca quede por debajo de ella en la métrica objetivo (D6 sin
+      cambios: media de ROC-AUC de los 5 pliegues, sin calibrar). Los valores por defecto que caen fuera del espacio se
+      encolan con el valor más cercano y se declaran en el Anexo C (`PREDETERMINADOS_NOTA`). En la RL es exactamente la
+      referencia `rl_defecto` (C = 1, L2, sin pesos de clase; `liblinear` en ambas RL, misma entrada); el espacio de la
+      RL incluye C = 1 con L2. `rl_defecto` pasa por la **misma calibración anidada** y elección por Brier que los
+      candidatos (la mayoritaria, sin calibrar). Pruebas: `test_rl_optimizada_nunca_por_debajo_de_la_rl_por_defecto`,
+      `test_rl_defecto_con_la_misma_calibracion_anidada_que_los_candidatos`.
 - [ ] **D30** Desbalance: pesos de clase como hiperparámetro; sin sobremuestreo por defecto.
 - [ ] Implementación (F2, `ml/automl/busqueda.py`; se declara en el Anexo C): GB = `HistGradientBoostingClassifier`
       (admite vacíos y es mucho más rápido que el clásico); RL con `liblinear` y L1 o L2 (`saga` con red elástica no
@@ -90,7 +98,7 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       sobre las 15 presentaciones (metamodelo con las predicciones *out-of-fold* de los 5 pliegues). `StackingClassifier`
       no recibe `groups`: pasar los *splits* precalculados como `cv`. Su coste computacional se informa por separado.
       Sus probabilidades son la salida del metamodelo logístico, sin calibración anidada adicional (añadirla exigiría
-      una tercera validación cruzada anidada); se declara.
+      una tercera validación cruzada anidada); se declara (**D52**).
 
 ## 4. Métricas, calibración y umbral
 

@@ -86,6 +86,26 @@ ESPACIOS: dict[str, dict[str, tuple]] = {
         "class_weight": ("categorica", [None, "balanced"]),
     },
 }
+# Primer ensayo de cada búsqueda (enqueue_trial): la optimizada nunca queda por debajo de la configuración por defecto
+# en la métrica objetivo. Valores por defecto de cada biblioteca; donde caen fuera del espacio, el valor más cercano.
+PREDETERMINADOS: dict[str, dict] = {
+    "rl": {"C": 1.0, "l1_ratio": 0.0, "class_weight": None},
+    "rf": {"n_estimators": 100, "max_depth": 30, "min_samples_leaf": 1, "max_features": "sqrt", "class_weight": None},
+    "gb": {"learning_rate": 0.1, "max_iter": 100, "max_leaf_nodes": 31, "min_samples_leaf": 20,
+           "l2_regularization": 1e-6, "class_weight": None},
+    "xgb": {"n_estimators": 100, "learning_rate": 0.3, "max_depth": 6, "min_child_weight": 1.0, "subsample": 1.0,
+            "colsample_bytree": 1.0, "reg_lambda": 1.0, "class_weight": None},
+    "lgbm": {"n_estimators": 100, "learning_rate": 0.1, "num_leaves": 31, "min_child_samples": 20, "subsample": 1.0,
+             "colsample_bytree": 1.0, "reg_lambda": 1e-3, "class_weight": None},
+    "catboost": {"iterations": 800, "learning_rate": 0.03, "depth": 6, "l2_leaf_reg": 3.0, "class_weight": None},
+    "mlp": {"hidden_layer_sizes": "128", "alpha": 1e-4, "learning_rate_init": 1e-3, "batch_size": 256,
+            "class_weight": None},
+}
+PREDETERMINADOS_NOTA = ("primer ensayo encolado de cada familia; valores por defecto de la biblioteca salvo donde caen "
+                        "fuera del espacio (valor por defecto entre paréntesis): rf max_depth 30 (None), "
+                        "gb l2_regularization 1e-6 (0), lgbm reg_lambda 1e-3 (0), catboost iterations 800 (1000), "
+                        "mlp hidden_layer_sizes 128 (100) y batch_size 256 (auto = 200). RL: C = 1, L2, sin pesos de "
+                        "clase, idéntica a la referencia rl_defecto")
 CONFIGURACION_FIJA = {
     "rl": "solver liblinear (l1_ratio 0 = L2, 1 = L1); saga con red elástica no convergía y multiplicaba el coste",
     "rf": "criterion gini; vacíos tratados de forma nativa",
@@ -199,11 +219,13 @@ def buscar(familia: str, X: pd.DataFrame, y: pd.Series, cv: list, n_trials: int,
         pruner=optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=1),
     )
     optuna.logging.set_verbosity(optuna.logging.WARNING)
+    estudio.enqueue_trial(PREDETERMINADOS[familia])
     estudio.optimize(objetivo, n_trials=n_trials)
     estados = [e.state for e in estudio.trials]
     return {
         "hiperparametros": estudio.best_params,
         "roc_auc_media_busqueda": round(estudio.best_value, 4),
+        "roc_auc_media_predeterminado": round(estudio.trials[0].value, 4),
         "n_trials": n_trials,
         "n_completados": estados.count(optuna.trial.TrialState.COMPLETE),
         "n_podados": estados.count(optuna.trial.TrialState.PRUNED),
@@ -213,7 +235,8 @@ def buscar(familia: str, X: pd.DataFrame, y: pd.Series, cv: list, n_trials: int,
 
 DESCRIPCION_OPTUNA = {
     "optimizador": "Optuna", "version": optuna.__version__,
-    "muestreador": "TPESampler (semilla de la configuración, parámetros por defecto)",
+    "muestreador": "TPESampler (semilla de la configuración, parámetros por defecto); primer ensayo encolado con la "
+                   "configuración por defecto de la familia",
     "podador": "MedianPruner(n_startup_trials=5, n_warmup_steps=1); valor intermedio = media acumulada de ROC-AUC "
                "tras cada pliegue",
     "metrica_objetivo": "roc_auc (media de los 5 pliegues agrupados por presentación)",

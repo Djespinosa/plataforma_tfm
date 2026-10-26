@@ -29,7 +29,6 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from sklearn.calibration import calibration_curve  # noqa: E402
 from sklearn.dummy import DummyClassifier  # noqa: E402
-from sklearn.linear_model import LogisticRegression  # noqa: E402
 from sklearn.metrics import average_precision_score, brier_score_loss, precision_recall_curve, roc_auc_score, roc_curve  # noqa: E402
 from sklearn.pipeline import Pipeline  # noqa: E402
 
@@ -39,7 +38,6 @@ from automl.calibracion import elegir_metodo, oof_anidado, punto_operacion, umbr
 from automl.comparacion import auc_bootstrap, delong, holm, intervalo, lectura, parsimonia  # noqa: E402
 from automl.equidad import auditar  # noqa: E402
 from automl.particion import divisiones  # noqa: E402
-from automl.preprocesado import codificador  # noqa: E402
 from cortes_oulad import IMPUTAR_MEDIANA, PROCESADO, SENSIBLES  # noqa: E402
 from evidencias import (  # noqa: E402
     EVIDENCIAS,
@@ -115,9 +113,36 @@ def metricas(y: pd.Series, p: np.ndarray, pliegue: pd.Series) -> dict:
             "pr_auc_oof": round(average_precision_score(y, p), 4), "brier_oof": round(brier_score_loss(y, p), 4)}
 
 
-def rl_defecto(columnas: dict) -> Pipeline:
-    """Referencia: LogisticRegression() por defecto de scikit-learn sobre la misma entrada que la RL optimizada."""
-    return Pipeline([("preprocesado", codificador(**columnas, escalar=True)), ("modelo", LogisticRegression())])
+def rl_defecto(columnas: dict, semilla: int = 42) -> Pipeline:
+    """Referencia: regresión logística por defecto (C = 1, L2, sin pesos de clase) con el solver de la familia RL
+    (liblinear) y la misma entrada; es exactamente el primer ensayo de la búsqueda de la RL optimizada."""
+    return busqueda.construir("rl", busqueda.PREDETERMINADOS["rl"], **columnas, semilla=semilla)
+
+
+def calcular_referencias(X: pd.DataFrame, y: pd.Series, pliegue: pd.Series, columnas: dict,
+                         semilla: int) -> tuple[list[dict], dict[str, np.ndarray]]:
+    """Mayoritaria sin calibrar; rl_defecto con la misma calibración anidada y elección por Brier que los candidatos
+    (D53), para comparar con la RL optimizada en igualdad de condiciones."""
+    referencias, predicciones = [], {}
+    inicio = time.perf_counter()
+    p = oof_anidado(DummyClassifier(strategy="prior"), X, y, pliegue, calibrar=False)["sin_calibrar"]
+    referencias.append({"modelo": "mayoritaria", "calibracion": None, **metricas(y, p, pliegue),
+                        "tiempo_s": round(time.perf_counter() - inicio, 1),
+                        "nota": "predice en cada pliegue la prevalencia de sus pliegues de ajuste: ROC-AUC 0,5 en cada "
+                                "pliegue; la ROC-AUC out-of-fold agrupada se aparta de 0,5 solo porque esa constante "
+                                "cambia entre pliegues (limitación de agrupar predicciones de 5 modelos, D40)"})
+    predicciones["ref_mayoritaria"] = p
+
+    inicio = time.perf_counter()
+    oof = oof_anidado(rl_defecto(columnas, semilla), X, y, pliegue)
+    calibracion = elegir_metodo(y, oof)
+    predicciones["ref_rl_defecto"] = oof[calibracion["metodo"]]
+    referencias.append({"modelo": "rl_defecto", "hiperparametros": busqueda.PREDETERMINADOS["rl"],
+                        "calibracion": calibracion,
+                        "roc_auc_oof_sin_calibrar": round(roc_auc_score(y, oof["sin_calibrar"]), 4),
+                        **metricas(y, predicciones["ref_rl_defecto"], pliegue),
+                        "tiempo_s": round(time.perf_counter() - inicio, 1)})
+    return referencias, predicciones
 
 
 # --- Un momento -------------------------------------------------------------------------------------------------------
@@ -150,16 +175,8 @@ def momento(semana: int, config: dict, cortes: dict, columnas: dict) -> tuple[di
                          "tiempo_oof_calibrado_s": round(time.perf_counter() - inicio, 1)})
         familias[-1]["tiempo_s"] = round(familias[-1]["tiempo_busqueda_s"] + familias[-1]["tiempo_oof_calibrado_s"], 1)
 
-    referencias = []
-    for nombre, modelo in (("mayoritaria", DummyClassifier(strategy="prior")), ("rl_defecto", rl_defecto(columnas))):
-        inicio = time.perf_counter()
-        p = oof_anidado(modelo, X, y, pliegue, calibrar=False)["sin_calibrar"]
-        referencias.append({"modelo": nombre, "calibracion": None, **metricas(y, p, pliegue),
-                            "tiempo_s": round(time.perf_counter() - inicio, 1)})
-        predicciones[f"ref_{nombre}"] = p
-    referencias[0]["nota"] = ("predice en cada pliegue la prevalencia de sus pliegues de ajuste: ROC-AUC 0,5 en cada "
-                              "pliegue; la ROC-AUC out-of-fold agrupada se aparta de 0,5 solo porque esa constante "
-                              "cambia entre pliegues (limitación de agrupar predicciones de 5 modelos, D40)")
+    referencias, p_referencias = calcular_referencias(X, y, pliegue, columnas, semillas["modelos"])
+    predicciones |= p_referencias
     if "rl" in predicciones:
         referencias.append({"modelo": "rl_optimizada", "igual_que": "familia rl (mismo nº de ensayos que cada familia)"})
 
@@ -387,6 +404,7 @@ def main() -> None:
         "automl": busqueda.DESCRIPCION_OPTUNA | {
             "n_trials_por_familia": config["n_trials_por_familia"],
             "espacios_busqueda": busqueda.ESPACIOS,
+            "predeterminados": {"valores": busqueda.PREDETERMINADOS, "nota": busqueda.PREDETERMINADOS_NOTA},
             "configuracion_fija": busqueda.CONFIGURACION_FIJA,
             "apilamiento": {"en_busqueda": False, "base": "mejor configuración de cada familia (D48)",
                             "metamodelo": METAMODELO, "cv_interna": "divisiones agrupadas por presentación dentro de "

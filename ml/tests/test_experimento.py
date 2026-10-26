@@ -38,3 +38,23 @@ def test_retiros_de_prueba_salen_del_experimento_de_cortes():
         {"semana": 8, "particion": "prueba", "variable": "gender", "valor": "F", "desercion": 7},
     ]}
     assert ex.retiros_prueba(cortes, 4) == {"gender": {"F": 31}}
+
+
+def test_rl_defecto_con_la_misma_calibracion_anidada_que_los_candidatos():
+    """D53: la referencia rl_defecto pasa por la calibración anidada y la elección por Brier de las familias."""
+    import numpy as np
+    from sklearn.metrics import roc_auc_score
+
+    from automl.calibracion import elegir_metodo, oof_anidado
+    from test_automl import COLUMNAS, datos
+
+    X, y, pliegue = datos()
+    referencias, predicciones = ex.calcular_referencias(X, y, pliegue, COLUMNAS, 42)
+    mayoritaria, rl = referencias
+    assert mayoritaria["calibracion"] is None
+    oof = oof_anidado(ex.rl_defecto(COLUMNAS, 42), X, y, pliegue)  # anti-fuga probada en test_automl
+    metodo = elegir_metodo(y, oof)["metodo"]
+    assert rl["calibracion"]["metodo"] == metodo
+    np.testing.assert_allclose(predicciones["ref_rl_defecto"], oof[metodo])
+    assert not np.allclose(predicciones["ref_rl_defecto"], oof["sin_calibrar"])
+    assert rl["roc_auc_oof_sin_calibrar"] == round(roc_auc_score(y, oof["sin_calibrar"]), 4)
