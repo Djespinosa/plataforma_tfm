@@ -1,11 +1,12 @@
 {
-  "generado": "2026-10-23T21:20:34",
-  "commit": "416ccb1",
+  "generado": "2026-10-26T15:24:45",
+  "commit": "d36dec0",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
     "experimentos/exp-2026-10-23-01.json",
-    "experimentos/exp-2026-10-23-02.json"
+    "experimentos/exp-2026-10-23-02.json",
+    "experimentos/exp-2026-10-26-01.json"
   ],
   "figuras": [
     {
@@ -47,6 +48,21 @@
       "archivo": "figuras/exp-2026-10-23-02_poblacion_prevalencia_por_corte.png",
       "descripcion": "Población en riesgo y prevalencia de Withdrawn por corte y partición en OULAD",
       "experimento": "exp-2026-10-23-02"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-26-01_roc_pr_oof.png",
+      "descripcion": "Curvas ROC y PR out-of-fold por momento: desplegado, mejor AutoML y RL optimizada",
+      "experimento": "exp-2026-10-26-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-26-01_calibracion_oof.png",
+      "descripcion": "Curva de calibración out-of-fold del modelo desplegado por momento",
+      "experimento": "exp-2026-10-26-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-26-01_familias_roc_auc.png",
+      "descripcion": "ROC-AUC out-of-fold por familia y referencia, por momento",
+      "experimento": "exp-2026-10-26-01"
     }
   ],
   "capturas": [],
