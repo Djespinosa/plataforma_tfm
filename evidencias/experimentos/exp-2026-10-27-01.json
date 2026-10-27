@@ -1,0 +1,5667 @@
+{
+  "id": "exp-2026-10-27-01",
+  "tipo": "modelado",
+  "fecha": "2026-10-27T10:47:53",
+  "commit": "e49f339",
+  "descripcion": "Configuración principal de la Entrega 2: búsqueda sin variables sensibles (D38), 7 familias, apilamiento posterior (D48), solo validación cruzada. Configuración: ml/configs/principal.json.",
+  "variante": "principal",
+  "configuracion": {
+    "nombre": "principal",
+    "variante": "principal",
+    "descripcion": "Configuración principal de la Entrega 2: búsqueda sin variables sensibles (D38), 7 familias, apilamiento posterior (D48), solo validación cruzada.",
+    "experimento_cortes": "exp-2026-10-23-02",
+    "semanas": [
+      0,
+      4,
+      8,
+      12
+    ],
+    "familias": [
+      "rl",
+      "rf",
+      "gb",
+      "xgb",
+      "lgbm",
+      "catboost",
+      "mlp"
+    ],
+    "n_trials_por_familia": 50,
+    "sin_sensibles": true,
+    "apilamiento": true,
+    "sensibilidad_minima": 0.7,
+    "n_bootstrap": 2000,
+    "semillas": {
+      "optuna": 42,
+      "modelos": 42,
+      "bootstrap": 42
+    },
+    "n_jobs": 8
+  },
+  "experimento_cortes": "exp-2026-10-23-02",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    },
+    "cortes_sha256": {
+      "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c",
+      "semana_4.parquet": "1678b4c811fc1e676d757cae2eb782c38214c8b1aca27ae5912e0744217ee1ee",
+      "semana_8.parquet": "1fba8c215aa58b96b49096c36c69c52fce38ca755995cceccdc287c545e4f76e",
+      "semana_12.parquet": "aea7eba703e29f0412746b681fa91226e88942059e0d75e890028640029ad8cf"
+    }
+  },
+  "variables": {
+    "numericas": [
+      "module_presentation_length",
+      "num_of_prev_attempts",
+      "studied_credits",
+      "date_registration",
+      "falta_date_registration",
+      "clics_total",
+      "dias_activos",
+      "clics_dataplus",
+      "clics_dualpane",
+      "clics_externalquiz",
+      "clics_folder",
+      "clics_forumng",
+      "clics_glossary",
+      "clics_homepage",
+      "clics_oucollaborate",
+      "clics_oucontent",
+      "clics_ouelluminate",
+      "clics_ouwiki",
+      "clics_page",
+      "clics_questionnaire",
+      "clics_quiz",
+      "clics_repeatactivity",
+      "clics_resource",
+      "clics_sharedsubpage",
+      "clics_subpage",
+      "clics_url",
+      "clics_ventana_1",
+      "clics_ventana_2",
+      "clics_ventana_3",
+      "clics_ventana_4",
+      "proporcion_dias_activos_28d",
+      "sin_actividad",
+      "dias_desde_ultima_actividad",
+      "tendencia_4s",
+      "cv_clics_4s",
+      "percentil_clics_total_cohorte",
+      "percentil_dias_activos_cohorte",
+      "percentil_clics_ventana_1_cohorte",
+      "n_evaluaciones_vencidas",
+      "n_entregadas",
+      "proporcion_entregadas",
+      "antelacion_media",
+      "n_entregas_tardias",
+      "n_cma_calificadas",
+      "nota_media_cma",
+      "n_convalidadas",
+      "nota_media_convalidada"
+    ],
+    "categoricas": [
+      "code_module",
+      "tipo_presentacion",
+      "region",
+      "highest_education"
+    ],
+    "imputar_mediana": [
+      "date_registration"
+    ],
+    "sensibles_excluidas": [
+      "gender",
+      "disability",
+      "age_band",
+      "imd_band"
+    ]
+  },
+  "particion": {
+    "estrategia": "temporal",
+    "entrenamiento": "presentaciones anteriores a 2014J (15)",
+    "prueba": "2014J (7)",
+    "validacion": "5 pliegues agrupados por presentación (D29-rev)",
+    "semillas": {
+      "optuna": 42,
+      "modelos": 42,
+      "bootstrap": 42
+    }
+  },
+  "automl": {
+    "optimizador": "Optuna",
+    "version": "5.0.0",
+    "muestreador": "TPESampler (semilla de la configuración, parámetros por defecto); primer ensayo encolado con la configuración por defecto de la familia",
+    "podador": "MedianPruner(n_startup_trials=5, n_warmup_steps=1); valor intermedio = media acumulada de ROC-AUC tras cada pliegue",
+    "metrica_objetivo": "roc_auc (media de los 5 pliegues agrupados por presentación)",
+    "n_trials_por_familia": 50,
+    "espacios_busqueda": {
+      "rl": {
+        "C": [
+          "float_log",
+          0.0001,
+          100.0
+        ],
+        "l1_ratio": [
+          "categorica",
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "class_weight": [
+          "categorica",
+          [
+            null,
+            "balanced"
+          ]
+        ]
+      },
+      "rf": {
+        "n_estimators": [
+          "int",
+          100,
+          500
+        ],
+        "max_depth": [
+          "int",
+          3,
+          30
+        ],
+        "min_samples_leaf": [
+          "int_log",
+          1,
+          100
+        ],
+        "max_features": [
+          "categorica",
+          [
+            "sqrt",
+            0.3,
+            0.5
+          ]
+        ],
+        "class_weight": [
+          "categorica",
+          [
+            null,
+            "balanced",
+            "balanced_subsample"
+          ]
+        ]
+      },
+      "gb": {
+        "learning_rate": [
+          "float_log",
+          0.01,
+          0.3
+        ],
+        "max_iter": [
+          "int",
+          100,
+          600
+        ],
+        "max_leaf_nodes": [
+          "int_log",
+          8,
+          128
+        ],
+        "min_samples_leaf": [
+          "int_log",
+          10,
+          300
+        ],
+        "l2_regularization": [
+          "float_log",
+          1e-06,
+          10.0
+        ],
+        "class_weight": [
+          "categorica",
+          [
+            null,
+            "balanced"
+          ]
+        ]
+      },
+      "xgb": {
+        "n_estimators": [
+          "int",
+          100,
+          600
+        ],
+        "learning_rate": [
+          "float_log",
+          0.01,
+          0.3
+        ],
+        "max_depth": [
+          "int",
+          2,
+          10
+        ],
+        "min_child_weight": [
+          "float_log",
+          1.0,
+          50.0
+        ],
+        "subsample": [
+          "float",
+          0.5,
+          1.0
+        ],
+        "colsample_bytree": [
+          "float",
+          0.4,
+          1.0
+        ],
+        "reg_lambda": [
+          "float_log",
+          0.001,
+          10.0
+        ],
+        "class_weight": [
+          "categorica",
+          [
+            null,
+            "balanced"
+          ]
+        ]
+      },
+      "lgbm": {
+        "n_estimators": [
+          "int",
+          100,
+          600
+        ],
+        "learning_rate": [
+          "float_log",
+          0.01,
+          0.3
+        ],
+        "num_leaves": [
+          "int_log",
+          8,
+          256
+        ],
+        "min_child_samples": [
+          "int_log",
+          5,
+          300
+        ],
+        "subsample": [
+          "float",
+          0.5,
+          1.0
+        ],
+        "colsample_bytree": [
+          "float",
+          0.4,
+          1.0
+        ],
+        "reg_lambda": [
+          "float_log",
+          0.001,
+          10.0
+        ],
+        "class_weight": [
+          "categorica",
+          [
+            null,
+            "balanced"
+          ]
+        ]
+      },
+      "catboost": {
+        "iterations": [
+          "int",
+          200,
+          800
+        ],
+        "learning_rate": [
+          "float_log",
+          0.01,
+          0.3
+        ],
+        "depth": [
+          "int",
+          4,
+          8
+        ],
+        "l2_leaf_reg": [
+          "float_log",
+          1.0,
+          30.0
+        ],
+        "class_weight": [
+          "categorica",
+          [
+            null,
+            "balanced"
+          ]
+        ]
+      },
+      "mlp": {
+        "hidden_layer_sizes": [
+          "categorica",
+          [
+            "64",
+            "128",
+            "64-32",
+            "128-64"
+          ]
+        ],
+        "alpha": [
+          "float_log",
+          1e-05,
+          0.1
+        ],
+        "learning_rate_init": [
+          "float_log",
+          0.0001,
+          0.01
+        ],
+        "batch_size": [
+          "categorica",
+          [
+            128,
+            256,
+            512
+          ]
+        ],
+        "class_weight": [
+          "categorica",
+          [
+            null,
+            "balanced"
+          ]
+        ]
+      }
+    },
+    "predeterminados": {
+      "valores": {
+        "rl": {
+          "C": 1.0,
+          "l1_ratio": 0.0,
+          "class_weight": null
+        },
+        "rf": {
+          "n_estimators": 100,
+          "max_depth": 30,
+          "min_samples_leaf": 1,
+          "max_features": "sqrt",
+          "class_weight": null
+        },
+        "gb": {
+          "learning_rate": 0.1,
+          "max_iter": 100,
+          "max_leaf_nodes": 31,
+          "min_samples_leaf": 20,
+          "l2_regularization": 1e-06,
+          "class_weight": null
+        },
+        "xgb": {
+          "n_estimators": 100,
+          "learning_rate": 0.3,
+          "max_depth": 6,
+          "min_child_weight": 1.0,
+          "subsample": 1.0,
+          "colsample_bytree": 1.0,
+          "reg_lambda": 1.0,
+          "class_weight": null
+        },
+        "lgbm": {
+          "n_estimators": 100,
+          "learning_rate": 0.1,
+          "num_leaves": 31,
+          "min_child_samples": 20,
+          "subsample": 1.0,
+          "colsample_bytree": 1.0,
+          "reg_lambda": 0.001,
+          "class_weight": null
+        },
+        "catboost": {
+          "iterations": 800,
+          "learning_rate": 0.03,
+          "depth": 6,
+          "l2_leaf_reg": 3.0,
+          "class_weight": null
+        },
+        "mlp": {
+          "hidden_layer_sizes": "128",
+          "alpha": 0.0001,
+          "learning_rate_init": 0.001,
+          "batch_size": 256,
+          "class_weight": null
+        }
+      },
+      "nota": "primer ensayo encolado de cada familia; valores por defecto de la biblioteca salvo donde caen fuera del espacio (valor por defecto entre paréntesis): rf max_depth 30 (None), gb l2_regularization 1e-6 (0), lgbm reg_lambda 1e-3 (0), catboost iterations 800 (1000), mlp hidden_layer_sizes 128 (100) y batch_size 256 (auto = 200). RL: C = 1, L2, sin pesos de clase, idéntica a la referencia rl_defecto"
+    },
+    "configuracion_fija": {
+      "rl": "solver liblinear (l1_ratio 0 = L2, 1 = L1); saga con red elástica no convergía y multiplicaba el coste",
+      "rf": "criterion gini; vacíos tratados de forma nativa",
+      "gb": "HistGradientBoostingClassifier de scikit-learn, sin parada temprana",
+      "xgb": "tree_method hist; class_weight 'balanced' = pesos por muestra inversos a la frecuencia de clase",
+      "lgbm": "subsample_freq 1",
+      "catboost": "class_weight 'balanced' = auto_class_weights Balanced",
+      "mlp": "activación relu, adam, early_stopping con 10 % de validación interna, max_iter 300; class_weight 'balanced' = pesos por muestra"
+    },
+    "apilamiento": {
+      "en_busqueda": false,
+      "base": "mejor configuración de cada familia (D48)",
+      "metamodelo": "LogisticRegression(C=1.0, L2) sobre predict_proba de los modelos base",
+      "cv_interna": "divisiones agrupadas por presentación dentro de cada pliegue externo (StackingClassifier con cv precalculado)"
+    }
+  },
+  "tratamiento_desbalance": "class_weight como hiperparámetro (D30); sin sobremuestreo",
+  "calibracion_definicion": "D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, isotonic) con los otros 4 pliegues como divisiones internas y ensemble=False: el calibrador se ajusta con las predicciones out-of-fold de esas divisiones y el modelo base se reentrena con los 4 pliegues; método por Brier out-of-fold; métricas por pliegue y out-of-fold sobre las probabilidades calibradas",
+  "evaluado_en_prueba": false,
+  "momentos": [
+    {
+      "semana": 0,
+      "n": 19023,
+      "retiros": 4111,
+      "familias": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 52.400505743603105,
+            "l1_ratio": 1.0,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6434,
+          "roc_auc_media_predeterminado": 0.6338,
+          "n_trials": 50,
+          "n_completados": 32,
+          "n_podados": 18,
+          "tiempo_busqueda_s": 563.4,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1617,
+            "brier_calibrado": 0.162,
+            "brier_por_metodo": {
+              "platt": 0.1623,
+              "isotonica": 0.162
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6513,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6298,
+              "pr_auc": 0.3588,
+              "brier": 0.189
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.568,
+              "pr_auc": 0.2247,
+              "brier": 0.1506
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6791,
+              "pr_auc": 0.3348,
+              "brier": 0.156
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6437,
+              "pr_auc": 0.3519,
+              "brier": 0.1792
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6851,
+              "pr_auc": 0.2603,
+              "brier": 0.1301
+            }
+          ],
+          "roc_auc_media": 0.6411,
+          "roc_auc_desv": 0.0471,
+          "roc_auc_oof": 0.6456,
+          "pr_auc_oof": 0.3212,
+          "brier_oof": 0.162,
+          "tiempo_oof_calibrado_s": 251.0,
+          "tiempo_s": 814.4
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 324,
+            "max_depth": 7,
+            "min_samples_leaf": 44,
+            "max_features": 0.5,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6266,
+          "roc_auc_media_predeterminado": 0.5792,
+          "n_trials": 50,
+          "n_completados": 39,
+          "n_podados": 11,
+          "tiempo_busqueda_s": 630.7,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1641,
+            "brier_calibrado": 0.1646,
+            "brier_por_metodo": {
+              "platt": 0.1646,
+              "isotonica": 0.1647
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6272,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6278,
+              "pr_auc": 0.361,
+              "brier": 0.1889
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5824,
+              "pr_auc": 0.2339,
+              "brier": 0.1506
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6782,
+              "pr_auc": 0.3452,
+              "brier": 0.1572
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5877,
+              "pr_auc": 0.3133,
+              "brier": 0.1868
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6571,
+              "pr_auc": 0.2475,
+              "brier": 0.1325
+            }
+          ],
+          "roc_auc_media": 0.6266,
+          "roc_auc_desv": 0.042,
+          "roc_auc_oof": 0.6195,
+          "pr_auc_oof": 0.2996,
+          "brier_oof": 0.1646,
+          "tiempo_oof_calibrado_s": 132.4,
+          "tiempo_s": 763.1
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.016339712054886612,
+            "max_iter": 420,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 29,
+            "l2_regularization": 2.376261476968747e-06,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6365,
+          "roc_auc_media_predeterminado": 0.6201,
+          "n_trials": 50,
+          "n_completados": 38,
+          "n_podados": 12,
+          "tiempo_busqueda_s": 896.9,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.221,
+            "brier_calibrado": 0.1631,
+            "brier_por_metodo": {
+              "platt": 0.1631,
+              "isotonica": 0.1634
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6414,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6354,
+              "pr_auc": 0.3688,
+              "brier": 0.1875
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5858,
+              "pr_auc": 0.2339,
+              "brier": 0.1502
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6834,
+              "pr_auc": 0.348,
+              "brier": 0.1561
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6016,
+              "pr_auc": 0.3237,
+              "brier": 0.1847
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6761,
+              "pr_auc": 0.2635,
+              "brier": 0.1303
+            }
+          ],
+          "roc_auc_media": 0.6365,
+          "roc_auc_desv": 0.0435,
+          "roc_auc_oof": 0.6349,
+          "pr_auc_oof": 0.3078,
+          "brier_oof": 0.1631,
+          "tiempo_oof_calibrado_s": 180.5,
+          "tiempo_s": 1077.4
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 483,
+            "learning_rate": 0.01610536775406386,
+            "max_depth": 3,
+            "min_child_weight": 40.71248741901085,
+            "subsample": 0.5220699377544697,
+            "colsample_bytree": 0.7219922085005973,
+            "reg_lambda": 1.0681069643168892,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6378,
+          "roc_auc_media_predeterminado": 0.6018,
+          "n_trials": 50,
+          "n_completados": 34,
+          "n_podados": 16,
+          "tiempo_busqueda_s": 272.7,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1625,
+            "brier_calibrado": 0.1631,
+            "brier_por_metodo": {
+              "platt": 0.1631,
+              "isotonica": 0.1636
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6407,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6361,
+              "pr_auc": 0.3726,
+              "brier": 0.1867
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5857,
+              "pr_auc": 0.249,
+              "brier": 0.1487
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6813,
+              "pr_auc": 0.3509,
+              "brier": 0.1571
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6054,
+              "pr_auc": 0.3277,
+              "brier": 0.1854
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6802,
+              "pr_auc": 0.2652,
+              "brier": 0.1308
+            }
+          ],
+          "roc_auc_media": 0.6377,
+          "roc_auc_desv": 0.0432,
+          "roc_auc_oof": 0.6342,
+          "pr_auc_oof": 0.316,
+          "brier_oof": 0.1631,
+          "tiempo_oof_calibrado_s": 60.0,
+          "tiempo_s": 332.7
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 143,
+            "learning_rate": 0.021395553430911693,
+            "num_leaves": 221,
+            "min_child_samples": 275,
+            "subsample": 0.571592409811714,
+            "colsample_bytree": 0.4412847943477749,
+            "reg_lambda": 0.028376059115978125,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6355,
+          "roc_auc_media_predeterminado": 0.618,
+          "n_trials": 50,
+          "n_completados": 33,
+          "n_podados": 17,
+          "tiempo_busqueda_s": 194.5,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2221,
+            "brier_calibrado": 0.1633,
+            "brier_por_metodo": {
+              "platt": 0.1633,
+              "isotonica": 0.1633
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6408,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6301,
+              "pr_auc": 0.3627,
+              "brier": 0.1877
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5836,
+              "pr_auc": 0.2304,
+              "brier": 0.1509
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6791,
+              "pr_auc": 0.3435,
+              "brier": 0.1567
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6138,
+              "pr_auc": 0.3281,
+              "brier": 0.1844
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6709,
+              "pr_auc": 0.2645,
+              "brier": 0.1301
+            }
+          ],
+          "roc_auc_media": 0.6355,
+          "roc_auc_desv": 0.0398,
+          "roc_auc_oof": 0.6352,
+          "pr_auc_oof": 0.3056,
+          "brier_oof": 0.1633,
+          "tiempo_oof_calibrado_s": 21.1,
+          "tiempo_s": 215.6
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 565,
+            "learning_rate": 0.021187955264867213,
+            "depth": 6,
+            "l2_leaf_reg": 19.82127681887461,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6429,
+          "roc_auc_media_predeterminado": 0.631,
+          "n_trials": 50,
+          "n_completados": 37,
+          "n_podados": 13,
+          "tiempo_busqueda_s": 1829.5,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1623,
+            "brier_calibrado": 0.1629,
+            "brier_por_metodo": {
+              "platt": 0.1629,
+              "isotonica": 0.1629
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6446,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6379,
+              "pr_auc": 0.3762,
+              "brier": 0.1869
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5887,
+              "pr_auc": 0.2526,
+              "brier": 0.1492
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6844,
+              "pr_auc": 0.3515,
+              "brier": 0.1563
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6132,
+              "pr_auc": 0.3303,
+              "brier": 0.1853
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6905,
+              "pr_auc": 0.276,
+              "brier": 0.1299
+            }
+          ],
+          "roc_auc_media": 0.6429,
+          "roc_auc_desv": 0.0443,
+          "roc_auc_oof": 0.6375,
+          "pr_auc_oof": 0.3169,
+          "brier_oof": 0.1629,
+          "tiempo_oof_calibrado_s": 326.1,
+          "tiempo_s": 2155.6
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "128-64",
+            "alpha": 0.0026578471048195754,
+            "learning_rate_init": 0.0013820249832880286,
+            "batch_size": 256,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6379,
+          "roc_auc_media_predeterminado": 0.6284,
+          "n_trials": 50,
+          "n_completados": 42,
+          "n_podados": 8,
+          "tiempo_busqueda_s": 768.4,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1629,
+            "brier_calibrado": 0.1631,
+            "brier_por_metodo": {
+              "platt": 0.1631,
+              "isotonica": 0.1632
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6465,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6409,
+              "pr_auc": 0.3872,
+              "brier": 0.1873
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5806,
+              "pr_auc": 0.2559,
+              "brier": 0.1484
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6633,
+              "pr_auc": 0.3306,
+              "brier": 0.1581
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6306,
+              "pr_auc": 0.3337,
+              "brier": 0.1843
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.674,
+              "pr_auc": 0.2671,
+              "brier": 0.1309
+            }
+          ],
+          "roc_auc_media": 0.6379,
+          "roc_auc_desv": 0.0364,
+          "roc_auc_oof": 0.6406,
+          "pr_auc_oof": 0.3149,
+          "brier_oof": 0.1631,
+          "tiempo_oof_calibrado_s": 109.5,
+          "tiempo_s": 877.9
+        }
+      ],
+      "referencias": [
+        {
+          "modelo": "mayoritaria",
+          "calibracion": null,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.5,
+              "pr_auc": 0.265,
+              "brier": 0.1983
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1827,
+              "brier": 0.1511
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.5,
+              "pr_auc": 0.2114,
+              "brier": 0.1667
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5,
+              "pr_auc": 0.2502,
+              "brier": 0.1897
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1618,
+              "brier": 0.1401
+            }
+          ],
+          "roc_auc_media": 0.5,
+          "roc_auc_desv": 0.0,
+          "roc_auc_oof": 0.4402,
+          "pr_auc_oof": 0.1932,
+          "brier_oof": 0.1702,
+          "tiempo_s": 0.1,
+          "nota": "predice en cada pliegue la prevalencia de sus pliegues de ajuste: ROC-AUC 0,5 en cada pliegue; la ROC-AUC out-of-fold agrupada se aparta de 0,5 solo porque esa constante cambia entre pliegues (limitación de agrupar predicciones de 5 modelos, D40)"
+        },
+        {
+          "modelo": "rl_defecto",
+          "hiperparametros": {
+            "C": 1.0,
+            "l1_ratio": 0.0,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1633,
+            "brier_calibrado": 0.1633,
+            "brier_por_metodo": {
+              "platt": 0.1633,
+              "isotonica": 0.1633
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6393,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6329,
+              "pr_auc": 0.3686,
+              "brier": 0.1893
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5739,
+              "pr_auc": 0.2362,
+              "brier": 0.1496
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6816,
+              "pr_auc": 0.3557,
+              "brier": 0.1566
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5901,
+              "pr_auc": 0.3127,
+              "brier": 0.1849
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6905,
+              "pr_auc": 0.2713,
+              "brier": 0.1293
+            }
+          ],
+          "roc_auc_media": 0.6338,
+          "roc_auc_desv": 0.0524,
+          "roc_auc_oof": 0.6355,
+          "pr_auc_oof": 0.3093,
+          "brier_oof": 0.1633,
+          "tiempo_s": 29.4
+        },
+        {
+          "modelo": "rl_optimizada",
+          "hiperparametros": {
+            "C": 52.400505743603105,
+            "l1_ratio": 1.0,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6434,
+          "roc_auc_media_predeterminado": 0.6338,
+          "n_trials": 50,
+          "n_completados": 32,
+          "n_podados": 18,
+          "tiempo_busqueda_s": 563.4,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1617,
+            "brier_calibrado": 0.162,
+            "brier_por_metodo": {
+              "platt": 0.1623,
+              "isotonica": 0.162
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6513,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6298,
+              "pr_auc": 0.3588,
+              "brier": 0.189
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.568,
+              "pr_auc": 0.2247,
+              "brier": 0.1506
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6791,
+              "pr_auc": 0.3348,
+              "brier": 0.156
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6437,
+              "pr_auc": 0.3519,
+              "brier": 0.1792
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6851,
+              "pr_auc": 0.2603,
+              "brier": 0.1301
+            }
+          ],
+          "roc_auc_media": 0.6411,
+          "roc_auc_desv": 0.0471,
+          "roc_auc_oof": 0.6456,
+          "pr_auc_oof": 0.3212,
+          "brier_oof": 0.162,
+          "tiempo_oof_calibrado_s": 251.0,
+          "tiempo_s": 814.4,
+          "igual_que": "familia rl (mismo nº de ensayos que cada familia)"
+        }
+      ],
+      "apilamiento": {
+        "base": [
+          "rl",
+          "rf",
+          "gb",
+          "xgb",
+          "lgbm",
+          "catboost",
+          "mlp"
+        ],
+        "por_pliegue": [
+          {
+            "pliegue": 1,
+            "roc_auc": 0.6319,
+            "pr_auc": 0.3613,
+            "brier": 0.1885
+          },
+          {
+            "pliegue": 2,
+            "roc_auc": 0.5867,
+            "pr_auc": 0.2514,
+            "brier": 0.1493
+          },
+          {
+            "pliegue": 3,
+            "roc_auc": 0.6822,
+            "pr_auc": 0.3423,
+            "brier": 0.1557
+          },
+          {
+            "pliegue": 4,
+            "roc_auc": 0.6359,
+            "pr_auc": 0.3562,
+            "brier": 0.1802
+          },
+          {
+            "pliegue": 5,
+            "roc_auc": 0.6925,
+            "pr_auc": 0.2758,
+            "brier": 0.1292
+          }
+        ],
+        "roc_auc_media": 0.6458,
+        "roc_auc_desv": 0.0427,
+        "roc_auc_oof": 0.6507,
+        "pr_auc_oof": 0.3231,
+        "brier_oof": 0.1617,
+        "calibracion": "salida del metamodelo logístico, sin calibración adicional",
+        "tiempo_s": 392.8
+      },
+      "mejor_automl": "apilamiento",
+      "contraste_central": {
+        "modelo_a": "apilamiento",
+        "modelo_b": "rl_optimizada",
+        "roc_auc_a": 0.6507,
+        "roc_auc_b": 0.6456,
+        "diferencia": 0.0051,
+        "ic95_bootstrap": [
+          0.001,
+          0.0094
+        ],
+        "delong_p": 0.01915645752331026,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "delong_p_holm": 0.05746937256993079,
+        "lectura": "equivalencia_practica"
+      },
+      "parsimonia": {
+        "regla": "no inferioridad (D49-rev)",
+        "mejor": "apilamiento",
+        "margen": 0.02,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "candidatos": [
+          {
+            "modelo": "rl",
+            "complejidad": 0,
+            "roc_auc_oof": 0.6456,
+            "perdida": 0.0051,
+            "ic95_bootstrap": [
+              0.001,
+              0.0094
+            ],
+            "delong_p": 0.01915645752331026,
+            "cumple": true
+          },
+          {
+            "modelo": "rf",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6195,
+            "perdida": 0.0312,
+            "ic95_bootstrap": [
+              0.0255,
+              0.0366
+            ],
+            "delong_p": 4.343950817963349e-31,
+            "cumple": false
+          },
+          {
+            "modelo": "gb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6349,
+            "perdida": 0.0158,
+            "ic95_bootstrap": [
+              0.0119,
+              0.0196
+            ],
+            "delong_p": 9.97388879637966e-17,
+            "cumple": true
+          },
+          {
+            "modelo": "xgb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6342,
+            "perdida": 0.0166,
+            "ic95_bootstrap": [
+              0.0124,
+              0.0206
+            ],
+            "delong_p": 1.6462726007002323e-15,
+            "cumple": false
+          },
+          {
+            "modelo": "lgbm",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6352,
+            "perdida": 0.0156,
+            "ic95_bootstrap": [
+              0.0119,
+              0.0193
+            ],
+            "delong_p": 1.5095079220504152e-17,
+            "cumple": true
+          },
+          {
+            "modelo": "catboost",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6375,
+            "perdida": 0.0132,
+            "ic95_bootstrap": [
+              0.0092,
+              0.0172
+            ],
+            "delong_p": 1.608296940879764e-11,
+            "cumple": true
+          },
+          {
+            "modelo": "mlp",
+            "complejidad": 2,
+            "roc_auc_oof": 0.6406,
+            "perdida": 0.0101,
+            "ic95_bootstrap": [
+              0.0046,
+              0.0154
+            ],
+            "delong_p": 0.00016928835517236032,
+            "cumple": true
+          },
+          {
+            "modelo": "apilamiento",
+            "complejidad": 3,
+            "roc_auc_oof": 0.6507,
+            "perdida": 0.0,
+            "ic95_bootstrap": [
+              0.0,
+              0.0
+            ],
+            "delong_p": null,
+            "cumple": true
+          }
+        ]
+      },
+      "modelo_desplegado": {
+        "modelo": "rl",
+        "motivo": "D33/D49-rev: rl es el candidato más simple cuya pérdida de ROC-AUC out-of-fold frente a apilamiento tiene límite superior del IC 95 % (0.0094) por debajo de 0.02"
+      },
+      "calibracion": {
+        "metodo": "isotonica",
+        "brier_sin_calibrar": 0.1617,
+        "brier_calibrado": 0.162,
+        "brier_por_metodo": {
+          "platt": 0.1623,
+          "isotonica": 0.162
+        },
+        "anidada": true
+      },
+      "punto_operacion_oof": {
+        "umbral": 0.213612,
+        "sensibilidad": 0.7025,
+        "precision": 0.2838,
+        "tasa_alerta": 0.5349,
+        "tasa_falsos_positivos": 0.4887,
+        "matriz_confusion": [
+          [
+            7624,
+            7288
+          ],
+          [
+            1223,
+            2888
+          ]
+        ]
+      },
+      "desglose": {
+        "CCC": {
+          "n": 1646,
+          "roc_auc": 0.626,
+          "umbral": 0.213612,
+          "sensibilidad": 0.9183,
+          "precision": 0.4078,
+          "tasa_alerta": 0.8372,
+          "tasa_falsos_positivos": 0.7892,
+          "matriz_confusion": [
+            [
+              218,
+              816
+            ],
+            [
+              50,
+              562
+            ]
+          ]
+        },
+        "resto": {
+          "n": 17377,
+          "roc_auc": 0.633,
+          "umbral": 0.213612,
+          "sensibilidad": 0.6648,
+          "precision": 0.2644,
+          "tasa_alerta": 0.5063,
+          "tasa_falsos_positivos": 0.4663,
+          "matriz_confusion": [
+            [
+              7406,
+              6472
+            ],
+            [
+              1173,
+              2326
+            ]
+          ]
+        }
+      },
+      "equidad_oof": {
+        "gender": {
+          "subgrupos": {
+            "F": {
+              "n": 8803,
+              "retiros": 1796,
+              "retiros_prueba": 1102,
+              "sensibilidad": 0.6709,
+              "sensibilidad_ic95": [
+                0.6497,
+                0.6923
+              ],
+              "tasa_falsos_positivos": 0.4464,
+              "tasa_falsos_positivos_ic95": [
+                0.4346,
+                0.4584
+              ],
+              "solo_descriptiva": false
+            },
+            "M": {
+              "n": 10220,
+              "retiros": 2315,
+              "retiros_prueba": 1714,
+              "sensibilidad": 0.727,
+              "sensibilidad_ic95": [
+                0.7097,
+                0.7451
+              ],
+              "tasa_falsos_positivos": 0.5262,
+              "tasa_falsos_positivos_ic95": [
+                0.5153,
+                0.537
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0561,
+          "diferencia_sensibilidad_ic95": [
+            0.0287,
+            0.0843
+          ],
+          "diferencia_tasa_falsos_positivos": 0.0798,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0637,
+            0.0954
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0561,
+            "diferencia_sensibilidad_ic95": [
+              0.0287,
+              0.0843
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0798,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0637,
+              0.0954
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "disability": {
+          "subgrupos": {
+            "N": {
+              "n": 17184,
+              "retiros": 3557,
+              "retiros_prueba": 2478,
+              "sensibilidad": 0.7028,
+              "sensibilidad_ic95": [
+                0.6878,
+                0.7178
+              ],
+              "tasa_falsos_positivos": 0.4881,
+              "tasa_falsos_positivos_ic95": [
+                0.4797,
+                0.4965
+              ],
+              "solo_descriptiva": false
+            },
+            "Y": {
+              "n": 1839,
+              "retiros": 554,
+              "retiros_prueba": 338,
+              "sensibilidad": 0.7004,
+              "sensibilidad_ic95": [
+                0.6626,
+                0.7374
+              ],
+              "tasa_falsos_positivos": 0.4957,
+              "tasa_falsos_positivos_ic95": [
+                0.4686,
+                0.5231
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0025,
+          "diferencia_sensibilidad_ic95": [
+            0.0007,
+            0.0474
+          ],
+          "diferencia_tasa_falsos_positivos": 0.0076,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0006,
+            0.036
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0025,
+            "diferencia_sensibilidad_ic95": [
+              0.0007,
+              0.0474
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0076,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0006,
+              0.036
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "age_band": {
+          "subgrupos": {
+            "0-35": {
+              "n": 13374,
+              "retiros": 2945,
+              "retiros_prueba": 2052,
+              "sensibilidad": 0.726,
+              "sensibilidad_ic95": [
+                0.7093,
+                0.743
+              ],
+              "tasa_falsos_positivos": 0.5165,
+              "tasa_falsos_positivos_ic95": [
+                0.5071,
+                0.5261
+              ],
+              "solo_descriptiva": false
+            },
+            "35-55": {
+              "n": 5538,
+              "retiros": 1147,
+              "retiros_prueba": 742,
+              "sensibilidad": 0.6443,
+              "sensibilidad_ic95": [
+                0.616,
+                0.6719
+              ],
+              "tasa_falsos_positivos": 0.4247,
+              "tasa_falsos_positivos_ic95": [
+                0.411,
+                0.4396
+              ],
+              "solo_descriptiva": false
+            },
+            "55<=": {
+              "n": 111,
+              "retiros": 19,
+              "retiros_prueba": 22,
+              "sensibilidad": 0.5789,
+              "sensibilidad_ic95": [
+                0.3499,
+                0.8
+              ],
+              "tasa_falsos_positivos": 0.3913,
+              "tasa_falsos_positivos_ic95": [
+                0.2857,
+                0.4938
+              ],
+              "solo_descriptiva": true
+            }
+          },
+          "diferencia_sensibilidad": 0.147,
+          "diferencia_sensibilidad_ic95": [
+            0.0635,
+            0.3781
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1252,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0818,
+            0.2293
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [
+              "55<="
+            ],
+            "diferencia_sensibilidad": 0.0817,
+            "diferencia_sensibilidad_ic95": [
+              0.0503,
+              0.1151
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0918,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0741,
+              0.1083
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "imd_band": {
+          "subgrupos": {
+            "0-10%": {
+              "n": 1910,
+              "retiros": 479,
+              "retiros_prueba": 337,
+              "sensibilidad": 0.7307,
+              "sensibilidad_ic95": [
+                0.6899,
+                0.7698
+              ],
+              "tasa_falsos_positivos": 0.5542,
+              "tasa_falsos_positivos_ic95": [
+                0.5279,
+                0.58
+              ],
+              "solo_descriptiva": false
+            },
+            "10-20%": {
+              "n": 2016,
+              "retiros": 467,
+              "retiros_prueba": 353,
+              "sensibilidad": 0.6809,
+              "sensibilidad_ic95": [
+                0.6378,
+                0.7197
+              ],
+              "tasa_falsos_positivos": 0.53,
+              "tasa_falsos_positivos_ic95": [
+                0.505,
+                0.5544
+              ],
+              "solo_descriptiva": false
+            },
+            "20-30%": {
+              "n": 2102,
+              "retiros": 540,
+              "retiros_prueba": 360,
+              "sensibilidad": 0.6963,
+              "sensibilidad_ic95": [
+                0.6591,
+                0.7329
+              ],
+              "tasa_falsos_positivos": 0.5166,
+              "tasa_falsos_positivos_ic95": [
+                0.4917,
+                0.5414
+              ],
+              "solo_descriptiva": false
+            },
+            "30-40%": {
+              "n": 2093,
+              "retiros": 448,
+              "retiros_prueba": 308,
+              "sensibilidad": 0.7165,
+              "sensibilidad_ic95": [
+                0.6752,
+                0.7586
+              ],
+              "tasa_falsos_positivos": 0.504,
+              "tasa_falsos_positivos_ic95": [
+                0.48,
+                0.5278
+              ],
+              "solo_descriptiva": false
+            },
+            "40-50%": {
+              "n": 1871,
+              "retiros": 408,
+              "retiros_prueba": 295,
+              "sensibilidad": 0.6618,
+              "sensibilidad_ic95": [
+                0.6152,
+                0.7076
+              ],
+              "tasa_falsos_positivos": 0.4846,
+              "tasa_falsos_positivos_ic95": [
+                0.4587,
+                0.5111
+              ],
+              "solo_descriptiva": false
+            },
+            "50-60%": {
+              "n": 1831,
+              "retiros": 363,
+              "retiros_prueba": 260,
+              "sensibilidad": 0.7328,
+              "sensibilidad_ic95": [
+                0.6861,
+                0.7792
+              ],
+              "tasa_falsos_positivos": 0.485,
+              "tasa_falsos_positivos_ic95": [
+                0.46,
+                0.5128
+              ],
+              "solo_descriptiva": false
+            },
+            "60-70%": {
+              "n": 1686,
+              "retiros": 376,
+              "retiros_prueba": 245,
+              "sensibilidad": 0.7234,
+              "sensibilidad_ic95": [
+                0.6787,
+                0.77
+              ],
+              "tasa_falsos_positivos": 0.4511,
+              "tasa_falsos_positivos_ic95": [
+                0.4241,
+                0.4792
+              ],
+              "solo_descriptiva": false
+            },
+            "70-80%": {
+              "n": 1698,
+              "retiros": 344,
+              "retiros_prueba": 207,
+              "sensibilidad": 0.6977,
+              "sensibilidad_ic95": [
+                0.6498,
+                0.7457
+              ],
+              "tasa_falsos_positivos": 0.4697,
+              "tasa_falsos_positivos_ic95": [
+                0.4428,
+                0.4972
+              ],
+              "solo_descriptiva": false
+            },
+            "80-90%": {
+              "n": 1620,
+              "retiros": 310,
+              "retiros_prueba": 202,
+              "sensibilidad": 0.7161,
+              "sensibilidad_ic95": [
+                0.6666,
+                0.7643
+              ],
+              "tasa_falsos_positivos": 0.4405,
+              "tasa_falsos_positivos_ic95": [
+                0.4146,
+                0.4678
+              ],
+              "solo_descriptiva": false
+            },
+            "90-100%": {
+              "n": 1526,
+              "retiros": 266,
+              "retiros_prueba": 181,
+              "sensibilidad": 0.6917,
+              "sensibilidad_ic95": [
+                0.6374,
+                0.75
+              ],
+              "tasa_falsos_positivos": 0.45,
+              "tasa_falsos_positivos_ic95": [
+                0.4228,
+                0.4761
+              ],
+              "solo_descriptiva": false
+            },
+            "faltante": {
+              "n": 670,
+              "retiros": 110,
+              "retiros_prueba": 68,
+              "sensibilidad": 0.6273,
+              "sensibilidad_ic95": [
+                0.5377,
+                0.7197
+              ],
+              "tasa_falsos_positivos": 0.4393,
+              "tasa_falsos_positivos_ic95": [
+                0.3985,
+                0.4816
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.1055,
+          "diferencia_sensibilidad_ic95": [
+            0.0738,
+            0.2242
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1149,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0973,
+            0.1661
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.1055,
+            "diferencia_sensibilidad_ic95": [
+              0.0738,
+              0.2242
+            ],
+            "diferencia_tasa_falsos_positivos": 0.1149,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0973,
+              0.1661
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        }
+      },
+      "shap": null,
+      "tiempo_s": 6756.6
+    },
+    {
+      "semana": 4,
+      "n": 18304,
+      "retiros": 3320,
+      "familias": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 0.0024898812812146156,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6833,
+          "roc_auc_media_predeterminado": 0.6763,
+          "n_trials": 50,
+          "n_completados": 31,
+          "n_podados": 19,
+          "tiempo_busqueda_s": 129.4,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2199,
+            "brier_calibrado": 0.1393,
+            "brier_por_metodo": {
+              "platt": 0.1393,
+              "isotonica": 0.1396
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6853,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6737,
+              "pr_auc": 0.3845,
+              "brier": 0.1744
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6347,
+              "pr_auc": 0.2638,
+              "brier": 0.1302
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7067,
+              "pr_auc": 0.3357,
+              "brier": 0.1338
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7139,
+              "pr_auc": 0.407,
+              "brier": 0.151
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6875,
+              "pr_auc": 0.2335,
+              "brier": 0.1045
+            }
+          ],
+          "roc_auc_media": 0.6833,
+          "roc_auc_desv": 0.0314,
+          "roc_auc_oof": 0.6775,
+          "pr_auc_oof": 0.3171,
+          "brier_oof": 0.1393,
+          "tiempo_oof_calibrado_s": 14.5,
+          "tiempo_s": 143.9
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 462,
+            "max_depth": 7,
+            "min_samples_leaf": 94,
+            "max_features": 0.5,
+            "class_weight": "balanced_subsample"
+          },
+          "roc_auc_media_busqueda": 0.6751,
+          "roc_auc_media_predeterminado": 0.6411,
+          "n_trials": 50,
+          "n_completados": 41,
+          "n_podados": 9,
+          "tiempo_busqueda_s": 868.7,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2101,
+            "brier_calibrado": 0.1398,
+            "brier_por_metodo": {
+              "platt": 0.1398,
+              "isotonica": 0.1404
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6786,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6713,
+              "pr_auc": 0.3878,
+              "brier": 0.1721
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6332,
+              "pr_auc": 0.2523,
+              "brier": 0.1308
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6975,
+              "pr_auc": 0.3265,
+              "brier": 0.1325
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6904,
+              "pr_auc": 0.346,
+              "brier": 0.1552
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6833,
+              "pr_auc": 0.2485,
+              "brier": 0.1043
+            }
+          ],
+          "roc_auc_media": 0.6751,
+          "roc_auc_desv": 0.0254,
+          "roc_auc_oof": 0.6701,
+          "pr_auc_oof": 0.3147,
+          "brier_oof": 0.1398,
+          "tiempo_oof_calibrado_s": 237.8,
+          "tiempo_s": 1106.5
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.012164240821175768,
+            "max_iter": 383,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 272,
+            "l2_regularization": 0.02827313267807227,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6784,
+          "roc_auc_media_predeterminado": 0.655,
+          "n_trials": 50,
+          "n_completados": 22,
+          "n_podados": 28,
+          "tiempo_busqueda_s": 909.7,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2116,
+            "brier_calibrado": 0.1394,
+            "brier_por_metodo": {
+              "platt": 0.1394,
+              "isotonica": 0.1401
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6853,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6585,
+              "pr_auc": 0.3808,
+              "brier": 0.1733
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6424,
+              "pr_auc": 0.2792,
+              "brier": 0.1301
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7028,
+              "pr_auc": 0.3133,
+              "brier": 0.1327
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7029,
+              "pr_auc": 0.3549,
+              "brier": 0.1531
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6855,
+              "pr_auc": 0.2414,
+              "brier": 0.1043
+            }
+          ],
+          "roc_auc_media": 0.6784,
+          "roc_auc_desv": 0.0271,
+          "roc_auc_oof": 0.6769,
+          "pr_auc_oof": 0.3108,
+          "brier_oof": 0.1394,
+          "tiempo_oof_calibrado_s": 257.1,
+          "tiempo_s": 1166.8
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 445,
+            "learning_rate": 0.01287154085200488,
+            "max_depth": 3,
+            "min_child_weight": 1.5600406636959327,
+            "subsample": 0.559093707808044,
+            "colsample_bytree": 0.6349905023005745,
+            "reg_lambda": 2.209423963312702,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6814,
+          "roc_auc_media_predeterminado": 0.6305,
+          "n_trials": 50,
+          "n_completados": 33,
+          "n_podados": 17,
+          "tiempo_busqueda_s": 224.4,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.139,
+            "brier_calibrado": 0.14,
+            "brier_por_metodo": {
+              "platt": 0.14,
+              "isotonica": 0.1406
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6832,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6703,
+              "pr_auc": 0.3884,
+              "brier": 0.1725
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6407,
+              "pr_auc": 0.2743,
+              "brier": 0.1294
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7067,
+              "pr_auc": 0.3315,
+              "brier": 0.1365
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7096,
+              "pr_auc": 0.3692,
+              "brier": 0.1532
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6799,
+              "pr_auc": 0.2369,
+              "brier": 0.1055
+            }
+          ],
+          "roc_auc_media": 0.6814,
+          "roc_auc_desv": 0.0284,
+          "roc_auc_oof": 0.6754,
+          "pr_auc_oof": 0.3168,
+          "brier_oof": 0.14,
+          "tiempo_oof_calibrado_s": 56.9,
+          "tiempo_s": 281.3
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 139,
+            "learning_rate": 0.023628954553306922,
+            "num_leaves": 13,
+            "min_child_samples": 242,
+            "subsample": 0.6042995941906505,
+            "colsample_bytree": 0.6738345817244809,
+            "reg_lambda": 0.011399889610617133,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6789,
+          "roc_auc_media_predeterminado": 0.6575,
+          "n_trials": 50,
+          "n_completados": 38,
+          "n_podados": 12,
+          "tiempo_busqueda_s": 175.2,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2108,
+            "brier_calibrado": 0.1393,
+            "brier_por_metodo": {
+              "platt": 0.1393,
+              "isotonica": 0.1403
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6839,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6691,
+              "pr_auc": 0.3923,
+              "brier": 0.1722
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.642,
+              "pr_auc": 0.272,
+              "brier": 0.13
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7053,
+              "pr_auc": 0.3145,
+              "brier": 0.1331
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6986,
+              "pr_auc": 0.3513,
+              "brier": 0.1534
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6796,
+              "pr_auc": 0.243,
+              "brier": 0.1041
+            }
+          ],
+          "roc_auc_media": 0.6789,
+          "roc_auc_desv": 0.0252,
+          "roc_auc_oof": 0.6755,
+          "pr_auc_oof": 0.3122,
+          "brier_oof": 0.1393,
+          "tiempo_oof_calibrado_s": 17.9,
+          "tiempo_s": 193.1
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 536,
+            "learning_rate": 0.026782110846678524,
+            "depth": 4,
+            "l2_leaf_reg": 15.555423565560107,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6811,
+          "roc_auc_media_predeterminado": 0.6691,
+          "n_trials": 50,
+          "n_completados": 31,
+          "n_podados": 19,
+          "tiempo_busqueda_s": 1292.8,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1392,
+            "brier_calibrado": 0.1398,
+            "brier_por_metodo": {
+              "platt": 0.14,
+              "isotonica": 0.1398
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6844,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6648,
+              "pr_auc": 0.3698,
+              "brier": 0.1719
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6385,
+              "pr_auc": 0.2515,
+              "brier": 0.1304
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7045,
+              "pr_auc": 0.3141,
+              "brier": 0.1351
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7,
+              "pr_auc": 0.3404,
+              "brier": 0.154
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6883,
+              "pr_auc": 0.2315,
+              "brier": 0.1041
+            }
+          ],
+          "roc_auc_media": 0.6792,
+          "roc_auc_desv": 0.0275,
+          "roc_auc_oof": 0.6802,
+          "pr_auc_oof": 0.3081,
+          "brier_oof": 0.1398,
+          "tiempo_oof_calibrado_s": 253.7,
+          "tiempo_s": 1546.5
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "128",
+            "alpha": 3.239273659770423e-05,
+            "learning_rate_init": 0.00021802553062961086,
+            "batch_size": 128,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6773,
+          "roc_auc_media_predeterminado": 0.6695,
+          "n_trials": 50,
+          "n_completados": 34,
+          "n_podados": 16,
+          "tiempo_busqueda_s": 844.7,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2071,
+            "brier_calibrado": 0.1407,
+            "brier_por_metodo": {
+              "platt": 0.1407,
+              "isotonica": 0.1412
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6788,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6619,
+              "pr_auc": 0.3765,
+              "brier": 0.177
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6349,
+              "pr_auc": 0.257,
+              "brier": 0.131
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7003,
+              "pr_auc": 0.339,
+              "brier": 0.1321
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7113,
+              "pr_auc": 0.3987,
+              "brier": 0.1546
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6783,
+              "pr_auc": 0.2245,
+              "brier": 0.1054
+            }
+          ],
+          "roc_auc_media": 0.6773,
+          "roc_auc_desv": 0.0305,
+          "roc_auc_oof": 0.6629,
+          "pr_auc_oof": 0.3046,
+          "brier_oof": 0.1407,
+          "tiempo_oof_calibrado_s": 184.0,
+          "tiempo_s": 1028.7
+        }
+      ],
+      "referencias": [
+        {
+          "modelo": "mayoritaria",
+          "calibracion": null,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.5,
+              "pr_auc": 0.2338,
+              "brier": 0.1832
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1601,
+              "brier": 0.1352
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1721,
+              "brier": 0.1426
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5,
+              "pr_auc": 0.2088,
+              "brier": 0.1666
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1252,
+              "brier": 0.1143
+            }
+          ],
+          "roc_auc_media": 0.5,
+          "roc_auc_desv": 0.0,
+          "roc_auc_oof": 0.4301,
+          "pr_auc_oof": 0.1592,
+          "brier_oof": 0.1492,
+          "tiempo_s": 0.1,
+          "nota": "predice en cada pliegue la prevalencia de sus pliegues de ajuste: ROC-AUC 0,5 en cada pliegue; la ROC-AUC out-of-fold agrupada se aparta de 0,5 solo porque esa constante cambia entre pliegues (limitación de agrupar predicciones de 5 modelos, D40)"
+        },
+        {
+          "modelo": "rl_defecto",
+          "hiperparametros": {
+            "C": 1.0,
+            "l1_ratio": 0.0,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1395,
+            "brier_calibrado": 0.1393,
+            "brier_por_metodo": {
+              "platt": 0.1393,
+              "isotonica": 0.1398
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.675,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6233,
+              "pr_auc": 0.3445,
+              "brier": 0.1785
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.647,
+              "pr_auc": 0.2722,
+              "brier": 0.1292
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7092,
+              "pr_auc": 0.3365,
+              "brier": 0.1311
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6999,
+              "pr_auc": 0.3952,
+              "brier": 0.1513
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.7019,
+              "pr_auc": 0.2367,
+              "brier": 0.1042
+            }
+          ],
+          "roc_auc_media": 0.6763,
+          "roc_auc_desv": 0.0386,
+          "roc_auc_oof": 0.6695,
+          "pr_auc_oof": 0.3247,
+          "brier_oof": 0.1393,
+          "tiempo_s": 39.8
+        },
+        {
+          "modelo": "rl_optimizada",
+          "hiperparametros": {
+            "C": 0.0024898812812146156,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6833,
+          "roc_auc_media_predeterminado": 0.6763,
+          "n_trials": 50,
+          "n_completados": 31,
+          "n_podados": 19,
+          "tiempo_busqueda_s": 129.4,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2199,
+            "brier_calibrado": 0.1393,
+            "brier_por_metodo": {
+              "platt": 0.1393,
+              "isotonica": 0.1396
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6853,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6737,
+              "pr_auc": 0.3845,
+              "brier": 0.1744
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6347,
+              "pr_auc": 0.2638,
+              "brier": 0.1302
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7067,
+              "pr_auc": 0.3357,
+              "brier": 0.1338
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7139,
+              "pr_auc": 0.407,
+              "brier": 0.151
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6875,
+              "pr_auc": 0.2335,
+              "brier": 0.1045
+            }
+          ],
+          "roc_auc_media": 0.6833,
+          "roc_auc_desv": 0.0314,
+          "roc_auc_oof": 0.6775,
+          "pr_auc_oof": 0.3171,
+          "brier_oof": 0.1393,
+          "tiempo_oof_calibrado_s": 14.5,
+          "tiempo_s": 143.9,
+          "igual_que": "familia rl (mismo nº de ensayos que cada familia)"
+        }
+      ],
+      "apilamiento": {
+        "base": [
+          "rl",
+          "rf",
+          "gb",
+          "xgb",
+          "lgbm",
+          "catboost",
+          "mlp"
+        ],
+        "por_pliegue": [
+          {
+            "pliegue": 1,
+            "roc_auc": 0.6738,
+            "pr_auc": 0.3879,
+            "brier": 0.1731
+          },
+          {
+            "pliegue": 2,
+            "roc_auc": 0.6412,
+            "pr_auc": 0.2637,
+            "brier": 0.1306
+          },
+          {
+            "pliegue": 3,
+            "roc_auc": 0.707,
+            "pr_auc": 0.3263,
+            "brier": 0.134
+          },
+          {
+            "pliegue": 4,
+            "roc_auc": 0.7106,
+            "pr_auc": 0.3781,
+            "brier": 0.1513
+          },
+          {
+            "pliegue": 5,
+            "roc_auc": 0.6899,
+            "pr_auc": 0.2369,
+            "brier": 0.1041
+          }
+        ],
+        "roc_auc_media": 0.6845,
+        "roc_auc_desv": 0.0283,
+        "roc_auc_oof": 0.6779,
+        "pr_auc_oof": 0.3126,
+        "brier_oof": 0.1392,
+        "calibracion": "salida del metamodelo logístico, sin calibración adicional",
+        "tiempo_s": 433.7
+      },
+      "mejor_automl": "catboost",
+      "contraste_central": {
+        "modelo_a": "catboost",
+        "modelo_b": "rl_optimizada",
+        "roc_auc_a": 0.6802,
+        "roc_auc_b": 0.6775,
+        "diferencia": 0.0027,
+        "ic95_bootstrap": [
+          -0.002,
+          0.0073
+        ],
+        "delong_p": 0.2589271675941388,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "delong_p_holm": 0.5178543351882776,
+        "lectura": "equivalencia_practica"
+      },
+      "parsimonia": {
+        "regla": "no inferioridad (D49-rev)",
+        "mejor": "catboost",
+        "margen": 0.02,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "candidatos": [
+          {
+            "modelo": "rl",
+            "complejidad": 0,
+            "roc_auc_oof": 0.6775,
+            "perdida": 0.0027,
+            "ic95_bootstrap": [
+              -0.002,
+              0.0073
+            ],
+            "delong_p": 0.2589271675941388,
+            "cumple": true
+          },
+          {
+            "modelo": "rf",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6701,
+            "perdida": 0.0101,
+            "ic95_bootstrap": [
+              0.0059,
+              0.0142
+            ],
+            "delong_p": 2.2080112505061803e-06,
+            "cumple": true
+          },
+          {
+            "modelo": "gb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6769,
+            "perdida": 0.0033,
+            "ic95_bootstrap": [
+              -0.0002,
+              0.0068
+            ],
+            "delong_p": 0.06246700049110192,
+            "cumple": true
+          },
+          {
+            "modelo": "xgb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6754,
+            "perdida": 0.0048,
+            "ic95_bootstrap": [
+              0.0014,
+              0.008
+            ],
+            "delong_p": 0.003532001476127984,
+            "cumple": true
+          },
+          {
+            "modelo": "lgbm",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6755,
+            "perdida": 0.0047,
+            "ic95_bootstrap": [
+              0.0011,
+              0.0081
+            ],
+            "delong_p": 0.007472569313642332,
+            "cumple": true
+          },
+          {
+            "modelo": "catboost",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6802,
+            "perdida": 0.0,
+            "ic95_bootstrap": [
+              0.0,
+              0.0
+            ],
+            "delong_p": null,
+            "cumple": true
+          },
+          {
+            "modelo": "mlp",
+            "complejidad": 2,
+            "roc_auc_oof": 0.6629,
+            "perdida": 0.0173,
+            "ic95_bootstrap": [
+              0.0115,
+              0.0231
+            ],
+            "delong_p": 3.814875384873894e-09,
+            "cumple": false
+          },
+          {
+            "modelo": "apilamiento",
+            "complejidad": 3,
+            "roc_auc_oof": 0.6779,
+            "perdida": 0.0023,
+            "ic95_bootstrap": [
+              -0.0017,
+              0.0062
+            ],
+            "delong_p": 0.24771526641724828,
+            "cumple": true
+          }
+        ]
+      },
+      "modelo_desplegado": {
+        "modelo": "rl",
+        "motivo": "D33/D49-rev: rl es el candidato más simple cuya pérdida de ROC-AUC out-of-fold frente a catboost tiene límite superior del IC 95 % (0.0073) por debajo de 0.02"
+      },
+      "calibracion": {
+        "metodo": "platt",
+        "brier_sin_calibrar": 0.2199,
+        "brier_calibrado": 0.1393,
+        "brier_por_metodo": {
+          "platt": 0.1393,
+          "isotonica": 0.1396
+        },
+        "anidada": true
+      },
+      "punto_operacion_oof": {
+        "umbral": 0.150952,
+        "sensibilidad": 0.7,
+        "precision": 0.2573,
+        "tasa_alerta": 0.4936,
+        "tasa_falsos_positivos": 0.4478,
+        "matriz_confusion": [
+          [
+            8274,
+            6710
+          ],
+          [
+            996,
+            2324
+          ]
+        ]
+      },
+      "desglose": {
+        "CCC": {
+          "n": 1498,
+          "roc_auc": 0.7161,
+          "umbral": 0.150952,
+          "sensibilidad": 0.9478,
+          "precision": 0.3639,
+          "tasa_alerta": 0.7997,
+          "tasa_falsos_positivos": 0.7341,
+          "matriz_confusion": [
+            [
+              276,
+              762
+            ],
+            [
+              24,
+              436
+            ]
+          ]
+        },
+        "resto": {
+          "n": 16806,
+          "roc_auc": 0.6636,
+          "umbral": 0.150952,
+          "sensibilidad": 0.6601,
+          "precision": 0.2409,
+          "tasa_alerta": 0.4663,
+          "tasa_falsos_positivos": 0.4265,
+          "matriz_confusion": [
+            [
+              7998,
+              5948
+            ],
+            [
+              972,
+              1888
+            ]
+          ]
+        }
+      },
+      "equidad_oof": {
+        "gender": {
+          "subgrupos": {
+            "F": {
+              "n": 8479,
+              "retiros": 1432,
+              "retiros_prueba": 662,
+              "sensibilidad": 0.6571,
+              "sensibilidad_ic95": [
+                0.6325,
+                0.6823
+              ],
+              "tasa_falsos_positivos": 0.3814,
+              "tasa_falsos_positivos_ic95": [
+                0.3699,
+                0.3921
+              ],
+              "solo_descriptiva": false
+            },
+            "M": {
+              "n": 9825,
+              "retiros": 1888,
+              "retiros_prueba": 1031,
+              "sensibilidad": 0.7325,
+              "sensibilidad_ic95": [
+                0.7121,
+                0.7515
+              ],
+              "tasa_falsos_positivos": 0.5067,
+              "tasa_falsos_positivos_ic95": [
+                0.4957,
+                0.5178
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0754,
+          "diferencia_sensibilidad_ic95": [
+            0.0427,
+            0.1071
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1253,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.1104,
+            0.1408
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0754,
+            "diferencia_sensibilidad_ic95": [
+              0.0427,
+              0.1071
+            ],
+            "diferencia_tasa_falsos_positivos": 0.1253,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.1104,
+              0.1408
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "disability": {
+          "subgrupos": {
+            "N": {
+              "n": 16550,
+              "retiros": 2862,
+              "retiros_prueba": 1474,
+              "sensibilidad": 0.6883,
+              "sensibilidad_ic95": [
+                0.6711,
+                0.7054
+              ],
+              "tasa_falsos_positivos": 0.4454,
+              "tasa_falsos_positivos_ic95": [
+                0.437,
+                0.4537
+              ],
+              "solo_descriptiva": false
+            },
+            "Y": {
+              "n": 1754,
+              "retiros": 458,
+              "retiros_prueba": 219,
+              "sensibilidad": 0.7729,
+              "sensibilidad_ic95": [
+                0.736,
+                0.8118
+              ],
+              "tasa_falsos_positivos": 0.4738,
+              "tasa_falsos_positivos_ic95": [
+                0.4474,
+                0.5026
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0846,
+          "diferencia_sensibilidad_ic95": [
+            0.0431,
+            0.1275
+          ],
+          "diferencia_tasa_falsos_positivos": 0.0284,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0027,
+            0.0578
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0846,
+            "diferencia_sensibilidad_ic95": [
+              0.0431,
+              0.1275
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0284,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0027,
+              0.0578
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "age_band": {
+          "subgrupos": {
+            "0-35": {
+              "n": 12855,
+              "retiros": 2383,
+              "retiros_prueba": 1168,
+              "sensibilidad": 0.7104,
+              "sensibilidad_ic95": [
+                0.6931,
+                0.7282
+              ],
+              "tasa_falsos_positivos": 0.4774,
+              "tasa_falsos_positivos_ic95": [
+                0.468,
+                0.4867
+              ],
+              "solo_descriptiva": false
+            },
+            "35-55": {
+              "n": 5343,
+              "retiros": 923,
+              "retiros_prueba": 508,
+              "sensibilidad": 0.6728,
+              "sensibilidad_ic95": [
+                0.6419,
+                0.7021
+              ],
+              "tasa_falsos_positivos": 0.3787,
+              "tasa_falsos_positivos_ic95": [
+                0.3644,
+                0.3934
+              ],
+              "solo_descriptiva": false
+            },
+            "55<=": {
+              "n": 106,
+              "retiros": 14,
+              "retiros_prueba": 17,
+              "sensibilidad": 0.7143,
+              "sensibilidad_ic95": [
+                0.4444,
+                0.9333
+              ],
+              "tasa_falsos_positivos": 0.4022,
+              "tasa_falsos_positivos_ic95": [
+                0.3,
+                0.5051
+              ],
+              "solo_descriptiva": true
+            }
+          },
+          "diferencia_sensibilidad": 0.0415,
+          "diferencia_sensibilidad_ic95": [
+            0.0248,
+            0.3106
+          ],
+          "diferencia_tasa_falsos_positivos": 0.0986,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0839,
+            0.1757
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [
+              "55<="
+            ],
+            "diferencia_sensibilidad": 0.0376,
+            "diferencia_sensibilidad_ic95": [
+              0.0052,
+              0.0727
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0986,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0802,
+              0.116
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "imd_band": {
+          "subgrupos": {
+            "0-10%": {
+              "n": 1827,
+              "retiros": 389,
+              "retiros_prueba": 172,
+              "sensibilidad": 0.7352,
+              "sensibilidad_ic95": [
+                0.6884,
+                0.7781
+              ],
+              "tasa_falsos_positivos": 0.5299,
+              "tasa_falsos_positivos_ic95": [
+                0.504,
+                0.5569
+              ],
+              "solo_descriptiva": false
+            },
+            "10-20%": {
+              "n": 1911,
+              "retiros": 359,
+              "retiros_prueba": 182,
+              "sensibilidad": 0.6769,
+              "sensibilidad_ic95": [
+                0.6273,
+                0.726
+              ],
+              "tasa_falsos_positivos": 0.4852,
+              "tasa_falsos_positivos_ic95": [
+                0.4598,
+                0.5091
+              ],
+              "solo_descriptiva": false
+            },
+            "20-30%": {
+              "n": 2007,
+              "retiros": 437,
+              "retiros_prueba": 203,
+              "sensibilidad": 0.6979,
+              "sensibilidad_ic95": [
+                0.6531,
+                0.7413
+              ],
+              "tasa_falsos_positivos": 0.4631,
+              "tasa_falsos_positivos_ic95": [
+                0.4377,
+                0.488
+              ],
+              "solo_descriptiva": false
+            },
+            "30-40%": {
+              "n": 2016,
+              "retiros": 356,
+              "retiros_prueba": 185,
+              "sensibilidad": 0.7247,
+              "sensibilidad_ic95": [
+                0.6778,
+                0.7716
+              ],
+              "tasa_falsos_positivos": 0.456,
+              "tasa_falsos_positivos_ic95": [
+                0.432,
+                0.481
+              ],
+              "solo_descriptiva": false
+            },
+            "40-50%": {
+              "n": 1788,
+              "retiros": 318,
+              "retiros_prueba": 175,
+              "sensibilidad": 0.6824,
+              "sensibilidad_ic95": [
+                0.6294,
+                0.7314
+              ],
+              "tasa_falsos_positivos": 0.4408,
+              "tasa_falsos_positivos_ic95": [
+                0.416,
+                0.4644
+              ],
+              "solo_descriptiva": false
+            },
+            "50-60%": {
+              "n": 1768,
+              "retiros": 294,
+              "retiros_prueba": 168,
+              "sensibilidad": 0.7381,
+              "sensibilidad_ic95": [
+                0.6864,
+                0.7907
+              ],
+              "tasa_falsos_positivos": 0.4315,
+              "tasa_falsos_positivos_ic95": [
+                0.4064,
+                0.4559
+              ],
+              "solo_descriptiva": false
+            },
+            "60-70%": {
+              "n": 1624,
+              "retiros": 306,
+              "retiros_prueba": 151,
+              "sensibilidad": 0.6863,
+              "sensibilidad_ic95": [
+                0.6326,
+                0.7355
+              ],
+              "tasa_falsos_positivos": 0.4196,
+              "tasa_falsos_positivos_ic95": [
+                0.3922,
+                0.4471
+              ],
+              "solo_descriptiva": false
+            },
+            "70-80%": {
+              "n": 1643,
+              "retiros": 286,
+              "retiros_prueba": 141,
+              "sensibilidad": 0.6853,
+              "sensibilidad_ic95": [
+                0.6308,
+                0.7393
+              ],
+              "tasa_falsos_positivos": 0.4178,
+              "tasa_falsos_positivos_ic95": [
+                0.3917,
+                0.4455
+              ],
+              "solo_descriptiva": false
+            },
+            "80-90%": {
+              "n": 1566,
+              "retiros": 253,
+              "retiros_prueba": 132,
+              "sensibilidad": 0.668,
+              "sensibilidad_ic95": [
+                0.6077,
+                0.7244
+              ],
+              "tasa_falsos_positivos": 0.4075,
+              "tasa_falsos_positivos_ic95": [
+                0.3799,
+                0.4346
+              ],
+              "solo_descriptiva": false
+            },
+            "90-100%": {
+              "n": 1493,
+              "retiros": 227,
+              "retiros_prueba": 127,
+              "sensibilidad": 0.6872,
+              "sensibilidad_ic95": [
+                0.6233,
+                0.7469
+              ],
+              "tasa_falsos_positivos": 0.3942,
+              "tasa_falsos_positivos_ic95": [
+                0.3661,
+                0.4211
+              ],
+              "solo_descriptiva": false
+            },
+            "faltante": {
+              "n": 661,
+              "retiros": 95,
+              "retiros_prueba": 57,
+              "sensibilidad": 0.7053,
+              "sensibilidad_ic95": [
+                0.6095,
+                0.7959
+              ],
+              "tasa_falsos_positivos": 0.4823,
+              "tasa_falsos_positivos_ic95": [
+                0.4399,
+                0.5209
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0701,
+          "diferencia_sensibilidad_ic95": [
+            0.0706,
+            0.1772
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1357,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.108,
+            0.1748
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0701,
+            "diferencia_sensibilidad_ic95": [
+              0.0706,
+              0.1772
+            ],
+            "diferencia_tasa_falsos_positivos": 0.1357,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.108,
+              0.1748
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        }
+      },
+      "shap": null,
+      "tiempo_s": 6083.4
+    },
+    {
+      "semana": 8,
+      "n": 17629,
+      "retiros": 2641,
+      "familias": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 0.0028100559580436705,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.692,
+          "roc_auc_media_predeterminado": 0.6863,
+          "n_trials": 50,
+          "n_completados": 42,
+          "n_podados": 8,
+          "tiempo_busqueda_s": 155.8,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2154,
+            "brier_calibrado": 0.1198,
+            "brier_por_metodo": {
+              "platt": 0.1198,
+              "isotonica": 0.1199
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6975,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6928,
+              "pr_auc": 0.3406,
+              "brier": 0.1523
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6804,
+              "pr_auc": 0.2421,
+              "brier": 0.1113
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.698,
+              "pr_auc": 0.2693,
+              "brier": 0.1167
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6993,
+              "pr_auc": 0.3172,
+              "brier": 0.1288
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6895,
+              "pr_auc": 0.1921,
+              "brier": 0.0893
+            }
+          ],
+          "roc_auc_media": 0.692,
+          "roc_auc_desv": 0.0076,
+          "roc_auc_oof": 0.6937,
+          "pr_auc_oof": 0.2758,
+          "brier_oof": 0.1198,
+          "tiempo_oof_calibrado_s": 16.8,
+          "tiempo_s": 172.6
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 449,
+            "max_depth": 28,
+            "min_samples_leaf": 36,
+            "max_features": "sqrt",
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6858,
+          "roc_auc_media_predeterminado": 0.6565,
+          "n_trials": 50,
+          "n_completados": 47,
+          "n_podados": 3,
+          "tiempo_busqueda_s": 600.1,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1203,
+            "brier_calibrado": 0.12,
+            "brier_por_metodo": {
+              "platt": 0.12,
+              "isotonica": 0.1205
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6876,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6904,
+              "pr_auc": 0.3549,
+              "brier": 0.1481
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6775,
+              "pr_auc": 0.2486,
+              "brier": 0.1114
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6941,
+              "pr_auc": 0.2593,
+              "brier": 0.1173
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6808,
+              "pr_auc": 0.2806,
+              "brier": 0.1321
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6863,
+              "pr_auc": 0.1974,
+              "brier": 0.0893
+            }
+          ],
+          "roc_auc_media": 0.6858,
+          "roc_auc_desv": 0.0068,
+          "roc_auc_oof": 0.6863,
+          "pr_auc_oof": 0.2738,
+          "brier_oof": 0.12,
+          "tiempo_oof_calibrado_s": 132.1,
+          "tiempo_s": 732.2
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.015689497350165556,
+            "max_iter": 322,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 286,
+            "l2_regularization": 0.0013628113485263432,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6819,
+          "roc_auc_media_predeterminado": 0.6633,
+          "n_trials": 50,
+          "n_completados": 38,
+          "n_podados": 12,
+          "tiempo_busqueda_s": 1034.4,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2098,
+            "brier_calibrado": 0.1209,
+            "brier_por_metodo": {
+              "platt": 0.1209,
+              "isotonica": 0.1213
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6832,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6906,
+              "pr_auc": 0.3603,
+              "brier": 0.1511
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6733,
+              "pr_auc": 0.243,
+              "brier": 0.1113
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6941,
+              "pr_auc": 0.2631,
+              "brier": 0.1165
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6772,
+              "pr_auc": 0.2692,
+              "brier": 0.132
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.674,
+              "pr_auc": 0.1785,
+              "brier": 0.0919
+            }
+          ],
+          "roc_auc_media": 0.6818,
+          "roc_auc_desv": 0.0098,
+          "roc_auc_oof": 0.6772,
+          "pr_auc_oof": 0.2587,
+          "brier_oof": 0.1209,
+          "tiempo_oof_calibrado_s": 238.8,
+          "tiempo_s": 1273.2
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 163,
+            "learning_rate": 0.011592173257686342,
+            "max_depth": 9,
+            "min_child_weight": 47.656118020708426,
+            "subsample": 0.5505424678225438,
+            "colsample_bytree": 0.44393086660101966,
+            "reg_lambda": 0.005414623594820752,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6845,
+          "roc_auc_media_predeterminado": 0.6364,
+          "n_trials": 50,
+          "n_completados": 44,
+          "n_podados": 6,
+          "tiempo_busqueda_s": 288.9,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2127,
+            "brier_calibrado": 0.1202,
+            "brier_por_metodo": {
+              "platt": 0.1202,
+              "isotonica": 0.1208
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6889,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6942,
+              "pr_auc": 0.3604,
+              "brier": 0.149
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6711,
+              "pr_auc": 0.239,
+              "brier": 0.1117
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6976,
+              "pr_auc": 0.2669,
+              "brier": 0.1163
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6763,
+              "pr_auc": 0.2763,
+              "brier": 0.1319
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6832,
+              "pr_auc": 0.1889,
+              "brier": 0.0902
+            }
+          ],
+          "roc_auc_media": 0.6845,
+          "roc_auc_desv": 0.0113,
+          "roc_auc_oof": 0.6842,
+          "pr_auc_oof": 0.2689,
+          "brier_oof": 0.1202,
+          "tiempo_oof_calibrado_s": 43.4,
+          "tiempo_s": 332.3
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 436,
+            "learning_rate": 0.0100994340303904,
+            "num_leaves": 250,
+            "min_child_samples": 266,
+            "subsample": 0.5274887434198277,
+            "colsample_bytree": 0.4394430650986362,
+            "reg_lambda": 0.014713147127349403,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6858,
+          "roc_auc_media_predeterminado": 0.6651,
+          "n_trials": 50,
+          "n_completados": 35,
+          "n_podados": 15,
+          "tiempo_busqueda_s": 222.2,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2051,
+            "brier_calibrado": 0.1201,
+            "brier_por_metodo": {
+              "platt": 0.1201,
+              "isotonica": 0.1205
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6902,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6852,
+              "pr_auc": 0.3613,
+              "brier": 0.1502
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6782,
+              "pr_auc": 0.2392,
+              "brier": 0.1112
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6999,
+              "pr_auc": 0.2653,
+              "brier": 0.1162
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.685,
+              "pr_auc": 0.2853,
+              "brier": 0.131
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6808,
+              "pr_auc": 0.1898,
+              "brier": 0.0905
+            }
+          ],
+          "roc_auc_media": 0.6858,
+          "roc_auc_desv": 0.0084,
+          "roc_auc_oof": 0.6852,
+          "pr_auc_oof": 0.2678,
+          "brier_oof": 0.1201,
+          "tiempo_oof_calibrado_s": 41.5,
+          "tiempo_s": 263.7
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 756,
+            "learning_rate": 0.010695187416061602,
+            "depth": 5,
+            "l2_leaf_reg": 23.754709479256235,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6842,
+          "roc_auc_media_predeterminado": 0.6727,
+          "n_trials": 50,
+          "n_completados": 41,
+          "n_podados": 9,
+          "tiempo_busqueda_s": 1648.8,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1208,
+            "brier_calibrado": 0.1209,
+            "brier_por_metodo": {
+              "platt": 0.121,
+              "isotonica": 0.1209
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6823,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6897,
+              "pr_auc": 0.3386,
+              "brier": 0.1506
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6776,
+              "pr_auc": 0.2375,
+              "brier": 0.1113
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6989,
+              "pr_auc": 0.2586,
+              "brier": 0.1169
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6788,
+              "pr_auc": 0.2698,
+              "brier": 0.1317
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6698,
+              "pr_auc": 0.1711,
+              "brier": 0.0923
+            }
+          ],
+          "roc_auc_media": 0.683,
+          "roc_auc_desv": 0.0114,
+          "roc_auc_oof": 0.6794,
+          "pr_auc_oof": 0.2573,
+          "brier_oof": 0.1209,
+          "tiempo_oof_calibrado_s": 398.7,
+          "tiempo_s": 2047.5
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "64",
+            "alpha": 0.08085987281637116,
+            "learning_rate_init": 0.0007262373275148985,
+            "batch_size": 128,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6842,
+          "roc_auc_media_predeterminado": 0.6654,
+          "n_trials": 50,
+          "n_completados": 34,
+          "n_podados": 16,
+          "tiempo_busqueda_s": 614.2,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2036,
+            "brier_calibrado": 0.1197,
+            "brier_por_metodo": {
+              "platt": 0.1197,
+              "isotonica": 0.1198
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6922,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6836,
+              "pr_auc": 0.3536,
+              "brier": 0.1498
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6832,
+              "pr_auc": 0.2592,
+              "brier": 0.1109
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.686,
+              "pr_auc": 0.2643,
+              "brier": 0.1171
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6941,
+              "pr_auc": 0.2974,
+              "brier": 0.1299
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6742,
+              "pr_auc": 0.1815,
+              "brier": 0.0895
+            }
+          ],
+          "roc_auc_media": 0.6842,
+          "roc_auc_desv": 0.0071,
+          "roc_auc_oof": 0.6909,
+          "pr_auc_oof": 0.2776,
+          "brier_oof": 0.1197,
+          "tiempo_oof_calibrado_s": 128.2,
+          "tiempo_s": 742.4
+        }
+      ],
+      "referencias": [
+        {
+          "modelo": "mayoritaria",
+          "calibracion": null,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1978,
+              "brier": 0.1621
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5,
+              "pr_auc": 0.135,
+              "brier": 0.1171
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1448,
+              "brier": 0.1239
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1666,
+              "brier": 0.1394
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1026,
+              "brier": 0.0955
+            }
+          ],
+          "roc_auc_media": 0.5,
+          "roc_auc_desv": 0.0,
+          "roc_auc_oof": 0.4328,
+          "pr_auc_oof": 0.1314,
+          "brier_oof": 0.1279,
+          "tiempo_s": 0.1,
+          "nota": "predice en cada pliegue la prevalencia de sus pliegues de ajuste: ROC-AUC 0,5 en cada pliegue; la ROC-AUC out-of-fold agrupada se aparta de 0,5 solo porque esa constante cambia entre pliegues (limitación de agrupar predicciones de 5 modelos, D40)"
+        },
+        {
+          "modelo": "rl_defecto",
+          "hiperparametros": {
+            "C": 1.0,
+            "l1_ratio": 0.0,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1197,
+            "brier_calibrado": 0.1199,
+            "brier_por_metodo": {
+              "platt": 0.1199,
+              "isotonica": 0.1199
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6925,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6835,
+              "pr_auc": 0.3254,
+              "brier": 0.1494
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.676,
+              "pr_auc": 0.2391,
+              "brier": 0.1118
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6877,
+              "pr_auc": 0.2513,
+              "brier": 0.1178
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6897,
+              "pr_auc": 0.292,
+              "brier": 0.1303
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6854,
+              "pr_auc": 0.1895,
+              "brier": 0.0887
+            }
+          ],
+          "roc_auc_media": 0.6845,
+          "roc_auc_desv": 0.0053,
+          "roc_auc_oof": 0.688,
+          "pr_auc_oof": 0.2694,
+          "brier_oof": 0.1199,
+          "tiempo_s": 36.5
+        },
+        {
+          "modelo": "rl_optimizada",
+          "hiperparametros": {
+            "C": 0.0028100559580436705,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.692,
+          "roc_auc_media_predeterminado": 0.6863,
+          "n_trials": 50,
+          "n_completados": 42,
+          "n_podados": 8,
+          "tiempo_busqueda_s": 155.8,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2154,
+            "brier_calibrado": 0.1198,
+            "brier_por_metodo": {
+              "platt": 0.1198,
+              "isotonica": 0.1199
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6975,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6928,
+              "pr_auc": 0.3406,
+              "brier": 0.1523
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6804,
+              "pr_auc": 0.2421,
+              "brier": 0.1113
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.698,
+              "pr_auc": 0.2693,
+              "brier": 0.1167
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6993,
+              "pr_auc": 0.3172,
+              "brier": 0.1288
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6895,
+              "pr_auc": 0.1921,
+              "brier": 0.0893
+            }
+          ],
+          "roc_auc_media": 0.692,
+          "roc_auc_desv": 0.0076,
+          "roc_auc_oof": 0.6937,
+          "pr_auc_oof": 0.2758,
+          "brier_oof": 0.1198,
+          "tiempo_oof_calibrado_s": 16.8,
+          "tiempo_s": 172.6,
+          "igual_que": "familia rl (mismo nº de ensayos que cada familia)"
+        }
+      ],
+      "apilamiento": {
+        "base": [
+          "rl",
+          "rf",
+          "gb",
+          "xgb",
+          "lgbm",
+          "catboost",
+          "mlp"
+        ],
+        "por_pliegue": [
+          {
+            "pliegue": 1,
+            "roc_auc": 0.6952,
+            "pr_auc": 0.3513,
+            "brier": 0.1504
+          },
+          {
+            "pliegue": 2,
+            "roc_auc": 0.6809,
+            "pr_auc": 0.2356,
+            "brier": 0.1114
+          },
+          {
+            "pliegue": 3,
+            "roc_auc": 0.7003,
+            "pr_auc": 0.2713,
+            "brier": 0.1157
+          },
+          {
+            "pliegue": 4,
+            "roc_auc": 0.7002,
+            "pr_auc": 0.3163,
+            "brier": 0.1288
+          },
+          {
+            "pliegue": 5,
+            "roc_auc": 0.6882,
+            "pr_auc": 0.1968,
+            "brier": 0.0895
+          }
+        ],
+        "roc_auc_media": 0.693,
+        "roc_auc_desv": 0.0084,
+        "roc_auc_oof": 0.6941,
+        "pr_auc_oof": 0.2767,
+        "brier_oof": 0.1194,
+        "calibracion": "salida del metamodelo logístico, sin calibración adicional",
+        "tiempo_s": 495.0
+      },
+      "mejor_automl": "apilamiento",
+      "contraste_central": {
+        "modelo_a": "apilamiento",
+        "modelo_b": "rl_optimizada",
+        "roc_auc_a": 0.6941,
+        "roc_auc_b": 0.6937,
+        "diferencia": 0.0004,
+        "ic95_bootstrap": [
+          -0.0017,
+          0.0026
+        ],
+        "delong_p": 0.7260541960849447,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "delong_p_holm": 0.7260541960849447,
+        "lectura": "equivalencia_practica"
+      },
+      "parsimonia": {
+        "regla": "no inferioridad (D49-rev)",
+        "mejor": "apilamiento",
+        "margen": 0.02,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "candidatos": [
+          {
+            "modelo": "rl",
+            "complejidad": 0,
+            "roc_auc_oof": 0.6937,
+            "perdida": 0.0004,
+            "ic95_bootstrap": [
+              -0.0017,
+              0.0026
+            ],
+            "delong_p": 0.7260541960849447,
+            "cumple": true
+          },
+          {
+            "modelo": "rf",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6863,
+            "perdida": 0.0078,
+            "ic95_bootstrap": [
+              0.003,
+              0.0125
+            ],
+            "delong_p": 0.0011081368133286505,
+            "cumple": true
+          },
+          {
+            "modelo": "gb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6772,
+            "perdida": 0.0169,
+            "ic95_bootstrap": [
+              0.0127,
+              0.0209
+            ],
+            "delong_p": 5.536882079231111e-16,
+            "cumple": false
+          },
+          {
+            "modelo": "xgb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6842,
+            "perdida": 0.0099,
+            "ic95_bootstrap": [
+              0.0061,
+              0.014
+            ],
+            "delong_p": 1.7449321976354088e-06,
+            "cumple": true
+          },
+          {
+            "modelo": "lgbm",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6852,
+            "perdida": 0.0089,
+            "ic95_bootstrap": [
+              0.0052,
+              0.0126
+            ],
+            "delong_p": 3.0166244055460224e-06,
+            "cumple": true
+          },
+          {
+            "modelo": "catboost",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6794,
+            "perdida": 0.0147,
+            "ic95_bootstrap": [
+              0.0101,
+              0.0192
+            ],
+            "delong_p": 7.229716980080612e-10,
+            "cumple": true
+          },
+          {
+            "modelo": "mlp",
+            "complejidad": 2,
+            "roc_auc_oof": 0.6909,
+            "perdida": 0.0033,
+            "ic95_bootstrap": [
+              -0.002,
+              0.0084
+            ],
+            "delong_p": 0.21901142641497384,
+            "cumple": true
+          },
+          {
+            "modelo": "apilamiento",
+            "complejidad": 3,
+            "roc_auc_oof": 0.6941,
+            "perdida": 0.0,
+            "ic95_bootstrap": [
+              0.0,
+              0.0
+            ],
+            "delong_p": null,
+            "cumple": true
+          }
+        ]
+      },
+      "modelo_desplegado": {
+        "modelo": "rl",
+        "motivo": "D33/D49-rev: rl es el candidato más simple cuya pérdida de ROC-AUC out-of-fold frente a apilamiento tiene límite superior del IC 95 % (0.0026) por debajo de 0.02"
+      },
+      "calibracion": {
+        "metodo": "platt",
+        "brier_sin_calibrar": 0.2154,
+        "brier_calibrado": 0.1198,
+        "brier_por_metodo": {
+          "platt": 0.1198,
+          "isotonica": 0.1199
+        },
+        "anidada": true
+      },
+      "punto_operacion_oof": {
+        "umbral": 0.132519,
+        "sensibilidad": 0.7001,
+        "precision": 0.2318,
+        "tasa_alerta": 0.4524,
+        "tasa_falsos_positivos": 0.4087,
+        "matriz_confusion": [
+          [
+            8862,
+            6126
+          ],
+          [
+            792,
+            1849
+          ]
+        ]
+      },
+      "desglose": {
+        "CCC": {
+          "n": 1359,
+          "roc_auc": 0.6846,
+          "umbral": 0.132519,
+          "sensibilidad": 0.9564,
+          "precision": 0.2691,
+          "tasa_alerta": 0.8396,
+          "tasa_falsos_positivos": 0.8035,
+          "matriz_confusion": [
+            [
+              204,
+              834
+            ],
+            [
+              14,
+              307
+            ]
+          ]
+        },
+        "resto": {
+          "n": 16270,
+          "roc_auc": 0.6883,
+          "umbral": 0.132519,
+          "sensibilidad": 0.6647,
+          "precision": 0.2256,
+          "tasa_alerta": 0.42,
+          "tasa_falsos_positivos": 0.3794,
+          "matriz_confusion": [
+            [
+              8658,
+              5292
+            ],
+            [
+              778,
+              1542
+            ]
+          ]
+        }
+      },
+      "equidad_oof": {
+        "gender": {
+          "subgrupos": {
+            "F": {
+              "n": 8196,
+              "retiros": 1147,
+              "retiros_prueba": 539,
+              "sensibilidad": 0.66,
+              "sensibilidad_ic95": [
+                0.6325,
+                0.6876
+              ],
+              "tasa_falsos_positivos": 0.3517,
+              "tasa_falsos_positivos_ic95": [
+                0.3407,
+                0.3631
+              ],
+              "solo_descriptiva": false
+            },
+            "M": {
+              "n": 9433,
+              "retiros": 1494,
+              "retiros_prueba": 819,
+              "sensibilidad": 0.7309,
+              "sensibilidad_ic95": [
+                0.7091,
+                0.7531
+              ],
+              "tasa_falsos_positivos": 0.4594,
+              "tasa_falsos_positivos_ic95": [
+                0.4478,
+                0.4703
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0709,
+          "diferencia_sensibilidad_ic95": [
+            0.0335,
+            0.1057
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1077,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0912,
+            0.123
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0709,
+            "diferencia_sensibilidad_ic95": [
+              0.0335,
+              0.1057
+            ],
+            "diferencia_tasa_falsos_positivos": 0.1077,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0912,
+              0.123
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "disability": {
+          "subgrupos": {
+            "N": {
+              "n": 15958,
+              "retiros": 2266,
+              "retiros_prueba": 1182,
+              "sensibilidad": 0.6871,
+              "sensibilidad_ic95": [
+                0.6686,
+                0.7058
+              ],
+              "tasa_falsos_positivos": 0.4066,
+              "tasa_falsos_positivos_ic95": [
+                0.3983,
+                0.4146
+              ],
+              "solo_descriptiva": false
+            },
+            "Y": {
+              "n": 1671,
+              "retiros": 375,
+              "retiros_prueba": 176,
+              "sensibilidad": 0.7787,
+              "sensibilidad_ic95": [
+                0.7374,
+                0.8203
+              ],
+              "tasa_falsos_positivos": 0.4313,
+              "tasa_falsos_positivos_ic95": [
+                0.4062,
+                0.4587
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0916,
+          "diferencia_sensibilidad_ic95": [
+            0.0454,
+            0.1359
+          ],
+          "diferencia_tasa_falsos_positivos": 0.0247,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0018,
+            0.0538
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0916,
+            "diferencia_sensibilidad_ic95": [
+              0.0454,
+              0.1359
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0247,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0018,
+              0.0538
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "age_band": {
+          "subgrupos": {
+            "0-35": {
+              "n": 12369,
+              "retiros": 1895,
+              "retiros_prueba": 931,
+              "sensibilidad": 0.7092,
+              "sensibilidad_ic95": [
+                0.6887,
+                0.7291
+              ],
+              "tasa_falsos_positivos": 0.4336,
+              "tasa_falsos_positivos_ic95": [
+                0.4243,
+                0.4427
+              ],
+              "solo_descriptiva": false
+            },
+            "35-55": {
+              "n": 5157,
+              "retiros": 735,
+              "retiros_prueba": 415,
+              "sensibilidad": 0.6762,
+              "sensibilidad_ic95": [
+                0.643,
+                0.7103
+              ],
+              "tasa_falsos_positivos": 0.3517,
+              "tasa_falsos_positivos_ic95": [
+                0.337,
+                0.3656
+              ],
+              "solo_descriptiva": false
+            },
+            "55<=": {
+              "n": 103,
+              "retiros": 11,
+              "retiros_prueba": 12,
+              "sensibilidad": 0.7273,
+              "sensibilidad_ic95": [
+                0.4444,
+                1.0
+              ],
+              "tasa_falsos_positivos": 0.3152,
+              "tasa_falsos_positivos_ic95": [
+                0.221,
+                0.4177
+              ],
+              "solo_descriptiva": true
+            }
+          },
+          "diferencia_sensibilidad": 0.0511,
+          "diferencia_sensibilidad_ic95": [
+            0.0218,
+            0.3386
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1184,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0722,
+            0.2136
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [
+              "55<="
+            ],
+            "diferencia_sensibilidad": 0.033,
+            "diferencia_sensibilidad_ic95": [
+              0.003,
+              0.0725
+            ],
+            "diferencia_tasa_falsos_positivos": 0.082,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0654,
+              0.0991
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "imd_band": {
+          "subgrupos": {
+            "0-10%": {
+              "n": 1757,
+              "retiros": 318,
+              "retiros_prueba": 141,
+              "sensibilidad": 0.7233,
+              "sensibilidad_ic95": [
+                0.6732,
+                0.7715
+              ],
+              "tasa_falsos_positivos": 0.501,
+              "tasa_falsos_positivos_ic95": [
+                0.4755,
+                0.526
+              ],
+              "solo_descriptiva": false
+            },
+            "10-20%": {
+              "n": 1849,
+              "retiros": 297,
+              "retiros_prueba": 146,
+              "sensibilidad": 0.6835,
+              "sensibilidad_ic95": [
+                0.6294,
+                0.7336
+              ],
+              "tasa_falsos_positivos": 0.4639,
+              "tasa_falsos_positivos_ic95": [
+                0.4393,
+                0.4864
+              ],
+              "solo_descriptiva": false
+            },
+            "20-30%": {
+              "n": 1920,
+              "retiros": 350,
+              "retiros_prueba": 172,
+              "sensibilidad": 0.72,
+              "sensibilidad_ic95": [
+                0.6714,
+                0.7688
+              ],
+              "tasa_falsos_positivos": 0.4382,
+              "tasa_falsos_positivos_ic95": [
+                0.413,
+                0.4627
+              ],
+              "solo_descriptiva": false
+            },
+            "30-40%": {
+              "n": 1937,
+              "retiros": 277,
+              "retiros_prueba": 148,
+              "sensibilidad": 0.6895,
+              "sensibilidad_ic95": [
+                0.6334,
+                0.7445
+              ],
+              "tasa_falsos_positivos": 0.4223,
+              "tasa_falsos_positivos_ic95": [
+                0.3988,
+                0.4463
+              ],
+              "solo_descriptiva": false
+            },
+            "40-50%": {
+              "n": 1727,
+              "retiros": 256,
+              "retiros_prueba": 133,
+              "sensibilidad": 0.6914,
+              "sensibilidad_ic95": [
+                0.6346,
+                0.7478
+              ],
+              "tasa_falsos_positivos": 0.412,
+              "tasa_falsos_positivos_ic95": [
+                0.387,
+                0.4376
+              ],
+              "solo_descriptiva": false
+            },
+            "50-60%": {
+              "n": 1701,
+              "retiros": 227,
+              "retiros_prueba": 135,
+              "sensibilidad": 0.7269,
+              "sensibilidad_ic95": [
+                0.6695,
+                0.7834
+              ],
+              "tasa_falsos_positivos": 0.3962,
+              "tasa_falsos_positivos_ic95": [
+                0.3712,
+                0.4217
+              ],
+              "solo_descriptiva": false
+            },
+            "60-70%": {
+              "n": 1561,
+              "retiros": 243,
+              "retiros_prueba": 122,
+              "sensibilidad": 0.7202,
+              "sensibilidad_ic95": [
+                0.6627,
+                0.7761
+              ],
+              "tasa_falsos_positivos": 0.3566,
+              "tasa_falsos_positivos_ic95": [
+                0.3307,
+                0.3823
+              ],
+              "solo_descriptiva": false
+            },
+            "70-80%": {
+              "n": 1579,
+              "retiros": 221,
+              "retiros_prueba": 108,
+              "sensibilidad": 0.6606,
+              "sensibilidad_ic95": [
+                0.5983,
+                0.7215
+              ],
+              "tasa_falsos_positivos": 0.3844,
+              "tasa_falsos_positivos_ic95": [
+                0.3576,
+                0.4113
+              ],
+              "solo_descriptiva": false
+            },
+            "80-90%": {
+              "n": 1513,
+              "retiros": 199,
+              "retiros_prueba": 105,
+              "sensibilidad": 0.6633,
+              "sensibilidad_ic95": [
+                0.6,
+                0.7316
+              ],
+              "tasa_falsos_positivos": 0.3554,
+              "tasa_falsos_positivos_ic95": [
+                0.3289,
+                0.3817
+              ],
+              "solo_descriptiva": false
+            },
+            "90-100%": {
+              "n": 1447,
+              "retiros": 181,
+              "retiros_prueba": 98,
+              "sensibilidad": 0.6851,
+              "sensibilidad_ic95": [
+                0.615,
+                0.7513
+              ],
+              "tasa_falsos_positivos": 0.3452,
+              "tasa_falsos_positivos_ic95": [
+                0.3191,
+                0.372
+              ],
+              "solo_descriptiva": false
+            },
+            "faltante": {
+              "n": 638,
+              "retiros": 72,
+              "retiros_prueba": 50,
+              "sensibilidad": 0.75,
+              "sensibilidad_ic95": [
+                0.6471,
+                0.8472
+              ],
+              "tasa_falsos_positivos": 0.371,
+              "tasa_falsos_positivos_ic95": [
+                0.3301,
+                0.4116
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0894,
+          "diferencia_sensibilidad_ic95": [
+            0.0786,
+            0.2247
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1559,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.1313,
+            0.1958
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0894,
+            "diferencia_sensibilidad_ic95": [
+              0.0786,
+              0.2247
+            ],
+            "diferencia_tasa_falsos_positivos": 0.1559,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.1313,
+              0.1958
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        }
+      },
+      "shap": null,
+      "tiempo_s": 6231.7
+    },
+    {
+      "semana": 12,
+      "n": 17146,
+      "retiros": 2154,
+      "familias": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 0.06969807555546856,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6919,
+          "roc_auc_media_predeterminado": 0.685,
+          "n_trials": 50,
+          "n_completados": 25,
+          "n_podados": 25,
+          "tiempo_busqueda_s": 164.0,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.2184,
+            "brier_calibrado": 0.1038,
+            "brier_por_metodo": {
+              "platt": 0.1039,
+              "isotonica": 0.1038
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7013,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6736,
+              "pr_auc": 0.29,
+              "brier": 0.1355
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6995,
+              "pr_auc": 0.2058,
+              "brier": 0.0947
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7064,
+              "pr_auc": 0.2344,
+              "brier": 0.0989
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6894,
+              "pr_auc": 0.253,
+              "brier": 0.1152
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6752,
+              "pr_auc": 0.1648,
+              "brier": 0.0736
+            }
+          ],
+          "roc_auc_media": 0.6888,
+          "roc_auc_desv": 0.0145,
+          "roc_auc_oof": 0.6956,
+          "pr_auc_oof": 0.2368,
+          "brier_oof": 0.1038,
+          "tiempo_oof_calibrado_s": 26.3,
+          "tiempo_s": 190.3
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 407,
+            "max_depth": 15,
+            "min_samples_leaf": 15,
+            "max_features": "sqrt",
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6945,
+          "roc_auc_media_predeterminado": 0.6611,
+          "n_trials": 50,
+          "n_completados": 35,
+          "n_podados": 15,
+          "tiempo_busqueda_s": 486.7,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1038,
+            "brier_calibrado": 0.1034,
+            "brier_por_metodo": {
+              "platt": 0.1034,
+              "isotonica": 0.1037
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6991,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6955,
+              "pr_auc": 0.3246,
+              "brier": 0.1326
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7014,
+              "pr_auc": 0.2161,
+              "brier": 0.0948
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6995,
+              "pr_auc": 0.2337,
+              "brier": 0.0995
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6865,
+              "pr_auc": 0.2696,
+              "brier": 0.1152
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6895,
+              "pr_auc": 0.1795,
+              "brier": 0.0734
+            }
+          ],
+          "roc_auc_media": 0.6945,
+          "roc_auc_desv": 0.0064,
+          "roc_auc_oof": 0.6999,
+          "pr_auc_oof": 0.2481,
+          "brier_oof": 0.1034,
+          "tiempo_oof_calibrado_s": 132.8,
+          "tiempo_s": 619.5
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.01776747925153677,
+            "max_iter": 346,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 178,
+            "l2_regularization": 0.002419703850797469,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6949,
+          "roc_auc_media_predeterminado": 0.6716,
+          "n_trials": 50,
+          "n_completados": 40,
+          "n_podados": 10,
+          "tiempo_busqueda_s": 1118.5,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1983,
+            "brier_calibrado": 0.1036,
+            "brier_por_metodo": {
+              "platt": 0.1036,
+              "isotonica": 0.1036
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7016,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6873,
+              "pr_auc": 0.3141,
+              "brier": 0.1337
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7025,
+              "pr_auc": 0.2143,
+              "brier": 0.095
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7085,
+              "pr_auc": 0.2477,
+              "brier": 0.0982
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6831,
+              "pr_auc": 0.2558,
+              "brier": 0.1156
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6931,
+              "pr_auc": 0.1713,
+              "brier": 0.0738
+            }
+          ],
+          "roc_auc_media": 0.6949,
+          "roc_auc_desv": 0.0105,
+          "roc_auc_oof": 0.6984,
+          "pr_auc_oof": 0.2409,
+          "brier_oof": 0.1036,
+          "tiempo_oof_calibrado_s": 261.2,
+          "tiempo_s": 1379.7
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 270,
+            "learning_rate": 0.015569349458963988,
+            "max_depth": 4,
+            "min_child_weight": 17.613366317498777,
+            "subsample": 0.5460777779224144,
+            "colsample_bytree": 0.7224729107379807,
+            "reg_lambda": 0.7540835316676694,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6999,
+          "roc_auc_media_predeterminado": 0.6343,
+          "n_trials": 50,
+          "n_completados": 31,
+          "n_podados": 19,
+          "tiempo_busqueda_s": 204.5,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1035,
+            "brier_calibrado": 0.1037,
+            "brier_por_metodo": {
+              "platt": 0.1041,
+              "isotonica": 0.1037
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7043,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6924,
+              "pr_auc": 0.3116,
+              "brier": 0.133
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7087,
+              "pr_auc": 0.2136,
+              "brier": 0.0944
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7091,
+              "pr_auc": 0.246,
+              "brier": 0.1005
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6868,
+              "pr_auc": 0.2519,
+              "brier": 0.1153
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6905,
+              "pr_auc": 0.1658,
+              "brier": 0.0739
+            }
+          ],
+          "roc_auc_media": 0.6975,
+          "roc_auc_desv": 0.0106,
+          "roc_auc_oof": 0.7018,
+          "pr_auc_oof": 0.2453,
+          "brier_oof": 0.1037,
+          "tiempo_oof_calibrado_s": 39.0,
+          "tiempo_s": 243.5
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 393,
+            "learning_rate": 0.010318048960159257,
+            "num_leaves": 127,
+            "min_child_samples": 207,
+            "subsample": 0.6424173550453424,
+            "colsample_bytree": 0.43592430173468344,
+            "reg_lambda": 0.052419784154173796,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6944,
+          "roc_auc_media_predeterminado": 0.6648,
+          "n_trials": 50,
+          "n_completados": 31,
+          "n_podados": 19,
+          "tiempo_busqueda_s": 178.6,
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1898,
+            "brier_calibrado": 0.1034,
+            "brier_por_metodo": {
+              "platt": 0.1034,
+              "isotonica": 0.1034
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7031,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.689,
+              "pr_auc": 0.3235,
+              "brier": 0.1335
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7088,
+              "pr_auc": 0.2111,
+              "brier": 0.0946
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7063,
+              "pr_auc": 0.2426,
+              "brier": 0.0984
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6844,
+              "pr_auc": 0.2606,
+              "brier": 0.1153
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6837,
+              "pr_auc": 0.1773,
+              "brier": 0.0737
+            }
+          ],
+          "roc_auc_media": 0.6944,
+          "roc_auc_desv": 0.0122,
+          "roc_auc_oof": 0.7006,
+          "pr_auc_oof": 0.2439,
+          "brier_oof": 0.1034,
+          "tiempo_oof_calibrado_s": 39.2,
+          "tiempo_s": 217.8
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 620,
+            "learning_rate": 0.018613902273988923,
+            "depth": 4,
+            "l2_leaf_reg": 23.848922988542277,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.6951,
+          "roc_auc_media_predeterminado": 0.6812,
+          "n_trials": 50,
+          "n_completados": 24,
+          "n_podados": 26,
+          "tiempo_busqueda_s": 1136.5,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1037,
+            "brier_calibrado": 0.1038,
+            "brier_por_metodo": {
+              "platt": 0.1042,
+              "isotonica": 0.1038
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6991,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6913,
+              "pr_auc": 0.3057,
+              "brier": 0.1328
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7075,
+              "pr_auc": 0.2062,
+              "brier": 0.0946
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6991,
+              "pr_auc": 0.2344,
+              "brier": 0.1
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6823,
+              "pr_auc": 0.2423,
+              "brier": 0.1163
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.689,
+              "pr_auc": 0.1658,
+              "brier": 0.0738
+            }
+          ],
+          "roc_auc_media": 0.6938,
+          "roc_auc_desv": 0.0097,
+          "roc_auc_oof": 0.698,
+          "pr_auc_oof": 0.2374,
+          "brier_oof": 0.1038,
+          "tiempo_oof_calibrado_s": 308.7,
+          "tiempo_s": 1445.2
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "128",
+            "alpha": 0.05645342572603958,
+            "learning_rate_init": 0.0008474996976951532,
+            "batch_size": 128,
+            "class_weight": null
+          },
+          "roc_auc_media_busqueda": 0.682,
+          "roc_auc_media_predeterminado": 0.6755,
+          "n_trials": 50,
+          "n_completados": 15,
+          "n_podados": 35,
+          "tiempo_busqueda_s": 402.1,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1071,
+            "brier_calibrado": 0.1053,
+            "brier_por_metodo": {
+              "platt": 0.1077,
+              "isotonica": 0.1053
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6867,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6761,
+              "pr_auc": 0.2987,
+              "brier": 0.1356
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6834,
+              "pr_auc": 0.193,
+              "brier": 0.0956
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6818,
+              "pr_auc": 0.2158,
+              "brier": 0.1052
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6939,
+              "pr_auc": 0.262,
+              "brier": 0.115
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6638,
+              "pr_auc": 0.149,
+              "brier": 0.0747
+            }
+          ],
+          "roc_auc_media": 0.6798,
+          "roc_auc_desv": 0.011,
+          "roc_auc_oof": 0.6816,
+          "pr_auc_oof": 0.2208,
+          "brier_oof": 0.1053,
+          "tiempo_oof_calibrado_s": 150.6,
+          "tiempo_s": 552.7
+        }
+      ],
+      "referencias": [
+        {
+          "modelo": "mayoritaria",
+          "calibracion": null,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1701,
+              "brier": 0.1441
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5,
+              "pr_auc": 0.112,
+              "brier": 0.0998
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1187,
+              "brier": 0.1047
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5,
+              "pr_auc": 0.1421,
+              "brier": 0.1224
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.5,
+              "pr_auc": 0.0834,
+              "brier": 0.0791
+            }
+          ],
+          "roc_auc_media": 0.5,
+          "roc_auc_desv": 0.0,
+          "roc_auc_oof": 0.4283,
+          "pr_auc_oof": 0.1091,
+          "brier_oof": 0.1103,
+          "tiempo_s": 0.1,
+          "nota": "predice en cada pliegue la prevalencia de sus pliegues de ajuste: ROC-AUC 0,5 en cada pliegue; la ROC-AUC out-of-fold agrupada se aparta de 0,5 solo porque esa constante cambia entre pliegues (limitación de agrupar predicciones de 5 modelos, D40)"
+        },
+        {
+          "modelo": "rl_defecto",
+          "hiperparametros": {
+            "C": 1.0,
+            "l1_ratio": 0.0,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1056,
+            "brier_calibrado": 0.1046,
+            "brier_por_metodo": {
+              "platt": 0.1049,
+              "isotonica": 0.1046
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6885,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6487,
+              "pr_auc": 0.2757,
+              "brier": 0.1386
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.693,
+              "pr_auc": 0.2041,
+              "brier": 0.0948
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6976,
+              "pr_auc": 0.2258,
+              "brier": 0.1009
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6902,
+              "pr_auc": 0.2609,
+              "brier": 0.1148
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6871,
+              "pr_auc": 0.1709,
+              "brier": 0.0734
+            }
+          ],
+          "roc_auc_media": 0.6833,
+          "roc_auc_desv": 0.0197,
+          "roc_auc_oof": 0.6846,
+          "pr_auc_oof": 0.2302,
+          "brier_oof": 0.1046,
+          "tiempo_s": 29.9
+        },
+        {
+          "modelo": "rl_optimizada",
+          "hiperparametros": {
+            "C": 0.06969807555546856,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "roc_auc_media_busqueda": 0.6919,
+          "roc_auc_media_predeterminado": 0.685,
+          "n_trials": 50,
+          "n_completados": 25,
+          "n_podados": 25,
+          "tiempo_busqueda_s": 164.0,
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.2184,
+            "brier_calibrado": 0.1038,
+            "brier_por_metodo": {
+              "platt": 0.1039,
+              "isotonica": 0.1038
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7013,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6736,
+              "pr_auc": 0.29,
+              "brier": 0.1355
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6995,
+              "pr_auc": 0.2058,
+              "brier": 0.0947
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7064,
+              "pr_auc": 0.2344,
+              "brier": 0.0989
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6894,
+              "pr_auc": 0.253,
+              "brier": 0.1152
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6752,
+              "pr_auc": 0.1648,
+              "brier": 0.0736
+            }
+          ],
+          "roc_auc_media": 0.6888,
+          "roc_auc_desv": 0.0145,
+          "roc_auc_oof": 0.6956,
+          "pr_auc_oof": 0.2368,
+          "brier_oof": 0.1038,
+          "tiempo_oof_calibrado_s": 26.3,
+          "tiempo_s": 190.3,
+          "igual_que": "familia rl (mismo nº de ensayos que cada familia)"
+        }
+      ],
+      "apilamiento": {
+        "base": [
+          "rl",
+          "rf",
+          "gb",
+          "xgb",
+          "lgbm",
+          "catboost",
+          "mlp"
+        ],
+        "por_pliegue": [
+          {
+            "pliegue": 1,
+            "roc_auc": 0.6925,
+            "pr_auc": 0.3304,
+            "brier": 0.1327
+          },
+          {
+            "pliegue": 2,
+            "roc_auc": 0.711,
+            "pr_auc": 0.2198,
+            "brier": 0.0942
+          },
+          {
+            "pliegue": 3,
+            "roc_auc": 0.7126,
+            "pr_auc": 0.2598,
+            "brier": 0.0984
+          },
+          {
+            "pliegue": 4,
+            "roc_auc": 0.6973,
+            "pr_auc": 0.2753,
+            "brier": 0.1142
+          },
+          {
+            "pliegue": 5,
+            "roc_auc": 0.6955,
+            "pr_auc": 0.1853,
+            "brier": 0.0731
+          }
+        ],
+        "roc_auc_media": 0.7018,
+        "roc_auc_desv": 0.0093,
+        "roc_auc_oof": 0.7082,
+        "pr_auc_oof": 0.2535,
+        "brier_oof": 0.1028,
+        "calibracion": "salida del metamodelo logístico, sin calibración adicional",
+        "tiempo_s": 502.4
+      },
+      "mejor_automl": "apilamiento",
+      "contraste_central": {
+        "modelo_a": "apilamiento",
+        "modelo_b": "rl_optimizada",
+        "roc_auc_a": 0.7082,
+        "roc_auc_b": 0.6956,
+        "diferencia": 0.0126,
+        "ic95_bootstrap": [
+          0.0074,
+          0.0177
+        ],
+        "delong_p": 1.179298922582514e-06,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "delong_p_holm": 4.717195690330056e-06,
+        "lectura": "detectable_sin_relevancia"
+      },
+      "parsimonia": {
+        "regla": "no inferioridad (D49-rev)",
+        "mejor": "apilamiento",
+        "margen": 0.02,
+        "n_bootstrap": 2000,
+        "semilla": 42,
+        "candidatos": [
+          {
+            "modelo": "rl",
+            "complejidad": 0,
+            "roc_auc_oof": 0.6956,
+            "perdida": 0.0126,
+            "ic95_bootstrap": [
+              0.0074,
+              0.0177
+            ],
+            "delong_p": 1.179298922582514e-06,
+            "cumple": true
+          },
+          {
+            "modelo": "rf",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6999,
+            "perdida": 0.0083,
+            "ic95_bootstrap": [
+              0.0032,
+              0.0133
+            ],
+            "delong_p": 0.0010636437603184683,
+            "cumple": true
+          },
+          {
+            "modelo": "gb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.6984,
+            "perdida": 0.0098,
+            "ic95_bootstrap": [
+              0.0058,
+              0.0137
+            ],
+            "delong_p": 1.2925891187692375e-06,
+            "cumple": true
+          },
+          {
+            "modelo": "xgb",
+            "complejidad": 1,
+            "roc_auc_oof": 0.7018,
+            "perdida": 0.0064,
+            "ic95_bootstrap": [
+              0.0026,
+              0.0104
+            ],
+            "delong_p": 0.001545403821725426,
+            "cumple": true
+          },
+          {
+            "modelo": "lgbm",
+            "complejidad": 1,
+            "roc_auc_oof": 0.7006,
+            "perdida": 0.0076,
+            "ic95_bootstrap": [
+              0.0042,
+              0.0111
+            ],
+            "delong_p": 1.210874616066221e-05,
+            "cumple": true
+          },
+          {
+            "modelo": "catboost",
+            "complejidad": 1,
+            "roc_auc_oof": 0.698,
+            "perdida": 0.0102,
+            "ic95_bootstrap": [
+              0.0054,
+              0.0151
+            ],
+            "delong_p": 2.3140616401481403e-05,
+            "cumple": true
+          },
+          {
+            "modelo": "mlp",
+            "complejidad": 2,
+            "roc_auc_oof": 0.6816,
+            "perdida": 0.0267,
+            "ic95_bootstrap": [
+              0.02,
+              0.0335
+            ],
+            "delong_p": 3.0347868618285397e-15,
+            "cumple": false
+          },
+          {
+            "modelo": "apilamiento",
+            "complejidad": 3,
+            "roc_auc_oof": 0.7082,
+            "perdida": 0.0,
+            "ic95_bootstrap": [
+              0.0,
+              0.0
+            ],
+            "delong_p": null,
+            "cumple": true
+          }
+        ]
+      },
+      "modelo_desplegado": {
+        "modelo": "rl",
+        "motivo": "D33/D49-rev: rl es el candidato más simple cuya pérdida de ROC-AUC out-of-fold frente a apilamiento tiene límite superior del IC 95 % (0.0177) por debajo de 0.02"
+      },
+      "calibracion": {
+        "metodo": "isotonica",
+        "brier_sin_calibrar": 0.2184,
+        "brier_calibrado": 0.1038,
+        "brier_por_metodo": {
+          "platt": 0.1039,
+          "isotonica": 0.1038
+        },
+        "anidada": true
+      },
+      "punto_operacion_oof": {
+        "umbral": 0.117117,
+        "sensibilidad": 0.7117,
+        "precision": 0.1992,
+        "tasa_alerta": 0.4489,
+        "tasa_falsos_positivos": 0.4111,
+        "matriz_confusion": [
+          [
+            8829,
+            6163
+          ],
+          [
+            621,
+            1533
+          ]
+        ]
+      },
+      "desglose": {
+        "CCC": {
+          "n": 1299,
+          "roc_auc": 0.6865,
+          "umbral": 0.117117,
+          "sensibilidad": 0.9847,
+          "precision": 0.2165,
+          "tasa_alerta": 0.9138,
+          "tasa_falsos_positivos": 0.896,
+          "matriz_confusion": [
+            [
+              108,
+              930
+            ],
+            [
+              4,
+              257
+            ]
+          ]
+        },
+        "resto": {
+          "n": 15847,
+          "roc_auc": 0.6913,
+          "umbral": 0.117117,
+          "sensibilidad": 0.6741,
+          "precision": 0.196,
+          "tasa_alerta": 0.4107,
+          "tasa_falsos_positivos": 0.375,
+          "matriz_confusion": [
+            [
+              8721,
+              5233
+            ],
+            [
+              617,
+              1276
+            ]
+          ]
+        }
+      },
+      "equidad_oof": {
+        "gender": {
+          "subgrupos": {
+            "F": {
+              "n": 7987,
+              "retiros": 935,
+              "retiros_prueba": 426,
+              "sensibilidad": 0.6342,
+              "sensibilidad_ic95": [
+                0.6033,
+                0.6659
+              ],
+              "tasa_falsos_positivos": 0.3267,
+              "tasa_falsos_positivos_ic95": [
+                0.3157,
+                0.3378
+              ],
+              "solo_descriptiva": false
+            },
+            "M": {
+              "n": 9159,
+              "retiros": 1219,
+              "retiros_prueba": 621,
+              "sensibilidad": 0.7711,
+              "sensibilidad_ic95": [
+                0.7466,
+                0.7964
+              ],
+              "tasa_falsos_positivos": 0.486,
+              "tasa_falsos_positivos_ic95": [
+                0.4756,
+                0.497
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.1369,
+          "diferencia_sensibilidad_ic95": [
+            0.0957,
+            0.1735
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1593,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.1442,
+            0.1742
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.1369,
+            "diferencia_sensibilidad_ic95": [
+              0.0957,
+              0.1735
+            ],
+            "diferencia_tasa_falsos_positivos": 0.1593,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.1442,
+              0.1742
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "disability": {
+          "subgrupos": {
+            "N": {
+              "n": 15540,
+              "retiros": 1845,
+              "retiros_prueba": 915,
+              "sensibilidad": 0.7019,
+              "sensibilidad_ic95": [
+                0.6809,
+                0.7237
+              ],
+              "tasa_falsos_positivos": 0.4068,
+              "tasa_falsos_positivos_ic95": [
+                0.3985,
+                0.415
+              ],
+              "solo_descriptiva": false
+            },
+            "Y": {
+              "n": 1606,
+              "retiros": 309,
+              "retiros_prueba": 132,
+              "sensibilidad": 0.7702,
+              "sensibilidad_ic95": [
+                0.7255,
+                0.817
+              ],
+              "tasa_falsos_positivos": 0.4564,
+              "tasa_falsos_positivos_ic95": [
+                0.4301,
+                0.4836
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0683,
+          "diferencia_sensibilidad_ic95": [
+            0.0201,
+            0.1188
+          ],
+          "diferencia_tasa_falsos_positivos": 0.0496,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0222,
+            0.0796
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0683,
+            "diferencia_sensibilidad_ic95": [
+              0.0201,
+              0.1188
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0496,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0222,
+              0.0796
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "age_band": {
+          "subgrupos": {
+            "0-35": {
+              "n": 12023,
+              "retiros": 1547,
+              "retiros_prueba": 713,
+              "sensibilidad": 0.7201,
+              "sensibilidad_ic95": [
+                0.6974,
+                0.7431
+              ],
+              "tasa_falsos_positivos": 0.4361,
+              "tasa_falsos_positivos_ic95": [
+                0.4263,
+                0.445
+              ],
+              "solo_descriptiva": false
+            },
+            "35-55": {
+              "n": 5022,
+              "retiros": 598,
+              "retiros_prueba": 324,
+              "sensibilidad": 0.6906,
+              "sensibilidad_ic95": [
+                0.6531,
+                0.7265
+              ],
+              "tasa_falsos_positivos": 0.3535,
+              "tasa_falsos_positivos_ic95": [
+                0.3393,
+                0.3676
+              ],
+              "solo_descriptiva": false
+            },
+            "55<=": {
+              "n": 101,
+              "retiros": 9,
+              "retiros_prueba": 10,
+              "sensibilidad": 0.6667,
+              "sensibilidad_ic95": [
+                0.3333,
+                1.0
+              ],
+              "tasa_falsos_positivos": 0.3261,
+              "tasa_falsos_positivos_ic95": [
+                0.2336,
+                0.4216
+              ],
+              "solo_descriptiva": true
+            }
+          },
+          "diferencia_sensibilidad": 0.0534,
+          "diferencia_sensibilidad_ic95": [
+            0.0226,
+            0.3897
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1101,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0725,
+            0.2044
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [
+              "55<="
+            ],
+            "diferencia_sensibilidad": 0.0295,
+            "diferencia_sensibilidad_ic95": [
+              0.0013,
+              0.0734
+            ],
+            "diferencia_tasa_falsos_positivos": 0.0826,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0643,
+              0.0997
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        },
+        "imd_band": {
+          "subgrupos": {
+            "0-10%": {
+              "n": 1699,
+              "retiros": 260,
+              "retiros_prueba": 96,
+              "sensibilidad": 0.7154,
+              "sensibilidad_ic95": [
+                0.6609,
+                0.7703
+              ],
+              "tasa_falsos_positivos": 0.4719,
+              "tasa_falsos_positivos_ic95": [
+                0.4457,
+                0.4986
+              ],
+              "solo_descriptiva": false
+            },
+            "10-20%": {
+              "n": 1796,
+              "retiros": 243,
+              "retiros_prueba": 107,
+              "sensibilidad": 0.6584,
+              "sensibilidad_ic95": [
+                0.5992,
+                0.7193
+              ],
+              "tasa_falsos_positivos": 0.4475,
+              "tasa_falsos_positivos_ic95": [
+                0.4228,
+                0.4717
+              ],
+              "solo_descriptiva": false
+            },
+            "20-30%": {
+              "n": 1849,
+              "retiros": 277,
+              "retiros_prueba": 132,
+              "sensibilidad": 0.7509,
+              "sensibilidad_ic95": [
+                0.6982,
+                0.8
+              ],
+              "tasa_falsos_positivos": 0.4288,
+              "tasa_falsos_positivos_ic95": [
+                0.4039,
+                0.4532
+              ],
+              "solo_descriptiva": false
+            },
+            "30-40%": {
+              "n": 1897,
+              "retiros": 237,
+              "retiros_prueba": 110,
+              "sensibilidad": 0.73,
+              "sensibilidad_ic95": [
+                0.6708,
+                0.7881
+              ],
+              "tasa_falsos_positivos": 0.4349,
+              "tasa_falsos_positivos_ic95": [
+                0.4111,
+                0.4586
+              ],
+              "solo_descriptiva": false
+            },
+            "40-50%": {
+              "n": 1669,
+              "retiros": 198,
+              "retiros_prueba": 101,
+              "sensibilidad": 0.6869,
+              "sensibilidad_ic95": [
+                0.6197,
+                0.7488
+              ],
+              "tasa_falsos_positivos": 0.4011,
+              "tasa_falsos_positivos_ic95": [
+                0.376,
+                0.4266
+              ],
+              "solo_descriptiva": false
+            },
+            "50-60%": {
+              "n": 1653,
+              "retiros": 179,
+              "retiros_prueba": 109,
+              "sensibilidad": 0.7486,
+              "sensibilidad_ic95": [
+                0.683,
+                0.8087
+              ],
+              "tasa_falsos_positivos": 0.4043,
+              "tasa_falsos_positivos_ic95": [
+                0.379,
+                0.428
+              ],
+              "solo_descriptiva": false
+            },
+            "60-70%": {
+              "n": 1520,
+              "retiros": 202,
+              "retiros_prueba": 101,
+              "sensibilidad": 0.7228,
+              "sensibilidad_ic95": [
+                0.6575,
+                0.7812
+              ],
+              "tasa_falsos_positivos": 0.3763,
+              "tasa_falsos_positivos_ic95": [
+                0.3499,
+                0.4017
+              ],
+              "solo_descriptiva": false
+            },
+            "70-80%": {
+              "n": 1544,
+              "retiros": 186,
+              "retiros_prueba": 89,
+              "sensibilidad": 0.6935,
+              "sensibilidad_ic95": [
+                0.625,
+                0.7617
+              ],
+              "tasa_falsos_positivos": 0.3895,
+              "tasa_falsos_positivos_ic95": [
+                0.363,
+                0.4147
+              ],
+              "solo_descriptiva": false
+            },
+            "80-90%": {
+              "n": 1483,
+              "retiros": 169,
+              "retiros_prueba": 81,
+              "sensibilidad": 0.6982,
+              "sensibilidad_ic95": [
+                0.6218,
+                0.7679
+              ],
+              "tasa_falsos_positivos": 0.3699,
+              "tasa_falsos_positivos_ic95": [
+                0.3444,
+                0.3952
+              ],
+              "solo_descriptiva": false
+            },
+            "90-100%": {
+              "n": 1412,
+              "retiros": 146,
+              "retiros_prueba": 78,
+              "sensibilidad": 0.6849,
+              "sensibilidad_ic95": [
+                0.6067,
+                0.76
+              ],
+              "tasa_falsos_positivos": 0.3618,
+              "tasa_falsos_positivos_ic95": [
+                0.3348,
+                0.3886
+              ],
+              "solo_descriptiva": false
+            },
+            "faltante": {
+              "n": 624,
+              "retiros": 57,
+              "retiros_prueba": 43,
+              "sensibilidad": 0.7544,
+              "sensibilidad_ic95": [
+                0.6316,
+                0.8571
+              ],
+              "tasa_falsos_positivos": 0.4198,
+              "tasa_falsos_positivos_ic95": [
+                0.3811,
+                0.4599
+              ],
+              "solo_descriptiva": false
+            }
+          },
+          "diferencia_sensibilidad": 0.0959,
+          "diferencia_sensibilidad_ic95": [
+            0.0884,
+            0.2322
+          ],
+          "diferencia_tasa_falsos_positivos": 0.1101,
+          "diferencia_tasa_falsos_positivos_ic95": [
+            0.0875,
+            0.1504
+          ],
+          "sin_solo_descriptiva": {
+            "subgrupos_excluidos": [],
+            "diferencia_sensibilidad": 0.0959,
+            "diferencia_sensibilidad_ic95": [
+              0.0884,
+              0.2322
+            ],
+            "diferencia_tasa_falsos_positivos": 0.1101,
+            "diferencia_tasa_falsos_positivos_ic95": [
+              0.0875,
+              0.1504
+            ]
+          },
+          "metodo_ic_diferencia": "bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual puede quedar cerca del extremo inferior del intervalo"
+        }
+      },
+      "shap": null,
+      "tiempo_s": 5313.6
+    }
+  ],
+  "metricas_test": null,
+  "motivos_null": {
+    "metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3",
+    "momentos.shap": "SHAP y su estabilidad se calculan en la F3, sobre la configuración principal ya fijada tras la salvaguarda de D38"
+  },
+  "predicciones_oof_sha256": {
+    "carpeta": "data/procesado/oof",
+    "exp-2026-10-27-01_semana_0.parquet": "d9badd1addc6024a8c33173e18db76d9167b5dd1642fec161b43d7545702c283",
+    "exp-2026-10-27-01_semana_4.parquet": "ce7d97bbd471dfb2bde696252d2726726db99a1d85b00e10ce064887b46d8d7e",
+    "exp-2026-10-27-01_semana_8.parquet": "daf89bfdef3502e8b2144db914e2dc23fba7dc627de603a87f69a9f7d98843e8",
+    "exp-2026-10-27-01_semana_12.parquet": "6d9746411ec0bd9f1c9aa9baee6f8e819e4275df8e29a31c49928d35e944e005"
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "scikit-learn": "1.9.1",
+    "optuna": "5.0.0",
+    "xgboost": "3.4.1",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2"
+  },
+  "tiempo_ejecucion_s": 24389.6,
+  "figuras": [
+    "figuras/exp-2026-10-27-01_roc_pr_oof.png",
+    "figuras/exp-2026-10-27-01_calibracion_oof.png",
+    "figuras/exp-2026-10-27-01_familias_roc_auc.png"
+  ]
+}
