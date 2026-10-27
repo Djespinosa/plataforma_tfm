@@ -1,7 +1,8 @@
 """Auditoría de equidad (D50): probabilidades igualadas (hardt2016) en el umbral de decisión.
 
 Indicador principal: sensibilidad por subgrupo (igualdad de oportunidades); secundario: tasa de falsos positivos.
-Diferencia entre subgrupos = máxima − mínima. IC bootstrap del 95 % remuestreando matrículas.
+Diferencia entre subgrupos = máxima − mínima, con todos los subgrupos y sin los "solo_descriptiva". IC bootstrap de
+percentiles del 95 % remuestreando matrículas; al ser un máximo menos un mínimo, el estimador está sesgado hacia arriba.
 """
 
 from __future__ import annotations
@@ -11,6 +12,9 @@ import pandas as pd
 
 MINIMO_RETIROS_PRUEBA = 30
 FALTANTE = "faltante"
+METODO_IC_DIFERENCIA = ("bootstrap de percentiles (2,5-97,5) sobre la diferencia máxima − mínima entre subgrupos; el "
+                        "estimador de un máximo menos un mínimo está sesgado hacia arriba, así que la estimación puntual "
+                        "puede quedar cerca del extremo inferior del intervalo")
 
 
 def _tasas(y: np.ndarray, alerta: np.ndarray, grupos: np.ndarray, valores: list) -> tuple[dict, dict]:
@@ -23,8 +27,8 @@ def _tasas(y: np.ndarray, alerta: np.ndarray, grupos: np.ndarray, valores: list)
     return sensibilidad, falsos_positivos
 
 
-def _diferencia(tasas: dict) -> float:
-    valores = [v for v in tasas.values() if not np.isnan(v)]
+def _diferencia(tasas: dict, incluidos: list | None = None) -> float:
+    valores = [v for k, v in tasas.items() if not np.isnan(v) and (incluidos is None or k in incluidos)]
     return max(valores) - min(valores) if len(valores) > 1 else np.nan
 
 
@@ -52,10 +56,14 @@ def auditar(y: np.ndarray, p: np.ndarray, corte: float, atributos: pd.DataFrame,
         valores = sorted(pd.unique(grupos), key=str)
         sens, fpr = _tasas(y, alerta, grupos, valores)
         muestras = [_tasas(y[i], alerta[i], grupos[i], valores) for i in remuestreos]
-        subgrupos = {}
+        subgrupos, inferenciales = {}, []
         for valor in valores:
             en = grupos == valor
-            retiros = int(retiros_prueba.get(atributo, {}).get(valor, 0))
+            if valor not in retiros_prueba.get(atributo, {}):
+                raise KeyError(f"Falta el recuento de retiros en prueba de {atributo} = {valor!r}")
+            retiros = int(retiros_prueba[atributo][valor])
+            if retiros >= MINIMO_RETIROS_PRUEBA:
+                inferenciales.append(valor)
             subgrupos[str(valor)] = {
                 "n": int(en.sum()), "retiros": int(y[en].sum()), "retiros_prueba": retiros,
                 "sensibilidad": _redondear(sens[valor]), "sensibilidad_ic95": _ic([m[0][valor] for m in muestras]),
@@ -69,5 +77,13 @@ def auditar(y: np.ndarray, p: np.ndarray, corte: float, atributos: pd.DataFrame,
             "diferencia_sensibilidad_ic95": _ic([_diferencia(m[0]) for m in muestras]),
             "diferencia_tasa_falsos_positivos": _redondear(_diferencia(fpr)),
             "diferencia_tasa_falsos_positivos_ic95": _ic([_diferencia(m[1]) for m in muestras]),
+            "sin_solo_descriptiva": {
+                "subgrupos_excluidos": [str(v) for v in valores if v not in inferenciales],
+                "diferencia_sensibilidad": _redondear(_diferencia(sens, inferenciales)),
+                "diferencia_sensibilidad_ic95": _ic([_diferencia(m[0], inferenciales) for m in muestras]),
+                "diferencia_tasa_falsos_positivos": _redondear(_diferencia(fpr, inferenciales)),
+                "diferencia_tasa_falsos_positivos_ic95": _ic([_diferencia(m[1], inferenciales) for m in muestras]),
+            },
+            "metodo_ic_diferencia": METODO_IC_DIFERENCIA,
         }
     return salida

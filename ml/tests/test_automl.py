@@ -10,13 +10,13 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.base import clone
+from sklearn.base import BaseEstimator, ClassifierMixin, clone
 from sklearn.metrics import roc_auc_score
 from scipy.stats import norm
 
 from automl.apilamiento import oof_apilamiento
 from automl.busqueda import ESPACIOS, FAMILIAS, PREDETERMINADOS, buscar, construir, sugerir
-from automl.calibracion import elegir_metodo, oof_anidado, punto_operacion, umbral
+from automl.calibracion import METODOS, elegir_metodo, oof_anidado, punto_operacion, umbral
 from automl.comparacion import auc_bootstrap, delong, holm, intervalo, lectura, parsimonia
 from automl.equidad import auditar
 from automl.particion import divisiones
@@ -99,6 +99,12 @@ def test_lectura_en_cuatro_casos():
     assert lectura(0.01, [-0.01, 0.04], 0.2) == "no_concluyente"
 
 
+def test_lectura_con_signo_una_desventaja_no_es_ventaja():
+    assert lectura(-0.05, [-0.07, -0.03], 0.001) == "desventaja_relevante"
+    assert lectura(-0.01, [-0.015, -0.005], 0.001) == "detectable_sin_relevancia"
+    assert lectura(-0.005, [-0.015, 0.01], 0.2) == "equivalencia_practica"
+
+
 def test_parsimonia_por_no_inferioridad():
     rng = np.random.default_rng(6)
     y = rng.integers(0, 2, 4000)
@@ -146,6 +152,49 @@ def test_calibracion_anidada_no_ve_las_etiquetas_del_pliegue_evaluado():
     assert elegir_metodo(y, original)["metodo"] in ("platt", "isotonica")
 
 
+class Espia(ClassifierMixin, BaseEstimator):
+    """Registra los pliegues de las filas con que se ajusta y que predice (columna "pliegue_espia")."""
+
+    def fit(self, X, y):
+        EVENTOS.append(("fit", frozenset(np.asarray(X["pliegue_espia"]))))
+        self.classes_ = np.array([0, 1])
+        return self
+
+    def predict_proba(self, X):
+        EVENTOS.append(("predict", frozenset(np.asarray(X["pliegue_espia"]))))
+        p = 1 / (1 + np.exp(-np.asarray(X["a"], dtype=float)))
+        return np.column_stack([1 - p, p])
+
+    def predict(self, X):  # cross_val_predict lo exige; la calibración usa predict_proba
+        return (np.asarray(X["a"], dtype=float) > 0).astype(int)
+
+
+EVENTOS: list[tuple[str, frozenset]] = []
+
+
+def test_calibrador_de_cada_pliegue_externo_no_usa_filas_de_ese_pliegue():
+    """D54 (ensemble=False): por pliegue externo f, el modelo sin calibrar se ajusta con los otros 4; por método, el
+    calibrador se ajusta con predicciones de las 4 divisiones internas (ninguna con filas de f) y el modelo base se
+    reentrena con los 4 pliegues; solo ese modelo predice f. Con ensemble=True habría 4 predicciones de f sin reajuste."""
+    X, y, pliegue = datos()
+    X = X.assign(pliegue_espia=pliegue.to_numpy(dtype=int))
+    EVENTOS.clear()
+    oof_anidado(Espia(), X, y, pliegue)
+    assert all(tipo == ("fit", "predict")[i % 2] for i, (tipo, _) in enumerate(EVENTOS))  # cada ajuste predice una vez
+    pares = [(EVENTOS[i][1], EVENTOS[i + 1][1]) for i in range(0, len(EVENTOS), 2)]
+    por_externo = 1 + len(METODOS) * 5  # sin calibrar + (4 internas + reentreno con los 4 pliegues) por método
+    assert len(pares) == 5 * por_externo
+    todos = frozenset(range(1, 6))
+    for b in range(5):
+        bloque = pares[b * por_externo:(b + 1) * por_externo]
+        f = next(iter(bloque[0][1]))
+        assert bloque[0] == (todos - {f}, frozenset({f}))
+        for ajuste, prediccion in bloque:
+            assert f not in ajuste  # nada se ajusta con filas de f
+            assert prediccion == {f} or f not in prediccion  # el calibrador solo ve predicciones de otros pliegues
+        assert [par for par in bloque if par[1] == {f}] == [(todos - {f}, frozenset({f}))] * (1 + len(METODOS))
+
+
 def test_calibracion_anidada_usa_divisiones_internas_agrupadas():
     """El calibrador de cada pliegue externo usa como divisiones internas los otros 4 pliegues (no cv=5 sin grupos)."""
     _, _, pliegue = datos()
@@ -189,6 +238,17 @@ def test_columna_sin_valores_no_rompe_ninguna_familia(familia):
     columnas = COLUMNAS | {"numericas": [*COLUMNAS["numericas"], "vacia"]}
     p = construir(familia, {}, **columnas).fit(X, y).predict_proba(X)[:, 1]
     assert np.isfinite(p).all()
+
+
+def test_busqueda_usa_la_semilla_de_los_modelos(monkeypatch):
+    import automl.busqueda as busqueda
+
+    semillas = []
+    original = busqueda.construir
+    monkeypatch.setattr(busqueda, "construir", lambda *a, **k: semillas.append(k["semilla"]) or original(*a, **k))
+    X, y, pliegue = datos(300)
+    busqueda.buscar("rl", X, y, divisiones(pliegue), 2, COLUMNAS, semilla=7, semilla_modelos=13)
+    assert semillas and set(semillas) == {13}
 
 
 def test_busqueda_reproducible_con_la_misma_semilla():
@@ -241,10 +301,22 @@ def test_equidad_tasas_por_subgrupo_y_diferencia_maxima():
     y = np.array([1, 1, 0, 0, 1, 1, 0, 0, 1, 0])
     p = np.array([.9, .1, .8, .2, .9, .9, .1, .1, .1, .1])
     atributos = pd.DataFrame({"gender": ["F", "F", "F", "F", "M", "M", "M", "M", None, None]})
-    resultado = auditar(y, p, 0.5, atributos, {"gender": {"F": 40, "M": 12}}, 50, 42)["gender"]
+    resultado = auditar(y, p, 0.5, atributos, {"gender": {"F": 40, "M": 35, "faltante": 5}}, 50, 42)["gender"]
     f, m, faltante = (resultado["subgrupos"][k] for k in ("F", "M", "faltante"))
     assert (f["n"], f["retiros"], f["sensibilidad"], f["tasa_falsos_positivos"]) == (4, 2, 0.5, 0.5)
     assert (m["sensibilidad"], m["tasa_falsos_positivos"]) == (1.0, 0.0)
     assert faltante["sensibilidad"] == 0.0
     assert resultado["diferencia_sensibilidad"] == 1.0 and resultado["diferencia_tasa_falsos_positivos"] == 0.5
-    assert not f["solo_descriptiva"] and m["solo_descriptiva"] and faltante["solo_descriptiva"]
+    assert not f["solo_descriptiva"] and not m["solo_descriptiva"] and faltante["solo_descriptiva"]
+    # M3: sin el subgrupo solo descriptivo, la diferencia de sensibilidad es la de F frente a M
+    sin = resultado["sin_solo_descriptiva"]
+    assert sin["subgrupos_excluidos"] == ["faltante"]
+    assert sin["diferencia_sensibilidad"] == 0.5 and sin["diferencia_tasa_falsos_positivos"] == 0.5
+    assert "percentiles" in resultado["metodo_ic_diferencia"]
+
+
+def test_equidad_falla_si_falta_un_recuento_de_prueba():
+    y, p = np.array([1, 0, 1, 0]), np.array([.9, .1, .9, .1])
+    atributos = pd.DataFrame({"gender": ["F", "F", "M", "M"]})
+    with pytest.raises(KeyError, match="gender = 'M'"):
+        auditar(y, p, 0.5, atributos, {"gender": {"F": 40}}, 10, 42)

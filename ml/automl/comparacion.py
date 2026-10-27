@@ -78,9 +78,12 @@ def holm(p: list[float]) -> list[float]:
 
 
 def lectura(diferencia: float, ic: list[float], p_holm: float, margen: float = MARGEN, alfa: float = ALFA) -> str:
-    """Lectura en cuatro casos de D49."""
+    """Lectura en cuatro casos de D49, con signo: diferencia = AutoML − RL optimizada. Una desventaja significativa
+    de AutoML ≥ margen es "desventaja_relevante", nunca una ventaja."""
     if p_holm < alfa:
-        return "ventaja_relevante" if abs(diferencia) >= margen else "detectable_sin_relevancia"
+        if diferencia >= margen:
+            return "ventaja_relevante"
+        return "desventaja_relevante" if diferencia <= -margen else "detectable_sin_relevancia"
     if -margen < ic[0] and ic[1] < margen:
         return "equivalencia_practica"
     return "no_concluyente"

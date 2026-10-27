@@ -93,7 +93,10 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
     "equidad_oof": {"gender": {"subgrupos": {"F": {"n": 0, "retiros": 0, "retiros_prueba": 0, "sensibilidad": 0.0, "sensibilidad_ic95": [0.0, 0.0],
                                              "tasa_falsos_positivos": 0.0, "tasa_falsos_positivos_ic95": [0.0, 0.0], "solo_descriptiva": false}},
                                "diferencia_sensibilidad": 0.0, "diferencia_sensibilidad_ic95": [0.0, 0.0],
-                               "diferencia_tasa_falsos_positivos": 0.0, "diferencia_tasa_falsos_positivos_ic95": [0.0, 0.0]}}
+                               "diferencia_tasa_falsos_positivos": 0.0, "diferencia_tasa_falsos_positivos_ic95": [0.0, 0.0],
+                               "sin_solo_descriptiva": {"subgrupos_excluidos": [], "diferencia_sensibilidad": 0.0, "diferencia_sensibilidad_ic95": [0.0, 0.0],
+                                                        "diferencia_tasa_falsos_positivos": 0.0, "diferencia_tasa_falsos_positivos_ic95": [0.0, 0.0]},
+                               "metodo_ic_diferencia": "…"}}
   }],
   "metricas_test": null
 }
@@ -101,16 +104,20 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 
 - `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion_<grupo>`.
   Las variantes que reutilizan hiperparámetros indican `hiperparametros_de: "<id del experimento principal>"`.
-- Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros).
+- Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros). `rl_optimizada` repite
+  los de la familia `rl` y añade `igual_que`.
+- `shap` es `null` con su motivo en `motivos_null` (`"momentos.shap"`) mientras no se calcule (F3).
 - `ablacion_<grupo>`: uno de los 5 grupos de `grupo_ablacion` del catálogo (D46), sobre el modelo `mejor_automl`.
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
   candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
   `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.
-- `lectura` (D49): `ventaja_relevante`, `detectable_sin_relevancia`, `equivalencia_practica` o `no_concluyente`.
+- `lectura` (D49): `ventaja_relevante`, `detectable_sin_relevancia`, `equivalencia_practica` o `no_concluyente`, con el
+  signo de la diferencia (AutoML − RL); una desventaja significativa ≥ 0,02 es `desventaja_relevante`.
   Los IC *bootstrap* son del 95 % sin ajustar; la significación usa `delong_p_holm`.
 - `equidad_oof` (D50): `gender`, `disability`, `age_band`, `imd_band` (con `faltante`); métricas en el umbral de
-  decisión; diferencia = máxima entre subgrupos si hay más de dos. `retiros_prueba` es un recuento descriptivo de 2014J;
-  `solo_descriptiva` = `retiros_prueba < 30`.
+  decisión; diferencia = máxima entre subgrupos si hay más de dos, con todos los subgrupos y en `sin_solo_descriptiva`
+  sin los marcados `solo_descriptiva`; `metodo_ic_diferencia` declara el *bootstrap* de percentiles sobre un máximo menos
+  un mínimo. `retiros_prueba` es un recuento descriptivo de 2014J; `solo_descriptiva` = `retiros_prueba < 30`.
 - `metricas_test` es `null` mientras `evaluado_en_prueba` sea `false`. En la Entrega 3 llevará por momento las mismas
   métricas, el punto de operación en prueba y `plan_evaluacion` (ruta y commit del archivo que declaraba la configuración).
 

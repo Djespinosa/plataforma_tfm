@@ -108,6 +108,11 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       presentación>)` (nunca `cv=5` sin grupos), y se predice *f*. Ninguna probabilidad calibrada *out-of-fold* procede de un
       calibrador que vio esa matrícula. Método elegido por Brier sobre esas predicciones. **No es válido** calibrar con los
       5 pliegues y fijar el umbral sobre esas mismas probabilidades.
+- [ ] **D54** `CalibratedClassifierCV(..., ensemble=False)`: dentro de cada pliegue externo, el calibrador se ajusta con las
+      predicciones *out-of-fold* de las divisiones internas agrupadas y el modelo base se reentrena con los 4 pliegues
+      completos, como el modelo final. Con `ensemble=True` la probabilidad calibrada promediaba 4 modelos entrenados con
+      3/5 de los datos y penalizaba de forma desigual a las familias (MLP −0,025 en la semana 0 de exp-2026-10-26-01).
+      Prueba: `test_calibrador_de_cada_pliegue_externo_no_usa_filas_de_ese_pliegue` (estimador espía).
 - [ ] **D6/D31/D45** Umbral = el que alcanza sensibilidad ≥ 0,70 (exacto, **sin margen**) con máxima precisión sobre las
       probabilidades calibradas *out-of-fold* anidadas. Nunca se ajusta con prueba. Riesgo asumido y declarado: quedar por
       debajo de 0,70 en prueba por variabilidad o cambio de cohorte.
@@ -132,7 +137,8 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       **DeLong** (pareada) y *p* **corregido por Holm** sobre los 4 momentos. Diferencia mínima relevante: **0,02**. Lectura
       que se exporta: significativa y ≥ 0,02 → ventaja relevante; significativa y < 0,02 → detectable sin relevancia práctica;
       no significativa → no concluyente, salvo IC dentro de ±0,02 → equivalencia práctica. Implementación propia de DeLong
-      con prueba unitaria contra un caso conocido.
+      con prueba unitaria contra un caso conocido. La lectura usa el **signo** de *Δ*ₖ (AutoML − RL): una desventaja
+      significativa ≥ 0,02 es `desventaja_relevante`, nunca una ventaja.
 - [ ] **D46** Ablación (solo en validación cruzada) sobre el **mejor modelo del motor** (D44), reutilizando sus
       hiperparámetros (la pérdida es una cota superior de la contribución), por momento, con los 5 grupos de `GRUPOS` en
       `ml/cortes_oulad.py` (columna `grupo_ablacion` del catálogo; reparto de D51-rev): (1) demográficas y matrícula;
@@ -165,7 +171,9 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       matrículas, **retiros**, sensibilidad (indicador principal) y tasa de falsos positivos (secundario) en el umbral de
       decisión, cada una con IC *bootstrap*; diferencia entre subgrupos de cada métrica (la máxima si hay más de dos
       categorías). Métrica **"solo descriptiva"** si el subgrupo tiene < 30 retiros en 2014J (recuento descriptivo,
-      permitido en la Entrega 2).
+      permitido en la Entrega 2). La diferencia se exporta con todos los subgrupos y sin los "solo descriptiva"; su IC es
+      un *bootstrap* de percentiles sobre un máximo menos un mínimo (sesgado hacia arriba) y se declara. Si falta el
+      recuento de prueba de un subgrupo, el cálculo falla (no cuenta 0).
 - [ ] Entrega 2: estabilidad de SHAP (D9) solo con TreeSHAP y si F3 termina a tiempo (permutación: Entrega 3); equidad
       *out-of-fold* (D50).
 

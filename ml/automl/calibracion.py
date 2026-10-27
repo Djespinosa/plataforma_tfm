@@ -3,6 +3,10 @@
 Para cada pliegue externo f, el modelo se ajusta solo con los otros pliegues y se predice f sin calibrar; el
 calibrador (Platt o isotónica) es un CalibratedClassifierCV cuyas divisiones internas son esos otros pliegues
 (agrupadas por presentación), así que ninguna probabilidad calibrada de f procede de un calibrador que vio f.
+
+D54: ensemble=False. El calibrador se ajusta con las predicciones out-of-fold de las divisiones internas y el modelo
+base se reentrena con los 4 pliegues completos, como el modelo final (todo el entrenamiento más su calibrador); con
+ensemble=True la probabilidad calibrada promediaba 4 modelos entrenados con 3/5 de los datos.
 """
 
 from __future__ import annotations
@@ -28,7 +32,8 @@ def oof_anidado(modelo, X: pd.DataFrame, y: pd.Series, pliegue: pd.Series, calib
         if calibrar:
             internas = divisiones(pliegue.iloc[ajuste])
             for nombre, metodo in METODOS.items():
-                calibrado = CalibratedClassifierCV(clone(modelo), method=metodo, cv=internas).fit(Xa, ya)
+                calibrado = CalibratedClassifierCV(clone(modelo), method=metodo, cv=internas,
+                                                   ensemble=False).fit(Xa, ya)
                 salida[nombre][validacion] = calibrado.predict_proba(Xv)[:, 1]
     return salida
 

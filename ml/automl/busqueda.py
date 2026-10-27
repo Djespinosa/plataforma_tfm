@@ -197,14 +197,15 @@ def predecir(modelo, X: pd.DataFrame) -> np.ndarray:
 
 
 def buscar(familia: str, X: pd.DataFrame, y: pd.Series, cv: list, n_trials: int, columnas: dict,
-           semilla: int = 42, n_jobs: int = 1) -> dict:
-    """TPE con poda por mediana; objetivo = media de ROC-AUC en los pliegues de cv."""
+           semilla: int = 42, n_jobs: int = 1, semilla_modelos: int = 42) -> dict:
+    """TPE con poda por mediana; objetivo = media de ROC-AUC en los pliegues de cv. `semilla` es la del muestreador
+    (semillas.optuna) y `semilla_modelos` la de cada modelo ajustado (semillas.modelos)."""
 
     def objetivo(ensayo: optuna.Trial) -> float:
         params = sugerir(ensayo, ESPACIOS[familia])
         valores = []
         for paso, (ajuste, validacion) in enumerate(cv):
-            modelo = construir(familia, params, **columnas, semilla=semilla, n_jobs=n_jobs)
+            modelo = construir(familia, params, **columnas, semilla=semilla_modelos, n_jobs=n_jobs)
             modelo.fit(X.iloc[ajuste], y.iloc[ajuste])
             valores.append(roc_auc_score(y.iloc[validacion], predecir(modelo, X.iloc[validacion])))
             ensayo.report(float(np.mean(valores)), paso)

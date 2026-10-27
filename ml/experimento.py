@@ -56,6 +56,7 @@ DPI = 300
 # los pares; cada serie lleva además su propio estilo de línea (impresión en escala de grises).
 SERIES = [("#2a78d6", "-"), ("#eb6834", "--"), ("#1baf7a", ":")]
 TINTA, TINTA_SECUNDARIA, REJILLA = "#0b0b0b", "#52514e", "#e4e3df"
+NOMBRE_METODO = {"platt": "Platt", "isotonica": "isotónica"}
 
 
 # --- Datos ----------------------------------------------------------------------------------------------------------
@@ -83,10 +84,8 @@ def cargar_entrenamiento(semana: int, cortes: dict) -> pd.DataFrame:
     ruta = PROCESADO / nombre
     if sha256(ruta) != cortes["salidas_sha256"][nombre]:
         raise ValueError(f"{nombre} no coincide con el SHA-256 de {cortes['id']}: regenera los cortes")
-    corte = pd.read_parquet(ruta)
-    entrenamiento = corte[corte["particion"] == "entrenamiento"].reset_index(drop=True)
-    del corte  # 2014J no se usa para modelar en la Entrega 2
-    return entrenamiento
+    # 2014J no se usa para modelar en la Entrega 2: el filtro se aplica al leer y sus filas no llegan a cargarse.
+    return pd.read_parquet(ruta, filters=[("particion", "==", "entrenamiento")]).reset_index(drop=True)
 
 
 def retiros_prueba(cortes: dict, semana: int) -> dict[str, dict]:
@@ -160,7 +159,7 @@ def momento(semana: int, config: dict, cortes: dict, columnas: dict) -> tuple[di
     for familia in config["familias"]:
         print(f"  semana {semana}: {familia}", flush=True)
         resultado = busqueda.buscar(familia, X, y, cv, config["n_trials_por_familia"], columnas,
-                                    semilla=semillas["optuna"], n_jobs=n_jobs)
+                                    semilla=semillas["optuna"], n_jobs=n_jobs, semilla_modelos=semillas["modelos"])
         modelo = busqueda.construir(familia, resultado["hiperparametros"], **columnas, semilla=semillas["modelos"],
                                     n_jobs=n_jobs)
         inicio = time.perf_counter()
@@ -178,7 +177,9 @@ def momento(semana: int, config: dict, cortes: dict, columnas: dict) -> tuple[di
     referencias, p_referencias = calcular_referencias(X, y, pliegue, columnas, semillas["modelos"])
     predicciones |= p_referencias
     if "rl" in predicciones:
-        referencias.append({"modelo": "rl_optimizada", "igual_que": "familia rl (mismo nº de ensayos que cada familia)"})
+        rl = next(f for f in familias if f["modelo"] == "rl")
+        referencias.append(rl | {"modelo": "rl_optimizada",
+                                 "igual_que": "familia rl (mismo nº de ensayos que cada familia)"})
 
     candidatos = list(config["familias"])
     resultado_apilamiento = None
@@ -227,6 +228,7 @@ def momento(semana: int, config: dict, cortes: dict, columnas: dict) -> tuple[di
         "punto_operacion_oof": punto_operacion(y, p_desplegado, corte),
         "desglose": desglose,
         "equidad_oof": equidad,
+        "shap": None,
     }
     oof = pd.DataFrame({"code_module": datos["code_module"], "code_presentation": datos["code_presentation"],
                         "id_student": datos["id_student"], "pliegue": pliegue, "etiqueta": y} |
@@ -289,7 +291,8 @@ def figura_calibracion(resumenes: list[dict], salidas: dict, ruta: Path) -> None
     for ax, resumen in zip(ejes[0], resumenes):
         oof = salidas[resumen["semana"]]
         desplegado = resumen["modelo_desplegado"]["modelo"]
-        curvas = [(f"calibrado ({resumen['calibracion'].get('metodo') or 'metamodelo'})", oof[f"p_{desplegado}"])]
+        metodo = NOMBRE_METODO.get(resumen["calibracion"].get("metodo"), "metamodelo")
+        curvas = [(f"calibrado ({metodo})", oof[f"p_{desplegado}"])]
         if f"p_{desplegado}_sin_calibrar" in oof:
             curvas.insert(0, ("sin calibrar", oof[f"p_{desplegado}_sin_calibrar"]))
         for (etiqueta, p), (color, linea) in zip(curvas, SERIES):
@@ -312,7 +315,7 @@ def figura_familias(resumenes: list[dict], ruta: Path) -> None:
         filas = [(f["modelo"], f["roc_auc_oof"], f["roc_auc_desv"]) for f in resumen["familias"]]
         if resumen["apilamiento"]:
             filas.append(("apilamiento", resumen["apilamiento"]["roc_auc_oof"], resumen["apilamiento"]["roc_auc_desv"]))
-        filas += [(r["modelo"], r["roc_auc_oof"], r["roc_auc_desv"]) for r in resumen["referencias"] if "roc_auc_oof" in r]
+        filas += [(r["modelo"], r["roc_auc_oof"], r["roc_auc_desv"]) for r in resumen["referencias"] if "igual_que" not in r]
         nombres, valores, desv = zip(*filas)
         posiciones = np.arange(len(nombres))
         ax.errorbar(valores, posiciones, xerr=desv, fmt="o", markersize=6, color=SERIES[0][0],
@@ -394,7 +397,7 @@ def main() -> None:
         "configuracion": config,
         "experimento_cortes": config["experimento_cortes"],
         "dataset": {"nombre": "OULAD", "version": "2017", "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
-                    "sha256": cortes["dataset"]["sha256"],
+                    "tablas_usadas": cortes["dataset"]["tablas_usadas"], "sha256": cortes["dataset"]["sha256"],
                     "cortes_sha256": {f"semana_{s}.parquet": cortes["salidas_sha256"][f"semana_{s}.parquet"]
                                       for s in config["semanas"]}},
         "variables": columnas | {"sensibles_excluidas": SENSIBLES if config["sin_sensibles"] else []},
@@ -411,13 +414,17 @@ def main() -> None:
                             "cada pliegue externo (StackingClassifier con cv precalculado)"},
         },
         "tratamiento_desbalance": "class_weight como hiperparámetro (D30); sin sobremuestreo",
-        "calibracion_definicion": "D37: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, isotonic) "
-                                  "con los otros 4 pliegues como divisiones internas; método por Brier out-of-fold; "
-                                  "métricas por pliegue y out-of-fold sobre las probabilidades calibradas",
+        "calibracion_definicion": "D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, "
+                                  "isotonic) con los otros 4 pliegues como divisiones internas y ensemble=False: el "
+                                  "calibrador se ajusta con las predicciones out-of-fold de esas divisiones y el modelo "
+                                  "base se reentrena con los 4 pliegues; método por Brier out-of-fold; métricas por "
+                                  "pliegue y out-of-fold sobre las probabilidades calibradas",
         "evaluado_en_prueba": False,
         "momentos": resumenes,
         "metricas_test": None,
-        "motivos_null": {"metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3"},
+        "motivos_null": {"metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3",
+                         "momentos.shap": "SHAP y su estabilidad se calculan en la F3, sobre la configuración principal "
+                                          "ya fijada tras la salvaguarda de D38"},
         "predicciones_oof_sha256": {"carpeta": OOF.relative_to(RAIZ).as_posix()} | oof_sha256,
         "entorno": versiones_entorno("pandas", "numpy", "sklearn", "optuna", "xgboost", "lightgbm", "catboost",
                                      "scipy", "matplotlib"),
