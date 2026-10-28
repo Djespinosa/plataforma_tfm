@@ -58,21 +58,34 @@ Detalle de capas, convenciones, API y modelo de datos: skill `arquitectura`.
 | Comando | `/cortes`, `/experimento`, `/comparar` | Construir cortes, ejecutar un experimento, comparar modelos |
 | Comando | `/auditar-fuga`, `/exportar-evidencias`, `/test`, `/estado` | Auditar, validar evidencias, probar, ver el avance |
 
-## Estado actual (2026-10-23)
+## Estado actual (2026-10-27)
 
-- Hecho: exploración de OULAD con calidad de datos, versiones y SHA-256 (exp-2026-10-05-02); infraestructura de Claude Code
-  (e1da870); F0 del plan de evidencias de la Entrega 2 (entorno, `rigor-ml` y `CONTRATO.md` al diseño vigente); F1, cortes
-  de OULAD (exp-2026-10-23-01, 99a3e1a); anexo D44-D50, D49-rev y D51-rev incorporados a `rigor-ml` y `CONTRATO.md`;
-  correcciones de la importación (5 grupos de ablación, D28 en `ml/automl/preprocesado.py` con su prueba, conciliación
-  de bajas, recuentos de evaluaciones por estudiante y partición, tipos de actividad de 2014J), 59 pruebas, pendientes
-  de exportar en un experimento `cortes` nuevo.
-- Encargo vigente de la memoria: `../memoria/revisiones/prompt-plataforma-evidencias-e2.md` (puntos 1-38) y su anexo D48-D50.
-- Siguiente: F2 (núcleo `ml/automl/`: pliegues, Pipeline con D28, Optuna con poda, calibración anidada, umbral, apilamiento
-  D48, DeLong, Holm y *bootstrap*, equidad D50), con ensayo cronometrado y parada para confirmar el presupuesto.
-- Las decisiones (a), (b), `is_banked`, variantes y D20 ya están en `decisiones.md` (D34-D39). **Pendiente de registrar:**
-  licencia MIT del código (2026-10-23).
+- Hecho:
+  - Exploración (exp-2026-10-05-02), F0 y F1: cortes de OULAD con las correcciones de la importación (exp-2026-10-23-02, a496076).
+  - F2, núcleo `ml/automl/` (a981755) con D52 y D53 (d36dec0) y D54, calibración anidada con `ensemble=False` (e49f339).
+  - Experimento principal exp-2026-10-27-01: 7 familias, 50 ensayos, solo *out-of-fold*, evidencias en f9861f4. Es la
+    fuente vigente de 5.4 y 5.7.2; exp-2026-10-26-01 queda como registro superado.
+    - Resultados: RL desplegada en los 4 momentos; lecturas D49 de equivalencia práctica (semanas 0, 4 y 8) y detectable
+      sin relevancia (semana 12); ROC-AUC OOF de 0,646-0,708, por debajo de 0,75 (D4).
+    - Auditoría de fuga: apto con observaciones, en `evidencias/pruebas/exp-2026-10-27-01_auditoria.md`.
+  - Preparación de la F3 (193340c):
+    - en cada experimento, hardware, parámetros efectivos de Optuna, nivel de `n_jobs`, definición del Brier sin calibrar y
+      JUnit en `pruebas/`;
+    - OOF con todas las calibraciones;
+    - variante D8 (`ml/variante.py`, `ml/configs/con_sensibles.json`) y nombres one-hot compatibles con XGBoost.
+  - Figuras `_v2` de exp-2026-10-27-01 con coma decimal (285ea62). 115 pruebas en `ml/tests`.
+- En curso: F3 en este orden, como experimentos separados sin nueva búsqueda (D38), cada uno con su id y commit para la
+  memoria:
+  - D8 con sensibles, unas 1,7 h; en el ensayo de la semana 0 el coste máximo es +0,006, lejos de 0,02;
+  - ablación D46 sobre el mejor AutoML, unas 2,3 h, más unos 25 min si se hace también sobre la RL;
+  - D20;
+  - SHAP (D9, D32).
+  - Si la salvaguarda D38 se activa (≥ 0,02), se detiene la F3 y se avisa.
+- Después: modelo final D41 preparado sin evaluar en 2014J; luego API e interfaz mínima.
+- Pendiente de registrar en `decisiones.md`: licencia MIT del código (2026-10-23); la etiqueta `desventaja_relevante`
+  (lectura con signo); observaciones de la auditoría para la memoria (I1-I8).
 - Entorno: `~/.venvs/plataforma_tfm` (fuera de OneDrive), versiones exactas en `requirements.txt`. Ejecutar con
-  `~/.venvs/plataforma_tfm/Scripts/python`. La exploración reproduce exp-2026-10-05-02 idéntica con pandas 3.1.
+  `~/.venvs/plataforma_tfm/Scripts/python`. Las ejecuciones largas las lanza el estudiante en PowerShell.
 
 ## Plan hacia la Entrega 2 (09/11/2026, D17)
 
