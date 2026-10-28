@@ -5,6 +5,7 @@ que se dibujaron. Las predicciones se comprueban contra los SHA-256 que registrÃ
 
 Uso:
     python ml/figuras_experimento.py exp-2026-10-27-01 --sufijo _v2
+    python ml/figuras_experimento.py exp-2026-10-28-01 --sufijo _v2   (variante D8: solo usa el JSON)
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ import pandas as pd
 
 from evidencias import EVIDENCIAS, RAIZ, actualizar_manifest, comprobar_arbol_limpio, sha256
 from experimento import dibujar_figuras, lista_figuras
+import variante
 
 
 def main() -> None:
@@ -38,13 +40,18 @@ def main() -> None:
             raise ValueError(f"{ruta.name} no coincide con el SHA-256 registrado en {args.experimento}")
         salidas[resumen["semana"]] = pd.read_parquet(ruta)
 
-    figuras = lista_figuras(args.experimento, args.sufijo)
+    es_variante = "variante" in experimento
+    figuras = (variante.lista_figuras if es_variante else lista_figuras)(args.experimento, args.sufijo)
     for archivo, _ in figuras:
         if (args.salida / archivo).exists():
             raise FileExistsError(f"{archivo} ya existe: usa otro sufijo")
     (args.salida / "figuras").mkdir(parents=True, exist_ok=True)
-    dibujar_figuras(experimento["momentos"], salidas, args.salida, figuras)
-    nota = f" (redibujada con el commit {commit} desde las predicciones out-of-fold, sin reentrenar)"
+    if es_variante:
+        variante.figura_diferencias(experimento["momentos"], args.salida / figuras[0][0])
+    else:
+        dibujar_figuras(experimento["momentos"], salidas, args.salida, figuras)
+    origen = "el JSON del experimento" if es_variante else "las predicciones out-of-fold"
+    nota = f" (redibujada con el commit {commit} desde {origen}, sin reentrenar)"
     actualizar_manifest(args.salida, datetime.now(), commit, args.experimento,
                         [{"archivo": a, "descripcion": d + nota, "experimento": args.experimento} for a, d in figuras])
     print(f"Figuras de {args.experimento} con sufijo {args.sufijo} en {args.salida} (commit {commit})")

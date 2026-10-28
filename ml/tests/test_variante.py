@@ -72,3 +72,22 @@ def test_salvaguarda_d38_se_activa_desde_el_margen():
     assert regla["activada"]
     assert regla["activadores"] == [{"semana": 8, "comparacion": "apilamiento", "diferencia": 0.02}]
     assert va.salvaguarda([_momento(12, {"rl": 0.01}, 0.021)])["activadores"][0]["comparacion"] == "mejor con − mejor sin"
+
+
+def test_figura_con_eje_x_comun_margen_visible_y_fila_de_mejores(tmp_path, monkeypatch):
+    capturadas = []
+    monkeypatch.setattr(va.plt, "close", capturadas.append)
+    momentos = [
+        {"semana": s, "por_modelo": [{"modelo": "rl", "diferencia": d, "ic95_bootstrap": [d - 0.004, d + 0.004]},
+                                     {"modelo": "mlp", "diferencia": -d, "ic95_bootstrap": [-d - 0.006, -d + 0.006]}],
+         "mejores": {"diferencia": d / 2, "ic95_bootstrap": [d / 2 - 0.003, d / 2 + 0.003]}}
+        for s, d in ((0, 0.003), (4, 0.012))
+    ]
+    ruta = tmp_path / "figura.png"
+    va.figura_diferencias(momentos, ruta)
+    assert ruta.exists()
+    ejes = capturadas[0].axes
+    assert len({ax.get_xlim() for ax in ejes}) == 1
+    izquierda, derecha = ejes[0].get_xlim()
+    assert izquierda < -0.018 and derecha > va.MARGEN
+    assert [t.get_text() for t in ejes[0].get_yticklabels()] == ["rl", "mlp", "mejor con − mejor sin"]

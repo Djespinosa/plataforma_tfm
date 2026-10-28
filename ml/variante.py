@@ -28,6 +28,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib import ticker  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from sklearn.metrics import roc_auc_score  # noqa: E402
@@ -53,6 +54,7 @@ from experimento import (  # noqa: E402
     CALIBRACION_DEFINICION,
     DPI,
     OOF,
+    REJILLA,
     SERIES,
     TINTA,
     TINTA_SECUNDARIA,
@@ -158,23 +160,36 @@ def momento(semana: int, config: dict, principal: dict, cortes: dict, columnas: 
     return resumen, oof
 
 
+def lista_figuras(id_exp: str, sufijo: str = "") -> list[tuple[str, str]]:
+    return [(f"figuras/{id_exp}_coste_excluir_sensibles{sufijo}.png",
+             "Diferencia de ROC-AUC out-of-fold con − sin variables sensibles por modelo y momento, y entre el mejor "
+             "candidato de cada variante (D8, D38)")]
+
+
 def figura_diferencias(momentos: list[dict], ruta: Path) -> None:
-    fig, ejes = plt.subplots(1, len(momentos), figsize=(3.6 * len(momentos), 4), sharey=True, squeeze=False)
+    """Un panel por momento con eje x común: cada candidato y, en la última fila, mejor con − mejor sin."""
+    fig, ejes = plt.subplots(1, len(momentos), figsize=(3.6 * len(momentos), 4.2), sharex=True, sharey=True,
+                             squeeze=False)
     for ax, m in zip(ejes[0], momentos):
         filas = m["por_modelo"]
-        posiciones = np.arange(len(filas))
-        valores = np.array([f["diferencia"] for f in filas])
-        ic = np.array([f["ic95_bootstrap"] for f in filas])
-        ax.errorbar(valores, posiciones, xerr=[valores - ic[:, 0], ic[:, 1] - valores], fmt="o", markersize=6,
-                    color=SERIES[0][0], ecolor=TINTA_SECUNDARIA, elinewidth=1, capsize=0)
+        for posiciones, grupo, marcador, color in ((np.arange(len(filas)), filas, "o", SERIES[0][0]),
+                                                   ([len(filas) + 0.5], [m["mejores"]], "D", TINTA)):
+            valores = np.array([f["diferencia"] for f in grupo])
+            ic = np.array([f["ic95_bootstrap"] for f in grupo])
+            ax.errorbar(valores, posiciones, xerr=[valores - ic[:, 0], ic[:, 1] - valores], fmt=marcador,
+                        markersize=6, color=color, ecolor=TINTA_SECUNDARIA, elinewidth=1, capsize=0)
+        ax.axhline(len(filas) - 0.25, color=REJILLA, linewidth=1.2)
         ax.axvline(0, color=TINTA_SECUNDARIA, linewidth=0.8)
         ax.axvline(MARGEN, color=SERIES[1][0], linewidth=1.2, linestyle="--")
-        ax.set_yticks(posiciones, [f["modelo"] for f in filas])
-        ax.invert_yaxis()
+        ax.set_yticks([*range(len(filas)), len(filas) + 0.5],
+                      [*(f["modelo"] for f in filas), "mejor con − mejor sin"])
         ax.set(title=f"Semana {m['semana']}", xlabel="ROC-AUC con − sin sensibles")
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(0.01))
         _estilo(ax)
+    ejes[0][0].invert_yaxis()
     fig.suptitle("Coste de excluir las variables sensibles (D8): diferencia de ROC-AUC out-of-fold con IC 95 %\n"
-                 "línea discontinua: margen de 0,02 (D38)", color=TINTA, fontsize=10)
+                 "rombo: mejor candidato con − mejor sin; línea discontinua: margen de 0,02 (D38)",
+                 color=TINTA, fontsize=10)
     fig.tight_layout()
     fig.savefig(ruta, dpi=DPI)
     plt.close(fig)
@@ -232,8 +247,7 @@ def main() -> None:
         print(f"semana {semana}: {resumen['tiempo_s']} s", flush=True)
 
     regla = salvaguarda(momentos)
-    figuras = [(f"figuras/{id_exp}_coste_excluir_sensibles.png",
-                "Diferencia de ROC-AUC out-of-fold con − sin variables sensibles por modelo y momento (D8, D38)")]
+    figuras = lista_figuras(id_exp)
     figura_diferencias(momentos, salida / figuras[0][0])
 
     experimento = {
@@ -264,7 +278,9 @@ def main() -> None:
         "salvaguarda_d38": regla,
         "metricas_test": None,
         "motivos_null": {"metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3"},
-        "predicciones_oof_sha256": {"carpeta": OOF.relative_to(RAIZ).as_posix()} | oof_sha256,
+        "predicciones_oof_sha256": {"carpeta": (carpeta_oof.resolve().relative_to(RAIZ)
+                                                if carpeta_oof.resolve().is_relative_to(RAIZ)
+                                                else carpeta_oof.resolve()).as_posix()} | oof_sha256,
         "entorno": versiones_entorno("pandas", "numpy", "pyarrow", "sklearn", "optuna", "xgboost", "lightgbm",
                                      "catboost", "scipy", "matplotlib", "pytest"),
         "hardware": hardware(),
