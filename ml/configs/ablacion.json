@@ -1,0 +1,8 @@
+{
+  "nombre": "ablacion",
+  "variante": "ablacion",
+  "descripcion": "Ablación D46 por los 5 grupos de variables (D51-rev), sin nueva búsqueda: hiperparámetros del experimento principal (D38) para el mejor AutoML (D44) y la RL optimizada desplegada (D49-rev); pérdida = ROC-AUC out-of-fold completo − sin el grupo, cota superior de la contribución; solo validación cruzada.",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "n_bootstrap": 2000,
+  "n_jobs": 8
+}

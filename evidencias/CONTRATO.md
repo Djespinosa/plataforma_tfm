@@ -108,7 +108,7 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 }
 ```
 
-- `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion_<grupo>`.
+- `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion` (D46).
   Las variantes que reutilizan hiperparámetros indican `hiperparametros_de: "<id del experimento principal>"`.
 - `con_sensibles` (D8, `ml/variante.py`): sin búsqueda; `reentrenamiento` y `comparacion` (texto); por momento
   `{semana, n, retiros, mejor_automl_principal, desplegado_principal, por_modelo, mejores, tiempo_s}`. Cada fila de
@@ -121,7 +121,12 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 - Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros). `rl_optimizada` repite
   los de la familia `rl` y añade `igual_que`.
 - `shap` es `null` con su motivo en `motivos_null` (`"momentos.shap"`) mientras no se calcule (F3).
-- `ablacion_<grupo>`: uno de los 5 grupos de `grupo_ablacion` del catálogo (D46), sobre el modelo `mejor_automl`.
+- `ablacion` (D46, `ml/ablacion.py`): sin búsqueda; un solo JSON con los 5 grupos de `grupo_ablacion` del catálogo
+  (`grupos`: nombre y variables de cada uno) y `reentrenamiento` y `comparacion` (texto). Por momento
+  `{semana, n, retiros, modelos, tiempo_s}`; cada elemento de `modelos` es `{papel, modelo, calibracion, grupos}`, con
+  `papel` = `mejor_automl` (D44) o `rl_desplegada` (D49-rev), y cada fila de `grupos` lleva `grupo`,
+  `variables_quitadas`, `roc_auc_completo`, `roc_auc_sin_grupo`, `perdida` (completo − sin el grupo; cota superior de
+  la contribución), `ic95_bootstrap` (pareado), `delong_p` y `tiempo_s`.
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
   candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
   `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.
@@ -140,6 +145,12 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 `experimentos` (ids comparados), `origen_predicciones` (`oof` o `prueba`) y `contrastes`: por semana
 `{modelo_a, modelo_b, roc_auc_a, roc_auc_b, diferencia, delong_p, delong_p_holm, ic95_bootstrap: [inf, sup], n_bootstrap, semilla, lectura}`.
 Holm se aplica sobre los 4 momentos de cada par de modelos comparado.
+
+Con `analisis: "equidad_con_sensibles"` (D8, D50, `ml/equidad_variante.py`), solo descriptivo y sin `contrastes`:
+`metodo` y `lectura` (texto) y, por momento, `{semana, n, retiros, modelo, con, sin}`. `modelo` es el desplegado del
+principal; `con` y `sin` llevan `calibracion`, `punto_operacion_oof` (umbral out-of-fold propio de cada variante, D45)
+y `equidad_oof` con el esquema de D50. `sin` se recalcula desde las predicciones del principal y debe coincidir con su
+JSON.
 
 ## `manifest.json`
 
