@@ -60,6 +60,38 @@ def versiones_entorno(*modulos: str) -> dict:
     }
 
 
+def hardware() -> dict:
+    """Procesador, núcleos y memoria del equipo que ejecuta el experimento, sin su nombre."""
+    import joblib
+
+    cpu = platform.processor()
+    if sys.platform == "win32":
+        import ctypes
+        import winreg
+
+        clave = r"HARDWARE\DESCRIPTION\System\CentralProcessor\0"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, clave) as k:
+            cpu = winreg.QueryValueEx(k, "ProcessorNameString")[0].strip()
+
+        class EstadoMemoria(ctypes.Structure):
+            _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
+                        ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
+                        ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
+                        ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
+                        ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+
+        estado = EstadoMemoria(dwLength=ctypes.sizeof(EstadoMemoria))
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(estado))
+        memoria = estado.ullTotalPhys
+    else:
+        import os
+
+        memoria = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+    return {"procesador": cpu, "nucleos_fisicos": joblib.cpu_count(only_physical_cores=True),
+            "nucleos_logicos": joblib.cpu_count(), "memoria_gb": round(memoria / 2**30, 1),
+            "sistema": f"{platform.system()} {platform.release()}"}
+
+
 def actualizar_manifest(
     salida: Path,
     fecha: datetime,

@@ -93,6 +93,11 @@
       "archivo": "pruebas/exp-2026-10-23-02_antifuga.xml",
       "descripcion": "Pruebas automatizadas anti-fuga de los cortes",
       "experimento": "exp-2026-10-23-02"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-27-01_auditoria.md",
+      "descripcion": "Auditoría de fugas (agente revisor-fuga) de exp-2026-10-27-01 sobre los commits e49f339 y f9861f4: apto con observaciones",
+      "experimento": "exp-2026-10-27-01"
     }
   ],
   "usabilidad": []

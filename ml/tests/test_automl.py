@@ -260,6 +260,31 @@ def test_busqueda_reproducible_con_la_misma_semilla():
     assert a["n_completados"] + a["n_podados"] == 6
 
 
+def test_parametros_efectivos_de_optuna():
+    """Lo que se declara en el experimento coincide con lo que usan el muestreador y el podador de buscar()."""
+    import optuna
+    from optuna.samplers._tpe.sampler import default_gamma, default_weights
+
+    from automl.busqueda import DESCRIPCION_OPTUNA
+
+    declarado = DESCRIPCION_OPTUNA["parametros_muestreador"]
+    muestreador = optuna.samplers.TPESampler(seed=42)
+    estudio = optuna.create_study(direction="maximize", sampler=muestreador)
+    parzen = muestreador._parzen_estimator_parameters
+    assert muestreador._is_multivariate(estudio) is declarado["multivariate"]
+    assert (muestreador._n_startup_trials, muestreador._n_ei_candidates, muestreador._group,
+            muestreador._constant_liar) == (declarado["n_startup_trials"], declarado["n_ei_candidates"],
+                                            declarado["group"], declarado["constant_liar"])
+    assert (parzen.prior_weight, parzen.consider_magic_clip, parzen.consider_endpoints) == (
+        declarado["prior_weight"], declarado["consider_magic_clip"], declarado["consider_endpoints"])
+    assert muestreador._gamma is None and parzen.weights is default_weights  # se resuelve a default_gamma
+    assert [default_gamma(n) for n in (10, 50, 300)] == [1, 5, 25]
+    podador = optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=1)
+    assert {"percentil": podador._percentile, "n_startup_trials": podador._n_startup_trials,
+            "n_warmup_steps": podador._n_warmup_steps, "interval_steps": podador._interval_steps,
+            "n_min_trials": podador._n_min_trials} == DESCRIPCION_OPTUNA["parametros_podador"]
+
+
 @pytest.mark.parametrize("familia", FAMILIAS)
 def test_predeterminados_dentro_del_espacio(familia):
     espacio, valores = ESPACIOS[familia], PREDETERMINADOS[familia]
@@ -320,3 +345,21 @@ def test_equidad_falla_si_falta_un_recuento_de_prueba():
     atributos = pd.DataFrame({"gender": ["F", "F", "M", "M"]})
     with pytest.raises(KeyError, match="gender = 'M'"):
         auditar(y, p, 0.5, atributos, {"gender": {"F": 40}}, 10, 42)
+
+
+@pytest.mark.parametrize("familia", FAMILIAS)
+def test_categorias_sensibles_con_caracteres_especiales(familia):
+    """D8: age_band = "55<=" no rompe ninguna familia (XGBoost no admite "<" en los nombres de columna)."""
+    X, y, _ = datos()
+    X = X.assign(age_band=np.random.default_rng(0).choice(["0-35", "35-55", "55<=", None], len(X)))
+    columnas = COLUMNAS | {"categoricas": ["c", "age_band"]}
+    modelo = construir(familia, PREDETERMINADOS[familia], **columnas).fit(X, y)
+    assert not np.isnan(modelo.predict_proba(X)).any()
+
+
+def test_nombres_one_hot_sin_cambios_en_la_configuracion_principal():
+    from automl.preprocesado import nombre_columna
+
+    assert nombre_columna("age_band", "55<=") == "age_band_55lt="
+    assert nombre_columna("region", "East Anglian Region") == "region_East Anglian Region"
+    assert nombre_columna("imd_band", "0-10%") == "imd_band_0-10%"

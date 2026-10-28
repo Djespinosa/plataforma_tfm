@@ -38,6 +38,15 @@ class DescartarVacias(TransformerMixin, BaseEstimator):
         return self.columnas_
 
 
+def nombre_columna(variable: str, categoria) -> str:
+    """Nombre de la columna one-hot sin los caracteres que XGBoost no admite ([, ] y <), p. ej. age_band = "55<=".
+    Las categorías de la configuración principal no los contienen: sus nombres no cambian."""
+    nombre = f"{variable}_{categoria}"
+    for caracter, sustituto in (("<", "lt"), ("[", "("), ("]", ")")):
+        nombre = nombre.replace(caracter, sustituto)
+    return nombre
+
+
 def codificador(numericas: list[str], categoricas: list[str], imputar_mediana: list[str], escalar: bool) -> ColumnTransformer:
     """Entrada numérica para los modelos.
 
@@ -50,7 +59,7 @@ def codificador(numericas: list[str], categoricas: list[str], imputar_mediana: l
     """
     categorico = make_pipeline(
         SimpleImputer(strategy="constant", fill_value="faltante"),
-        OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+        OneHotEncoder(handle_unknown="ignore", sparse_output=False, feature_name_combiner=nombre_columna),
     )
     if escalar:
         numerico = [("numericas", make_pipeline(SimpleImputer(strategy="median", add_indicator=True), StandardScaler()),

@@ -69,6 +69,10 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       **sin variables sensibles**, así que la ventaja de la variante "con" es una cota inferior. **Salvaguarda:** si aun así
       excluirlas cuesta ≥ 0,02 de ROC-AUC *out-of-fold*, la configuración principal pasa a ser "con" y se repite la búsqueda
       para ella. En D20 la inflación medida también es una cota inferior (la variante con fuga no está optimizada).
+      Implementación de D8: `ml/variante.py` con `ml/configs/con_sensibles.json`; compara por modelo la ROC-AUC
+      *out-of-fold* calibrada con − sin sobre las mismas filas (las "sin" son las OOF del principal, por SHA-256), y la
+      salvaguarda se activa si la diferencia puntual es ≥ 0,02 en algún candidato o entre los mejores de cada variante,
+      en algún momento. El script avisa; no cambia la configuración por su cuenta.
 
 ## 3. AutoML y optimización
 
@@ -77,6 +81,9 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - [ ] Optuna con TPE y poda (valor intermedio = media acumulada tras cada pliegue); métrica objetivo ROC-AUC (**D6**)
       media en los pliegues de D29-rev; se registran `n_trials`, semilla, configuración del muestreador y del podador,
       espacio de búsqueda por modelo y tiempo. La RL optimizada recibe el mismo nº de ensayos que cada familia.
+      Se exportan los parámetros efectivos de TPE y del podador (`test_parametros_efectivos_de_optuna`), el tiempo
+      máximo por búsqueda (ninguno), el nivel al que actúa `n_jobs`, el hardware sin nombre del equipo y el JUnit de
+      todas las pruebas en el commit del experimento.
 - [ ] **D53** Primer ensayo de cada familia = su configuración por defecto (`enqueue_trial`, `PREDETERMINADOS` de
       `ml/automl/busqueda.py`), para que la optimizada nunca quede por debajo de ella en la métrica objetivo (D6 sin
       cambios: media de ROC-AUC de los 5 pliegues, sin calibrar). Los valores por defecto que caen fuera del espacio se

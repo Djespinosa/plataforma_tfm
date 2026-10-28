@@ -1,0 +1,8 @@
+{
+  "nombre": "con_sensibles",
+  "variante": "con_sensibles",
+  "descripcion": "Variante D8 con variables sensibles (gender, disability, age_band, imd_band), sin nueva búsqueda: hiperparámetros del experimento principal (D38), solo validación cruzada; salvaguarda de D38 con margen 0,02.",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "n_bootstrap": 2000,
+  "n_jobs": 8
+}

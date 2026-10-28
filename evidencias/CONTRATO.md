@@ -34,6 +34,9 @@ evidencias/
 
 - `tipo`: `exploracion`, `cortes`, `modelado` o `comparacion`. Si falta (exp-2026-10-05-01 y -02), es `exploracion`.
 - `entorno`: versión de Python y de **cada** biblioteca que usa el script. `dataset.sha256`: de cada archivo de entrada.
+- Experimentos de modelado (desde la F3): `hardware` = `{procesador, nucleos_fisicos, nucleos_logicos, memoria_gb, sistema}`,
+  sin el nombre del equipo; `pruebas` = `{informe: "pruebas/<id>_pruebas.xml", superadas, fallidas, omitidas}`, JUnit de
+  todas las pruebas de `ml/tests` ejecutadas en el commit del experimento antes de modelar (sin `hostname`).
 - Un valor que no se puede calcular se deja en `null` y se añade su motivo en `motivos_null: {"<ruta.del.campo>": "…"}`.
 
 ## `tipo: "exploracion"`
@@ -69,10 +72,13 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   "experimento_cortes": "exp-…",
   "particion": {"estrategia": "temporal", "entrenamiento": "presentaciones anteriores a 2014J (15)", "prueba": "2014J (7)",
                 "validacion": "5 pliegues agrupados por presentación", "semillas": {"optuna": 42, "modelos": 42, "bootstrap": 42}},
-  "automl": {"optimizador": "Optuna", "muestreador": "TPE", "podador": "…", "metrica_objetivo": "roc_auc",
+  "automl": {"optimizador": "Optuna", "muestreador": "TPE", "parametros_muestreador": {"n_startup_trials": 10, "…": "…"},
+             "podador": "…", "parametros_podador": {"…": "…"}, "tiempo_maximo_por_busqueda": "ninguno: …",
+             "n_jobs": {"valor": 8, "nivel": "…"}, "metrica_objetivo": "roc_auc",
              "n_trials_por_familia": 0, "espacios_busqueda": {"lgbm": {"…": "…"}},
              "apilamiento": {"en_busqueda": false, "base": "mejor de cada familia (D48)", "metamodelo": "rl_regularizada", "cv_interna": "agrupada por presentación"}},
   "tratamiento_desbalance": "class_weight como hiperparámetro",
+  "calibracion_definicion": "…", "brier_sin_calibrar_definicion": "…",
   "evaluado_en_prueba": false,
   "momentos": [{
     "semana": 8,
@@ -104,6 +110,14 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 
 - `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion_<grupo>`.
   Las variantes que reutilizan hiperparámetros indican `hiperparametros_de: "<id del experimento principal>"`.
+- `con_sensibles` (D8, `ml/variante.py`): sin búsqueda; `reentrenamiento` y `comparacion` (texto); por momento
+  `{semana, n, retiros, mejor_automl_principal, desplegado_principal, por_modelo, mejores, tiempo_s}`. Cada fila de
+  `por_modelo` lleva los campos de una familia más `roc_auc_con`, `roc_auc_sin`, `diferencia` (con − sin = coste de
+  excluirlas), `ic95_bootstrap` (pareado), `delong_p` y `alcanza_margen` (diferencia ≥ 0,02); `mejores` compara el mejor
+  candidato de cada variante (`mejor_con`, `mejor_sin`). `salvaguarda_d38`: `{regla, margen, activada, activadores}`.
+- Las figuras de un experimento se pueden redibujar desde sus predicciones *out-of-fold* (`ml/figuras_experimento.py`)
+  con un sufijo nuevo (p. ej. `_v2`), sin sobrescribir las anteriores; el manifiesto registra el commit del dibujo.
+  Ejes y etiquetas con coma decimal.
 - Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros). `rl_optimizada` repite
   los de la familia `rl` y añade `igual_que`.
 - `shap` es `null` con su motivo en `motivos_null` (`"momentos.shap"`) mientras no se calcule (F3).

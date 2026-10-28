@@ -25,6 +25,8 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib import ticker  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from sklearn.calibration import calibration_curve  # noqa: E402
@@ -38,13 +40,14 @@ from automl.calibracion import elegir_metodo, oof_anidado, punto_operacion, umbr
 from automl.comparacion import auc_bootstrap, delong, holm, intervalo, lectura, parsimonia  # noqa: E402
 from automl.equidad import auditar  # noqa: E402
 from automl.particion import divisiones  # noqa: E402
-from cortes_oulad import IMPUTAR_MEDIANA, PROCESADO, SENSIBLES  # noqa: E402
+from cortes_oulad import IMPUTAR_MEDIANA, PROCESADO, SENSIBLES, ejecutar_pruebas  # noqa: E402
 from evidencias import (  # noqa: E402
     EVIDENCIAS,
     RAIZ,
     actualizar_manifest,
     comprobar_arbol_limpio,
     escribir_json,
+    hardware,
     sha256,
     siguiente_id,
     versiones_entorno,
@@ -57,6 +60,16 @@ DPI = 300
 SERIES = [("#2a78d6", "-"), ("#eb6834", "--"), ("#1baf7a", ":")]
 TINTA, TINTA_SECUNDARIA, REJILLA = "#0b0b0b", "#52514e", "#e4e3df"
 NOMBRE_METODO = {"platt": "Platt", "isotonica": "isotónica"}
+CALIBRACION_DEFINICION = ("D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, isotonic) con "
+                          "los otros 4 pliegues como divisiones internas y ensemble=False: el calibrador se ajusta con "
+                          "las predicciones out-of-fold de esas divisiones y el modelo base se reentrena con los 4 "
+                          "pliegues; método por Brier out-of-fold; métricas por pliegue y out-of-fold sobre las "
+                          "probabilidades calibradas")
+BRIER_SIN_CALIBRAR_DEFINICION = ("Brier de predict_proba del modelo base tal como sale, sin corregir la prevalencia: "
+                                 "con class_weight 'balanced' (pesos por muestra en xgb y mlp, auto_class_weights en "
+                                 "catboost) el modelo se entrena con las clases reponderadas y sus probabilidades sin "
+                                 "calibrar están desplazadas hacia la clase minoritaria, así que su Brier es mayor que "
+                                 "el de un modelo sin pesos. Se informa; el método se elige solo entre Platt e isotónica")
 
 
 # --- Datos ----------------------------------------------------------------------------------------------------------
@@ -136,6 +149,7 @@ def calcular_referencias(X: pd.DataFrame, y: pd.Series, pliegue: pd.Series, colu
     oof = oof_anidado(rl_defecto(columnas, semilla), X, y, pliegue)
     calibracion = elegir_metodo(y, oof)
     predicciones["ref_rl_defecto"] = oof[calibracion["metodo"]]
+    predicciones |= {f"ref_rl_defecto_{nombre}": p for nombre, p in oof.items()}  # todas, para reproducir el JSON
     referencias.append({"modelo": "rl_defecto", "hiperparametros": busqueda.PREDETERMINADOS["rl"],
                         "calibracion": calibracion,
                         "roc_auc_oof_sin_calibrar": round(roc_auc_score(y, oof["sin_calibrar"]), 4),
@@ -153,7 +167,7 @@ def momento(semana: int, config: dict, cortes: dict, columnas: dict) -> tuple[di
     cv = divisiones(pliegue)
     semillas, n_jobs = config["semillas"], config["n_jobs"]
     predicciones: dict[str, np.ndarray] = {}
-    sin_calibrar: dict[str, np.ndarray] = {}
+    otras: dict[str, np.ndarray] = {}  # sin calibrar y con cada método, para reproducir el JSON desde el parquet
     familias, modelos = [], {}
 
     for familia in config["familias"]:
@@ -166,7 +180,7 @@ def momento(semana: int, config: dict, cortes: dict, columnas: dict) -> tuple[di
         oof = oof_anidado(modelo, X, y, pliegue)
         calibracion = elegir_metodo(y, oof)
         predicciones[familia] = oof[calibracion["metodo"]]
-        sin_calibrar[familia] = oof["sin_calibrar"]
+        otras |= {f"{familia}_{nombre}": p for nombre, p in oof.items()}
         modelos[familia] = modelo
         familias.append({"modelo": familia, **resultado, "calibracion": calibracion,
                          "roc_auc_oof_sin_calibrar": round(roc_auc_score(y, oof["sin_calibrar"]), 4),
@@ -233,13 +247,27 @@ def momento(semana: int, config: dict, cortes: dict, columnas: dict) -> tuple[di
     oof = pd.DataFrame({"code_module": datos["code_module"], "code_presentation": datos["code_presentation"],
                         "id_student": datos["id_student"], "pliegue": pliegue, "etiqueta": y} |
                        {f"p_{nombre}": p for nombre, p in predicciones.items()} |
-                       {f"p_{nombre}_sin_calibrar": p for nombre, p in sin_calibrar.items()})
+                       {f"p_{nombre}": p for nombre, p in otras.items()})
     return resumen, oof
 
 
 # --- Figuras ----------------------------------------------------------------------------------------------------------
 
+class FormatoComa(ticker.ScalarFormatter):
+    """Marcas de los ejes con coma decimal (la memoria está en español)."""
+
+    def __call__(self, x, pos=None):
+        return super().__call__(x, pos).replace(".", ",")
+
+
+def coma(valor: float, decimales: int = 3) -> str:
+    return f"{valor:.{decimales}f}".replace(".", ",")
+
+
 def _estilo(ax) -> None:
+    for eje in (ax.xaxis, ax.yaxis):
+        if type(eje.get_major_formatter()) is ticker.ScalarFormatter:  # no toca las etiquetas de categorías
+            eje.set_major_formatter(FormatoComa())
     ax.grid(color=REJILLA, linewidth=0.8)
     ax.set_axisbelow(True)
     for lado in ("top", "right"):
@@ -269,10 +297,10 @@ def figura_roc_pr(resumenes: list[dict], salidas: dict, ruta: Path) -> None:
             p = oof[f"p_{nombre}"]
             fpr, tpr, _ = roc_curve(y, p)
             precision, sensibilidad, _ = precision_recall_curve(y, p)
-            texto = f"{nombre} ({etiqueta}), AUC {roc_auc_score(y, p):.3f}"
+            texto = f"{nombre} ({etiqueta}), AUC {coma(roc_auc_score(y, p))}"
             ax_roc.plot(fpr, tpr, linea, color=color, linewidth=2, label=texto)
             ax_pr.plot(sensibilidad, precision, linea, color=color, linewidth=2,
-                       label=f"{nombre}, PR-AUC {average_precision_score(y, p):.3f}")
+                       label=f"{nombre}, PR-AUC {coma(average_precision_score(y, p))}")
         ax_roc.plot([0, 1], [0, 1], color=TINTA_SECUNDARIA, linewidth=0.8)
         ax_pr.axhline(y.mean(), color=TINTA_SECUNDARIA, linewidth=0.8)
         ax_roc.set(title=f"Semana {resumen['semana']}", xlabel="Tasa de falsos positivos", ylabel="Sensibilidad")
@@ -309,25 +337,56 @@ def figura_calibracion(resumenes: list[dict], salidas: dict, ruta: Path) -> None
     plt.close(fig)
 
 
+ETIQUETA_FAMILIA = {"rl": "rl (RL optimizada)", "rl_defecto": "rl_defecto (RL por defecto)",
+                    "mayoritaria": "mayoritaria (prevalencia)"}
+
+
 def figura_familias(resumenes: list[dict], ruta: Path) -> None:
-    fig, ejes = plt.subplots(1, len(resumenes), figsize=(3.6 * len(resumenes), 4), sharey=True, squeeze=False)
+    """Candidatos (familias y apilamiento) y referencias con marcas distintas; rl_optimizada no se repite."""
+    fig, ejes = plt.subplots(1, len(resumenes), figsize=(3.6 * len(resumenes), 4.4), sharey=True, squeeze=False)
     for ax, resumen in zip(ejes[0], resumenes):
-        filas = [(f["modelo"], f["roc_auc_oof"], f["roc_auc_desv"]) for f in resumen["familias"]]
-        if resumen["apilamiento"]:
-            filas.append(("apilamiento", resumen["apilamiento"]["roc_auc_oof"], resumen["apilamiento"]["roc_auc_desv"]))
-        filas += [(r["modelo"], r["roc_auc_oof"], r["roc_auc_desv"]) for r in resumen["referencias"] if "igual_que" not in r]
-        nombres, valores, desv = zip(*filas)
-        posiciones = np.arange(len(nombres))
-        ax.errorbar(valores, posiciones, xerr=desv, fmt="o", markersize=6, color=SERIES[0][0],
-                    ecolor=TINTA_SECUNDARIA, elinewidth=1, capsize=0)
-        ax.set_yticks(posiciones, nombres)
+        candidatos = list(resumen["familias"]) + ([resumen["apilamiento"] | {"modelo": "apilamiento"}]
+                                                  if resumen["apilamiento"] else [])
+        referencias = [r for r in resumen["referencias"] if "igual_que" not in r]
+        filas = candidatos + referencias
+        posiciones = np.arange(len(filas))
+        for grupo, inicio, (color, _), marca in ((candidatos, 0, SERIES[0], "o"),
+                                                 (referencias, len(candidatos), SERIES[1], "s")):
+            ax.errorbar([f["roc_auc_oof"] for f in grupo], posiciones[inicio:inicio + len(grupo)],
+                        xerr=[f["roc_auc_desv"] for f in grupo], fmt=marca, markersize=6, color=color,
+                        ecolor=TINTA_SECUNDARIA, elinewidth=1, capsize=0)
+        ax.axhline(len(candidatos) - 0.5, color=TINTA_SECUNDARIA, linewidth=0.8, linestyle=":")
+        mayoritaria = next((i for i, f in enumerate(filas) if f["modelo"] == "mayoritaria"), None)
+        if mayoritaria is not None:
+            f = filas[mayoritaria]
+            ax.annotate(f"{coma(f['roc_auc_oof'])} agrupada; {coma(f['roc_auc_media'], 2)} en cada pliegue (D40)",
+                        (f["roc_auc_oof"], mayoritaria), xytext=(8, 0), textcoords="offset points", va="center",
+                        fontsize=6.5, color=TINTA_SECUNDARIA)
+        ax.set_yticks(posiciones, [ETIQUETA_FAMILIA.get(f["modelo"], f["modelo"]) for f in filas])
         ax.invert_yaxis()
         ax.set(title=f"Semana {resumen['semana']}", xlabel="ROC-AUC out-of-fold")
         _estilo(ax)
+    leyenda = [Line2D([], [], marker="o", linestyle="", color=SERIES[0][0], label="candidato del motor AutoML"),
+               Line2D([], [], marker="s", linestyle="", color=SERIES[1][0], label="referencia")]
+    fig.legend(handles=leyenda, loc="lower center", ncol=2, frameon=False, fontsize=8)
     fig.suptitle("ROC-AUC out-of-fold por familia y referencia (barra: ± desviación entre pliegues)", color=TINTA, fontsize=10)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
     fig.savefig(ruta, dpi=DPI)
     plt.close(fig)
+
+
+def lista_figuras(id_exp: str, sufijo: str = "") -> list[tuple[str, str]]:
+    return [
+        (f"figuras/{id_exp}_roc_pr_oof{sufijo}.png", "Curvas ROC y PR out-of-fold por momento: desplegado, mejor AutoML y RL optimizada"),
+        (f"figuras/{id_exp}_calibracion_oof{sufijo}.png", "Curva de calibración out-of-fold del modelo desplegado por momento"),
+        (f"figuras/{id_exp}_familias_roc_auc{sufijo}.png", "ROC-AUC out-of-fold por familia y referencia, por momento"),
+    ]
+
+
+def dibujar_figuras(resumenes: list[dict], salidas: dict, salida: Path, figuras: list[tuple[str, str]]) -> None:
+    figura_roc_pr(resumenes, salidas, salida / figuras[0][0])
+    figura_calibracion(resumenes, salidas, salida / figuras[1][0])
+    figura_familias(resumenes, salida / figuras[2][0])
 
 
 # --- Principal --------------------------------------------------------------------------------------------------------
@@ -356,6 +415,10 @@ def main() -> None:
     for carpeta in ("experimentos", "figuras"):
         (salida / carpeta).mkdir(parents=True, exist_ok=True)
     id_exp = siguiente_id(salida / "experimentos", fecha)
+    # Pruebas antes de modelar: si falla alguna, no se gastan horas de cómputo ni se exporta nada.
+    (salida / "pruebas").mkdir(parents=True, exist_ok=True)
+    archivo_pruebas = f"pruebas/{id_exp}_pruebas.xml"
+    resultado_pruebas = ejecutar_pruebas(salida / archivo_pruebas)
     carpeta_oof = OOF if salida.resolve() == EVIDENCIAS.resolve() else salida / "oof"
     carpeta_oof.mkdir(parents=True, exist_ok=True)
 
@@ -378,14 +441,8 @@ def main() -> None:
         contraste["delong_p_holm"] = p_holm
         contraste["lectura"] = lectura(contraste["diferencia"], contraste["ic95_bootstrap"], p_holm)
 
-    figuras = [
-        (f"figuras/{id_exp}_roc_pr_oof.png", "Curvas ROC y PR out-of-fold por momento: desplegado, mejor AutoML y RL optimizada"),
-        (f"figuras/{id_exp}_calibracion_oof.png", "Curva de calibración out-of-fold del modelo desplegado por momento"),
-        (f"figuras/{id_exp}_familias_roc_auc.png", "ROC-AUC out-of-fold por familia y referencia, por momento"),
-    ]
-    figura_roc_pr(resumenes, salidas, salida / figuras[0][0])
-    figura_calibracion(resumenes, salidas, salida / figuras[1][0])
-    figura_familias(resumenes, salida / figuras[2][0])
+    figuras = lista_figuras(id_exp)
+    dibujar_figuras(resumenes, salidas, salida, figuras)
 
     experimento = {
         "id": id_exp,
@@ -409,16 +466,14 @@ def main() -> None:
             "espacios_busqueda": busqueda.ESPACIOS,
             "predeterminados": {"valores": busqueda.PREDETERMINADOS, "nota": busqueda.PREDETERMINADOS_NOTA},
             "configuracion_fija": busqueda.CONFIGURACION_FIJA,
+            "n_jobs": {"valor": config["n_jobs"], "nivel": busqueda.NIVEL_N_JOBS},
             "apilamiento": {"en_busqueda": False, "base": "mejor configuración de cada familia (D48)",
                             "metamodelo": METAMODELO, "cv_interna": "divisiones agrupadas por presentación dentro de "
                             "cada pliegue externo (StackingClassifier con cv precalculado)"},
         },
         "tratamiento_desbalance": "class_weight como hiperparámetro (D30); sin sobremuestreo",
-        "calibracion_definicion": "D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, "
-                                  "isotonic) con los otros 4 pliegues como divisiones internas y ensemble=False: el "
-                                  "calibrador se ajusta con las predicciones out-of-fold de esas divisiones y el modelo "
-                                  "base se reentrena con los 4 pliegues; método por Brier out-of-fold; métricas por "
-                                  "pliegue y out-of-fold sobre las probabilidades calibradas",
+        "calibracion_definicion": CALIBRACION_DEFINICION,
+        "brier_sin_calibrar_definicion": BRIER_SIN_CALIBRAR_DEFINICION,
         "evaluado_en_prueba": False,
         "momentos": resumenes,
         "metricas_test": None,
@@ -426,14 +481,18 @@ def main() -> None:
                          "momentos.shap": "SHAP y su estabilidad se calculan en la F3, sobre la configuración principal "
                                           "ya fijada tras la salvaguarda de D38"},
         "predicciones_oof_sha256": {"carpeta": OOF.relative_to(RAIZ).as_posix()} | oof_sha256,
-        "entorno": versiones_entorno("pandas", "numpy", "sklearn", "optuna", "xgboost", "lightgbm", "catboost",
-                                     "scipy", "matplotlib"),
+        "entorno": versiones_entorno("pandas", "numpy", "pyarrow", "sklearn", "optuna", "xgboost", "lightgbm",
+                                     "catboost", "scipy", "matplotlib", "pytest"),
+        "hardware": hardware(),
+        "pruebas": {"informe": archivo_pruebas} | resultado_pruebas,
         "tiempo_ejecucion_s": round(time.perf_counter() - inicio, 1),
         "figuras": [archivo for archivo, _ in figuras],
     }
     escribir_json(salida / "experimentos" / f"{id_exp}.json", experimento)
     actualizar_manifest(salida, fecha, commit, id_exp,
-                        [{"archivo": a, "descripcion": d, "experimento": id_exp} for a, d in figuras])
+                        [{"archivo": a, "descripcion": d, "experimento": id_exp} for a, d in figuras],
+                        [{"archivo": archivo_pruebas, "descripcion": "JUnit de todas las pruebas de ml/tests (núcleo "
+                          "de modelado, anti-fuga y cortes) en el commit del experimento", "experimento": id_exp}])
     print(f"Exportado {id_exp} en {salida} (commit {commit})")
 
 

@@ -238,7 +238,21 @@ DESCRIPCION_OPTUNA = {
     "optimizador": "Optuna", "version": optuna.__version__,
     "muestreador": "TPESampler (semilla de la configuración, parámetros por defecto); primer ensayo encolado con la "
                    "configuración por defecto de la familia",
+    # Valores efectivos de los parámetros por defecto de Optuna 5.0.0 para un objetivo único (los None de la firma se
+    # resuelven dentro del muestreador); test_parametros_efectivos_de_optuna los contrasta con los objetos.
+    "parametros_muestreador": {
+        "n_startup_trials": 10, "n_ei_candidates": 24, "multivariate": True, "group": False, "constant_liar": True,
+        "prior_weight": 1.0, "consider_magic_clip": True, "consider_endpoints": False,
+        "gamma": "default_gamma: min(ceil(0,1·n), 25)",
+        "weights": "default_weights: 1 para los 25 ensayos más recientes y rampa lineal para los anteriores",
+    },
     "podador": "MedianPruner(n_startup_trials=5, n_warmup_steps=1); valor intermedio = media acumulada de ROC-AUC "
                "tras cada pliegue",
+    "parametros_podador": {"percentil": 50.0, "n_startup_trials": 5, "n_warmup_steps": 1, "interval_steps": 1,
+                           "n_min_trials": 1},
+    "tiempo_maximo_por_busqueda": "ninguno: cada búsqueda termina al completar n_trials (timeout=None)",
     "metrica_objetivo": "roc_auc (media de los 5 pliegues agrupados por presentación)",
 }
+NIVEL_N_JOBS = ("n_jobs actúa dentro de cada modelo: hilos de rf, xgb, lgbm y catboost. Los ensayos de Optuna, los "
+                "pliegues, la calibración y el apilamiento se ejecutan en serie. rl (liblinear) usa un hilo; gb "
+                "(OpenMP) y mlp (BLAS de numpy) usan el paralelismo interno de su biblioteca, que n_jobs no controla")
