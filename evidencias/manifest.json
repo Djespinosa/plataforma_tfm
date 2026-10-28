@@ -1,13 +1,14 @@
 {
-  "generado": "2026-10-27T20:07:15",
-  "commit": "193340c",
+  "generado": "2026-10-28T09:38:45",
+  "commit": "20ebcfa",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
     "experimentos/exp-2026-10-23-01.json",
     "experimentos/exp-2026-10-23-02.json",
     "experimentos/exp-2026-10-26-01.json",
-    "experimentos/exp-2026-10-27-01.json"
+    "experimentos/exp-2026-10-27-01.json",
+    "experimentos/exp-2026-10-28-01.json"
   ],
   "figuras": [
     {
@@ -94,6 +95,11 @@
       "archivo": "figuras/exp-2026-10-27-01_familias_roc_auc_v2.png",
       "descripcion": "ROC-AUC out-of-fold por familia y referencia, por momento (redibujada con el commit 193340c desde las predicciones out-of-fold, sin reentrenar)",
       "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-28-01_coste_excluir_sensibles.png",
+      "descripcion": "Diferencia de ROC-AUC out-of-fold con − sin variables sensibles por modelo y momento (D8, D38)",
+      "experimento": "exp-2026-10-28-01"
     }
   ],
   "capturas": [],
@@ -113,6 +119,16 @@
       "archivo": "pruebas/exp-2026-10-27-01_auditoria.md",
       "descripcion": "Auditoría de fugas (agente revisor-fuga) de exp-2026-10-27-01 sobre los commits e49f339 y f9861f4: apto con observaciones",
       "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-28-01_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de ml/tests en el commit del experimento",
+      "experimento": "exp-2026-10-28-01"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-28-01_auditoria.md",
+      "descripcion": "Auditoría de fugas (agente revisor-fuga) de exp-2026-10-28-01 sobre el commit 20ebcfa: apto con observaciones",
+      "experimento": "exp-2026-10-28-01"
     }
   ],
   "usabilidad": []

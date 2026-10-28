@@ -1,0 +1,2443 @@
+{
+  "id": "exp-2026-10-28-01",
+  "tipo": "modelado",
+  "fecha": "2026-10-28T09:38:45",
+  "commit": "20ebcfa",
+  "descripcion": "Variante D8 con variables sensibles (gender, disability, age_band, imd_band), sin nueva búsqueda: hiperparámetros del experimento principal (D38), solo validación cruzada; salvaguarda de D38 con margen 0,02. Configuración: ml/configs/con_sensibles.json.",
+  "variante": "con_sensibles",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "configuracion": {
+    "nombre": "con_sensibles",
+    "variante": "con_sensibles",
+    "descripcion": "Variante D8 con variables sensibles (gender, disability, age_band, imd_band), sin nueva búsqueda: hiperparámetros del experimento principal (D38), solo validación cruzada; salvaguarda de D38 con margen 0,02.",
+    "hiperparametros_de": "exp-2026-10-27-01",
+    "n_bootstrap": 2000,
+    "n_jobs": 8
+  },
+  "experimento_cortes": "exp-2026-10-23-02",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    },
+    "cortes_sha256": {
+      "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c",
+      "semana_4.parquet": "1678b4c811fc1e676d757cae2eb782c38214c8b1aca27ae5912e0744217ee1ee",
+      "semana_8.parquet": "1fba8c215aa58b96b49096c36c69c52fce38ca755995cceccdc287c545e4f76e",
+      "semana_12.parquet": "aea7eba703e29f0412746b681fa91226e88942059e0d75e890028640029ad8cf"
+    }
+  },
+  "variables": {
+    "numericas": [
+      "module_presentation_length",
+      "num_of_prev_attempts",
+      "studied_credits",
+      "date_registration",
+      "falta_date_registration",
+      "clics_total",
+      "dias_activos",
+      "clics_dataplus",
+      "clics_dualpane",
+      "clics_externalquiz",
+      "clics_folder",
+      "clics_forumng",
+      "clics_glossary",
+      "clics_homepage",
+      "clics_oucollaborate",
+      "clics_oucontent",
+      "clics_ouelluminate",
+      "clics_ouwiki",
+      "clics_page",
+      "clics_questionnaire",
+      "clics_quiz",
+      "clics_repeatactivity",
+      "clics_resource",
+      "clics_sharedsubpage",
+      "clics_subpage",
+      "clics_url",
+      "clics_ventana_1",
+      "clics_ventana_2",
+      "clics_ventana_3",
+      "clics_ventana_4",
+      "proporcion_dias_activos_28d",
+      "sin_actividad",
+      "dias_desde_ultima_actividad",
+      "tendencia_4s",
+      "cv_clics_4s",
+      "percentil_clics_total_cohorte",
+      "percentil_dias_activos_cohorte",
+      "percentil_clics_ventana_1_cohorte",
+      "n_evaluaciones_vencidas",
+      "n_entregadas",
+      "proporcion_entregadas",
+      "antelacion_media",
+      "n_entregas_tardias",
+      "n_cma_calificadas",
+      "nota_media_cma",
+      "n_convalidadas",
+      "nota_media_convalidada"
+    ],
+    "categoricas": [
+      "code_module",
+      "tipo_presentacion",
+      "gender",
+      "region",
+      "highest_education",
+      "imd_band",
+      "age_band",
+      "disability"
+    ],
+    "imputar_mediana": [
+      "date_registration"
+    ],
+    "sensibles_incluidas": [
+      "gender",
+      "disability",
+      "age_band",
+      "imd_band"
+    ]
+  },
+  "particion": {
+    "estrategia": "temporal",
+    "entrenamiento": "presentaciones anteriores a 2014J (15)",
+    "prueba": "2014J (7)",
+    "validacion": "5 pliegues agrupados por presentación (D29-rev)",
+    "semillas": {
+      "optuna": 42,
+      "modelos": 42,
+      "bootstrap": 42
+    }
+  },
+  "reentrenamiento": "sin nueva búsqueda (D38): hiperparámetros de cada familia y momento tomados de exp-2026-10-27-01; mismos pliegues, filas y semillas; apilamiento (D48) con los modelos de la variante. La ventaja de 'con' es una cota inferior (búsqueda hecha sin sensibles)",
+  "comparacion": "por modelo, ROC-AUC out-of-fold calibrada con − sin sensibles sobre las mismas filas; las predicciones 'sin' son las de exp-2026-10-27-01 (SHA-256 comprobado); IC bootstrap pareado del 95 % sin ajustar y p de DeLong, que solo se informa",
+  "calibracion_definicion": "D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, isotonic) con los otros 4 pliegues como divisiones internas y ensemble=False: el calibrador se ajusta con las predicciones out-of-fold de esas divisiones y el modelo base se reentrena con los 4 pliegues; método por Brier out-of-fold; métricas por pliegue y out-of-fold sobre las probabilidades calibradas",
+  "brier_sin_calibrar_definicion": "Brier de predict_proba del modelo base tal como sale, sin corregir la prevalencia: con class_weight 'balanced' (pesos por muestra en xgb y mlp, auto_class_weights en catboost) el modelo se entrena con las clases reponderadas y sus probabilidades sin calibrar están desplazadas hacia la clase minoritaria, así que su Brier es mayor que el de un modelo sin pesos. Se informa; el método se elige solo entre Platt e isotónica",
+  "evaluado_en_prueba": false,
+  "momentos": [
+    {
+      "semana": 0,
+      "n": 19023,
+      "retiros": 4111,
+      "mejor_automl_principal": "apilamiento",
+      "desplegado_principal": "rl",
+      "por_modelo": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 52.400505743603105,
+            "l1_ratio": 1.0,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1615,
+            "brier_calibrado": 0.1614,
+            "brier_por_metodo": {
+              "platt": 0.1617,
+              "isotonica": 0.1614
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6547,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6492,
+              "pr_auc": 0.3788,
+              "brier": 0.1862
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5871,
+              "pr_auc": 0.2392,
+              "brier": 0.1492
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6916,
+              "pr_auc": 0.3522,
+              "brier": 0.1543
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6185,
+              "pr_auc": 0.3302,
+              "brier": 0.1817
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6868,
+              "pr_auc": 0.265,
+              "brier": 0.1295
+            }
+          ],
+          "roc_auc_media": 0.6466,
+          "roc_auc_desv": 0.0447,
+          "roc_auc_oof": 0.6514,
+          "pr_auc_oof": 0.3264,
+          "brier_oof": 0.1614,
+          "tiempo_s": 214.4,
+          "roc_auc_con": 0.6514,
+          "roc_auc_sin": 0.6456,
+          "diferencia": 0.0058,
+          "ic95_bootstrap": [
+            0.0014,
+            0.0106
+          ],
+          "delong_p": 0.010824538643899477,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 324,
+            "max_depth": 7,
+            "min_samples_leaf": 44,
+            "max_features": 0.5,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1639,
+            "brier_calibrado": 0.1642,
+            "brier_por_metodo": {
+              "platt": 0.1643,
+              "isotonica": 0.1642
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6286,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6272,
+              "pr_auc": 0.3514,
+              "brier": 0.1881
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.586,
+              "pr_auc": 0.226,
+              "brier": 0.15
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6802,
+              "pr_auc": 0.3294,
+              "brier": 0.1571
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5863,
+              "pr_auc": 0.3051,
+              "brier": 0.1865
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6336,
+              "pr_auc": 0.2284,
+              "brier": 0.1324
+            }
+          ],
+          "roc_auc_media": 0.6227,
+          "roc_auc_desv": 0.0391,
+          "roc_auc_oof": 0.621,
+          "pr_auc_oof": 0.2955,
+          "brier_oof": 0.1642,
+          "tiempo_s": 117.7,
+          "roc_auc_con": 0.621,
+          "roc_auc_sin": 0.6195,
+          "diferencia": 0.0016,
+          "ic95_bootstrap": [
+            -0.0011,
+            0.0043
+          ],
+          "delong_p": 0.27830380605918514,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.016339712054886612,
+            "max_iter": 420,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 29,
+            "l2_regularization": 2.376261476968747e-06,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2208,
+            "brier_calibrado": 0.1625,
+            "brier_por_metodo": {
+              "platt": 0.1625,
+              "isotonica": 0.1629
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6456,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6452,
+              "pr_auc": 0.3874,
+              "brier": 0.1861
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5953,
+              "pr_auc": 0.2446,
+              "brier": 0.1493
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6888,
+              "pr_auc": 0.3535,
+              "brier": 0.1554
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6,
+              "pr_auc": 0.3255,
+              "brier": 0.1847
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6695,
+              "pr_auc": 0.2624,
+              "brier": 0.1303
+            }
+          ],
+          "roc_auc_media": 0.6398,
+          "roc_auc_desv": 0.0415,
+          "roc_auc_oof": 0.6394,
+          "pr_auc_oof": 0.3167,
+          "brier_oof": 0.1625,
+          "tiempo_s": 155.4,
+          "roc_auc_con": 0.6394,
+          "roc_auc_sin": 0.6349,
+          "diferencia": 0.0045,
+          "ic95_bootstrap": [
+            0.0016,
+            0.0076
+          ],
+          "delong_p": 0.0029177917349921187,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 483,
+            "learning_rate": 0.01610536775406386,
+            "max_depth": 3,
+            "min_child_weight": 40.71248741901085,
+            "subsample": 0.5220699377544697,
+            "colsample_bytree": 0.7219922085005973,
+            "reg_lambda": 1.0681069643168892,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1619,
+            "brier_calibrado": 0.1625,
+            "brier_por_metodo": {
+              "platt": 0.1625,
+              "isotonica": 0.1625
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6457,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6496,
+              "pr_auc": 0.3927,
+              "brier": 0.1847
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.596,
+              "pr_auc": 0.2515,
+              "brier": 0.1479
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6903,
+              "pr_auc": 0.3577,
+              "brier": 0.1561
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5988,
+              "pr_auc": 0.3237,
+              "brier": 0.1858
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6805,
+              "pr_auc": 0.2661,
+              "brier": 0.1306
+            }
+          ],
+          "roc_auc_media": 0.643,
+          "roc_auc_desv": 0.0443,
+          "roc_auc_oof": 0.639,
+          "pr_auc_oof": 0.3236,
+          "brier_oof": 0.1625,
+          "tiempo_s": 59.5,
+          "roc_auc_con": 0.639,
+          "roc_auc_sin": 0.6342,
+          "diferencia": 0.0048,
+          "ic95_bootstrap": [
+            0.002,
+            0.0078
+          ],
+          "delong_p": 0.0011931223018181415,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 143,
+            "learning_rate": 0.021395553430911693,
+            "num_leaves": 221,
+            "min_child_samples": 275,
+            "subsample": 0.571592409811714,
+            "colsample_bytree": 0.4412847943477749,
+            "reg_lambda": 0.028376059115978125,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2202,
+            "brier_calibrado": 0.1631,
+            "brier_por_metodo": {
+              "platt": 0.1631,
+              "isotonica": 0.1644
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6395,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6356,
+              "pr_auc": 0.3682,
+              "brier": 0.1874
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5904,
+              "pr_auc": 0.2325,
+              "brier": 0.1501
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6875,
+              "pr_auc": 0.356,
+              "brier": 0.1556
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.5956,
+              "pr_auc": 0.3219,
+              "brier": 0.1852
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6609,
+              "pr_auc": 0.2615,
+              "brier": 0.1305
+            }
+          ],
+          "roc_auc_media": 0.634,
+          "roc_auc_desv": 0.0417,
+          "roc_auc_oof": 0.6343,
+          "pr_auc_oof": 0.3098,
+          "brier_oof": 0.1631,
+          "tiempo_s": 21.5,
+          "roc_auc_con": 0.6343,
+          "roc_auc_sin": 0.6352,
+          "diferencia": -0.0009,
+          "ic95_bootstrap": [
+            -0.0042,
+            0.0024
+          ],
+          "delong_p": 0.5913454721253528,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 565,
+            "learning_rate": 0.021187955264867213,
+            "depth": 6,
+            "l2_leaf_reg": 19.82127681887461,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1616,
+            "brier_calibrado": 0.1621,
+            "brier_por_metodo": {
+              "platt": 0.1621,
+              "isotonica": 0.1621
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6496,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6572,
+              "pr_auc": 0.4,
+              "brier": 0.1839
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.597,
+              "pr_auc": 0.2648,
+              "brier": 0.1483
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6889,
+              "pr_auc": 0.3597,
+              "brier": 0.1555
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6073,
+              "pr_auc": 0.3309,
+              "brier": 0.1853
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6871,
+              "pr_auc": 0.2747,
+              "brier": 0.13
+            }
+          ],
+          "roc_auc_media": 0.6475,
+          "roc_auc_desv": 0.0434,
+          "roc_auc_oof": 0.643,
+          "pr_auc_oof": 0.3282,
+          "brier_oof": 0.1621,
+          "tiempo_s": 270.6,
+          "roc_auc_con": 0.643,
+          "roc_auc_sin": 0.6375,
+          "diferencia": 0.0055,
+          "ic95_bootstrap": [
+            0.0023,
+            0.0091
+          ],
+          "delong_p": 0.0008500654956599434,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "128-64",
+            "alpha": 0.0026578471048195754,
+            "learning_rate_init": 0.0013820249832880286,
+            "batch_size": 256,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1645,
+            "brier_calibrado": 0.1645,
+            "brier_por_metodo": {
+              "platt": 0.1647,
+              "isotonica": 0.1645
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6339,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6302,
+              "pr_auc": 0.3518,
+              "brier": 0.1903
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5856,
+              "pr_auc": 0.2364,
+              "brier": 0.152
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6708,
+              "pr_auc": 0.3269,
+              "brier": 0.1585
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6111,
+              "pr_auc": 0.321,
+              "brier": 0.185
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6642,
+              "pr_auc": 0.2506,
+              "brier": 0.1302
+            }
+          ],
+          "roc_auc_media": 0.6324,
+          "roc_auc_desv": 0.0358,
+          "roc_auc_oof": 0.6227,
+          "pr_auc_oof": 0.2921,
+          "brier_oof": 0.1645,
+          "tiempo_s": 139.3,
+          "roc_auc_con": 0.6227,
+          "roc_auc_sin": 0.6406,
+          "diferencia": -0.0179,
+          "ic95_bootstrap": [
+            -0.0241,
+            -0.0116
+          ],
+          "delong_p": 5.778093855378548e-08,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "apilamiento",
+          "base": [
+            "rl",
+            "rf",
+            "gb",
+            "xgb",
+            "lgbm",
+            "catboost",
+            "mlp"
+          ],
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6552,
+              "pr_auc": 0.3966,
+              "brier": 0.1844
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.5938,
+              "pr_auc": 0.2572,
+              "brier": 0.1494
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6915,
+              "pr_auc": 0.3559,
+              "brier": 0.155
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6161,
+              "pr_auc": 0.3402,
+              "brier": 0.1825
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6913,
+              "pr_auc": 0.2799,
+              "brier": 0.129
+            }
+          ],
+          "roc_auc_media": 0.6496,
+          "roc_auc_desv": 0.0441,
+          "roc_auc_oof": 0.6513,
+          "pr_auc_oof": 0.3286,
+          "brier_oof": 0.1614,
+          "tiempo_s": 421.3,
+          "roc_auc_con": 0.6513,
+          "roc_auc_sin": 0.6507,
+          "diferencia": 0.0005,
+          "ic95_bootstrap": [
+            -0.0035,
+            0.0047
+          ],
+          "delong_p": 0.7862354719486382,
+          "alcanza_margen": false
+        }
+      ],
+      "mejores": {
+        "mejor_con": "rl",
+        "mejor_sin": "apilamiento",
+        "roc_auc_con": 0.6514,
+        "roc_auc_sin": 0.6507,
+        "diferencia": 0.0007,
+        "ic95_bootstrap": [
+          -0.0039,
+          0.0059
+        ],
+        "delong_p": 0.7722003382108525,
+        "alcanza_margen": false
+      },
+      "tiempo_s": 1543.2
+    },
+    {
+      "semana": 4,
+      "n": 18304,
+      "retiros": 3320,
+      "mejor_automl_principal": "catboost",
+      "desplegado_principal": "rl",
+      "por_modelo": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 0.0024898812812146156,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2165,
+            "brier_calibrado": 0.1387,
+            "brier_por_metodo": {
+              "platt": 0.1387,
+              "isotonica": 0.139
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.689,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6789,
+              "pr_auc": 0.3983,
+              "brier": 0.1732
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6407,
+              "pr_auc": 0.2713,
+              "brier": 0.1297
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.713,
+              "pr_auc": 0.3402,
+              "brier": 0.1328
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7142,
+              "pr_auc": 0.4067,
+              "brier": 0.1506
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6845,
+              "pr_auc": 0.2357,
+              "brier": 0.1043
+            }
+          ],
+          "roc_auc_media": 0.6863,
+          "roc_auc_desv": 0.0301,
+          "roc_auc_oof": 0.6817,
+          "pr_auc_oof": 0.3238,
+          "brier_oof": 0.1387,
+          "tiempo_s": 19.3,
+          "roc_auc_con": 0.6817,
+          "roc_auc_sin": 0.6775,
+          "diferencia": 0.0042,
+          "ic95_bootstrap": [
+            0.0024,
+            0.006
+          ],
+          "delong_p": 4.002282917209863e-06,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 462,
+            "max_depth": 7,
+            "min_samples_leaf": 94,
+            "max_features": 0.5,
+            "class_weight": "balanced_subsample"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2101,
+            "brier_calibrado": 0.1397,
+            "brier_por_metodo": {
+              "platt": 0.1397,
+              "isotonica": 0.14
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6802,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6738,
+              "pr_auc": 0.39,
+              "brier": 0.1717
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6329,
+              "pr_auc": 0.2533,
+              "brier": 0.1309
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6988,
+              "pr_auc": 0.3288,
+              "brier": 0.1324
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6915,
+              "pr_auc": 0.3482,
+              "brier": 0.1552
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6839,
+              "pr_auc": 0.2463,
+              "brier": 0.1042
+            }
+          ],
+          "roc_auc_media": 0.6762,
+          "roc_auc_desv": 0.0259,
+          "roc_auc_oof": 0.6717,
+          "pr_auc_oof": 0.3167,
+          "brier_oof": 0.1397,
+          "tiempo_s": 216.4,
+          "roc_auc_con": 0.6717,
+          "roc_auc_sin": 0.6701,
+          "diferencia": 0.0016,
+          "ic95_bootstrap": [
+            0.0006,
+            0.0027
+          ],
+          "delong_p": 0.0026152294040945215,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.012164240821175768,
+            "max_iter": 383,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 272,
+            "l2_regularization": 0.02827313267807227,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2111,
+            "brier_calibrado": 0.1389,
+            "brier_por_metodo": {
+              "platt": 0.1389,
+              "isotonica": 0.1396
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6882,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6652,
+              "pr_auc": 0.3955,
+              "brier": 0.1721
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6464,
+              "pr_auc": 0.281,
+              "brier": 0.1296
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7075,
+              "pr_auc": 0.317,
+              "brier": 0.1322
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7031,
+              "pr_auc": 0.3568,
+              "brier": 0.1529
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6845,
+              "pr_auc": 0.2409,
+              "brier": 0.1043
+            }
+          ],
+          "roc_auc_media": 0.6813,
+          "roc_auc_desv": 0.0257,
+          "roc_auc_oof": 0.6801,
+          "pr_auc_oof": 0.3161,
+          "brier_oof": 0.1389,
+          "tiempo_s": 198.8,
+          "roc_auc_con": 0.6801,
+          "roc_auc_sin": 0.6769,
+          "diferencia": 0.0032,
+          "ic95_bootstrap": [
+            0.0012,
+            0.0052
+          ],
+          "delong_p": 0.002413997928287414,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 445,
+            "learning_rate": 0.01287154085200488,
+            "max_depth": 3,
+            "min_child_weight": 1.5600406636959327,
+            "subsample": 0.559093707808044,
+            "colsample_bytree": 0.6349905023005745,
+            "reg_lambda": 2.209423963312702,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1388,
+            "brier_calibrado": 0.1397,
+            "brier_por_metodo": {
+              "platt": 0.1399,
+              "isotonica": 0.1397
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6844,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6716,
+              "pr_auc": 0.3891,
+              "brier": 0.1714
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6461,
+              "pr_auc": 0.2707,
+              "brier": 0.1296
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7109,
+              "pr_auc": 0.3287,
+              "brier": 0.1359
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7027,
+              "pr_auc": 0.3511,
+              "brier": 0.1537
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6801,
+              "pr_auc": 0.2356,
+              "brier": 0.1047
+            }
+          ],
+          "roc_auc_media": 0.6823,
+          "roc_auc_desv": 0.0258,
+          "roc_auc_oof": 0.6768,
+          "pr_auc_oof": 0.3125,
+          "brier_oof": 0.1397,
+          "tiempo_s": 58.6,
+          "roc_auc_con": 0.6768,
+          "roc_auc_sin": 0.6754,
+          "diferencia": 0.0014,
+          "ic95_bootstrap": [
+            -0.0011,
+            0.0039
+          ],
+          "delong_p": 0.29754610950386506,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 139,
+            "learning_rate": 0.023628954553306922,
+            "num_leaves": 13,
+            "min_child_samples": 242,
+            "subsample": 0.6042995941906505,
+            "colsample_bytree": 0.6738345817244809,
+            "reg_lambda": 0.011399889610617133,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2107,
+            "brier_calibrado": 0.1389,
+            "brier_por_metodo": {
+              "platt": 0.1389,
+              "isotonica": 0.1399
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.686,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.67,
+              "pr_auc": 0.4053,
+              "brier": 0.1712
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6441,
+              "pr_auc": 0.28,
+              "brier": 0.1295
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.709,
+              "pr_auc": 0.3232,
+              "brier": 0.1324
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6971,
+              "pr_auc": 0.3549,
+              "brier": 0.1533
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6825,
+              "pr_auc": 0.2419,
+              "brier": 0.1042
+            }
+          ],
+          "roc_auc_media": 0.6805,
+          "roc_auc_desv": 0.0251,
+          "roc_auc_oof": 0.6785,
+          "pr_auc_oof": 0.3198,
+          "brier_oof": 0.1389,
+          "tiempo_s": 18.9,
+          "roc_auc_con": 0.6785,
+          "roc_auc_sin": 0.6755,
+          "diferencia": 0.003,
+          "ic95_bootstrap": [
+            0.0005,
+            0.0054
+          ],
+          "delong_p": 0.01919373386626001,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 536,
+            "learning_rate": 0.026782110846678524,
+            "depth": 4,
+            "l2_leaf_reg": 15.555423565560107,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1391,
+            "brier_calibrado": 0.1395,
+            "brier_por_metodo": {
+              "platt": 0.1396,
+              "isotonica": 0.1395
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6837,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.669,
+              "pr_auc": 0.3876,
+              "brier": 0.1709
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6453,
+              "pr_auc": 0.2644,
+              "brier": 0.1296
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7096,
+              "pr_auc": 0.3151,
+              "brier": 0.1336
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6915,
+              "pr_auc": 0.3411,
+              "brier": 0.1548
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6767,
+              "pr_auc": 0.2279,
+              "brier": 0.1046
+            }
+          ],
+          "roc_auc_media": 0.6784,
+          "roc_auc_desv": 0.0241,
+          "roc_auc_oof": 0.6789,
+          "pr_auc_oof": 0.3129,
+          "brier_oof": 0.1395,
+          "tiempo_s": 204.8,
+          "roc_auc_con": 0.6789,
+          "roc_auc_sin": 0.6802,
+          "diferencia": -0.0013,
+          "ic95_bootstrap": [
+            -0.0045,
+            0.0022
+          ],
+          "delong_p": 0.4700329758700368,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "128",
+            "alpha": 3.239273659770423e-05,
+            "learning_rate_init": 0.00021802553062961086,
+            "batch_size": 128,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2035,
+            "brier_calibrado": 0.1389,
+            "brier_por_metodo": {
+              "platt": 0.1389,
+              "isotonica": 0.1396
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6845,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.667,
+              "pr_auc": 0.3955,
+              "brier": 0.1697
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6307,
+              "pr_auc": 0.2527,
+              "brier": 0.1312
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6849,
+              "pr_auc": 0.3201,
+              "brier": 0.1346
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7061,
+              "pr_auc": 0.3881,
+              "brier": 0.1516
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6895,
+              "pr_auc": 0.2349,
+              "brier": 0.1043
+            }
+          ],
+          "roc_auc_media": 0.6756,
+          "roc_auc_desv": 0.0287,
+          "roc_auc_oof": 0.681,
+          "pr_auc_oof": 0.3179,
+          "brier_oof": 0.1389,
+          "tiempo_s": 233.0,
+          "roc_auc_con": 0.681,
+          "roc_auc_sin": 0.6629,
+          "diferencia": 0.0181,
+          "ic95_bootstrap": [
+            0.0123,
+            0.0242
+          ],
+          "delong_p": 5.263938516787364e-09,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "apilamiento",
+          "base": [
+            "rl",
+            "rf",
+            "gb",
+            "xgb",
+            "lgbm",
+            "catboost",
+            "mlp"
+          ],
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6784,
+              "pr_auc": 0.406,
+              "brier": 0.1707
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6428,
+              "pr_auc": 0.2666,
+              "brier": 0.1304
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7142,
+              "pr_auc": 0.3372,
+              "brier": 0.1325
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7149,
+              "pr_auc": 0.3889,
+              "brier": 0.1503
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6881,
+              "pr_auc": 0.2387,
+              "brier": 0.104
+            }
+          ],
+          "roc_auc_media": 0.6877,
+          "roc_auc_desv": 0.0298,
+          "roc_auc_oof": 0.6856,
+          "pr_auc_oof": 0.3244,
+          "brier_oof": 0.1382,
+          "tiempo_s": 429.2,
+          "roc_auc_con": 0.6856,
+          "roc_auc_sin": 0.6779,
+          "diferencia": 0.0077,
+          "ic95_bootstrap": [
+            0.0056,
+            0.0098
+          ],
+          "delong_p": 1.2050812453104918e-11,
+          "alcanza_margen": false
+        }
+      ],
+      "mejores": {
+        "mejor_con": "apilamiento",
+        "mejor_sin": "catboost",
+        "roc_auc_con": 0.6856,
+        "roc_auc_sin": 0.6802,
+        "diferencia": 0.0054,
+        "ic95_bootstrap": [
+          0.0014,
+          0.0095
+        ],
+        "delong_p": 0.009667892936542811,
+        "alcanza_margen": false
+      },
+      "tiempo_s": 1522.6
+    },
+    {
+      "semana": 8,
+      "n": 17629,
+      "retiros": 2641,
+      "mejor_automl_principal": "apilamiento",
+      "desplegado_principal": "rl",
+      "por_modelo": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 0.0028100559580436705,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.2117,
+            "brier_calibrado": 0.1194,
+            "brier_por_metodo": {
+              "platt": 0.1195,
+              "isotonica": 0.1194
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6997,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6968,
+              "pr_auc": 0.3413,
+              "brier": 0.1501
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6836,
+              "pr_auc": 0.2397,
+              "brier": 0.1111
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7013,
+              "pr_auc": 0.2672,
+              "brier": 0.1169
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6991,
+              "pr_auc": 0.3037,
+              "brier": 0.1288
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6871,
+              "pr_auc": 0.1893,
+              "brier": 0.0892
+            }
+          ],
+          "roc_auc_media": 0.6936,
+          "roc_auc_desv": 0.0078,
+          "roc_auc_oof": 0.6957,
+          "pr_auc_oof": 0.2754,
+          "brier_oof": 0.1194,
+          "tiempo_s": 21.1,
+          "roc_auc_con": 0.6957,
+          "roc_auc_sin": 0.6937,
+          "diferencia": 0.002,
+          "ic95_bootstrap": [
+            -0.0002,
+            0.0041
+          ],
+          "delong_p": 0.06829836353113054,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 449,
+            "max_depth": 28,
+            "min_samples_leaf": 36,
+            "max_features": "sqrt",
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1202,
+            "brier_calibrado": 0.1197,
+            "brier_por_metodo": {
+              "platt": 0.1197,
+              "isotonica": 0.1202
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6895,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6972,
+              "pr_auc": 0.3681,
+              "brier": 0.1472
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6745,
+              "pr_auc": 0.2496,
+              "brier": 0.1114
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7022,
+              "pr_auc": 0.2694,
+              "brier": 0.1167
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6817,
+              "pr_auc": 0.2864,
+              "brier": 0.1318
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6889,
+              "pr_auc": 0.2058,
+              "brier": 0.0892
+            }
+          ],
+          "roc_auc_media": 0.6889,
+          "roc_auc_desv": 0.0112,
+          "roc_auc_oof": 0.6877,
+          "pr_auc_oof": 0.2812,
+          "brier_oof": 0.1197,
+          "tiempo_s": 115.0,
+          "roc_auc_con": 0.6877,
+          "roc_auc_sin": 0.6863,
+          "diferencia": 0.0014,
+          "ic95_bootstrap": [
+            -0.0008,
+            0.0036
+          ],
+          "delong_p": 0.21154304317984673,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.015689497350165556,
+            "max_iter": 322,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 286,
+            "l2_regularization": 0.0013628113485263432,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.21,
+            "brier_calibrado": 0.1207,
+            "brier_por_metodo": {
+              "platt": 0.1207,
+              "isotonica": 0.121
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6852,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6951,
+              "pr_auc": 0.3707,
+              "brier": 0.1504
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6776,
+              "pr_auc": 0.2539,
+              "brier": 0.1109
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6968,
+              "pr_auc": 0.2689,
+              "brier": 0.1163
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6792,
+              "pr_auc": 0.2751,
+              "brier": 0.1319
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6719,
+              "pr_auc": 0.183,
+              "brier": 0.0922
+            }
+          ],
+          "roc_auc_media": 0.6841,
+          "roc_auc_desv": 0.0112,
+          "roc_auc_oof": 0.6791,
+          "pr_auc_oof": 0.2648,
+          "brier_oof": 0.1207,
+          "tiempo_s": 193.7,
+          "roc_auc_con": 0.6791,
+          "roc_auc_sin": 0.6772,
+          "diferencia": 0.0019,
+          "ic95_bootstrap": [
+            -0.0002,
+            0.0039
+          ],
+          "delong_p": 0.0814591014516164,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 163,
+            "learning_rate": 0.011592173257686342,
+            "max_depth": 9,
+            "min_child_weight": 47.656118020708426,
+            "subsample": 0.5505424678225438,
+            "colsample_bytree": 0.44393086660101966,
+            "reg_lambda": 0.005414623594820752,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2115,
+            "brier_calibrado": 0.12,
+            "brier_por_metodo": {
+              "platt": 0.12,
+              "isotonica": 0.1204
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6902,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6922,
+              "pr_auc": 0.3666,
+              "brier": 0.1489
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6753,
+              "pr_auc": 0.2491,
+              "brier": 0.1111
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6989,
+              "pr_auc": 0.2675,
+              "brier": 0.1163
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6807,
+              "pr_auc": 0.2802,
+              "brier": 0.1316
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6822,
+              "pr_auc": 0.1959,
+              "brier": 0.0902
+            }
+          ],
+          "roc_auc_media": 0.6859,
+          "roc_auc_desv": 0.0095,
+          "roc_auc_oof": 0.6855,
+          "pr_auc_oof": 0.2736,
+          "brier_oof": 0.12,
+          "tiempo_s": 45.0,
+          "roc_auc_con": 0.6855,
+          "roc_auc_sin": 0.6842,
+          "diferencia": 0.0013,
+          "ic95_bootstrap": [
+            -0.0007,
+            0.0034
+          ],
+          "delong_p": 0.20347603408628867,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 436,
+            "learning_rate": 0.0100994340303904,
+            "num_leaves": 250,
+            "min_child_samples": 266,
+            "subsample": 0.5274887434198277,
+            "colsample_bytree": 0.4394430650986362,
+            "reg_lambda": 0.014713147127349403,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.203,
+            "brier_calibrado": 0.1198,
+            "brier_por_metodo": {
+              "platt": 0.1198,
+              "isotonica": 0.1201
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6926,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6889,
+              "pr_auc": 0.3647,
+              "brier": 0.1494
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6834,
+              "pr_auc": 0.2502,
+              "brier": 0.1107
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.703,
+              "pr_auc": 0.2724,
+              "brier": 0.1158
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6867,
+              "pr_auc": 0.2902,
+              "brier": 0.1308
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6779,
+              "pr_auc": 0.1944,
+              "brier": 0.0904
+            }
+          ],
+          "roc_auc_media": 0.688,
+          "roc_auc_desv": 0.0094,
+          "roc_auc_oof": 0.6878,
+          "pr_auc_oof": 0.2757,
+          "brier_oof": 0.1198,
+          "tiempo_s": 42.1,
+          "roc_auc_con": 0.6878,
+          "roc_auc_sin": 0.6852,
+          "diferencia": 0.0025,
+          "ic95_bootstrap": [
+            0.0003,
+            0.0048
+          ],
+          "delong_p": 0.029460722842259198,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 756,
+            "learning_rate": 0.010695187416061602,
+            "depth": 5,
+            "l2_leaf_reg": 23.754709479256235,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1205,
+            "brier_calibrado": 0.1205,
+            "brier_por_metodo": {
+              "platt": 0.1207,
+              "isotonica": 0.1205
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6837,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6937,
+              "pr_auc": 0.3433,
+              "brier": 0.1498
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6812,
+              "pr_auc": 0.2514,
+              "brier": 0.1108
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7012,
+              "pr_auc": 0.2619,
+              "brier": 0.1168
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6777,
+              "pr_auc": 0.2724,
+              "brier": 0.1317
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6695,
+              "pr_auc": 0.1745,
+              "brier": 0.092
+            }
+          ],
+          "roc_auc_media": 0.6847,
+          "roc_auc_desv": 0.0127,
+          "roc_auc_oof": 0.6823,
+          "pr_auc_oof": 0.265,
+          "brier_oof": 0.1205,
+          "tiempo_s": 363.6,
+          "roc_auc_con": 0.6823,
+          "roc_auc_sin": 0.6794,
+          "diferencia": 0.0029,
+          "ic95_bootstrap": [
+            -0.0004,
+            0.0059
+          ],
+          "delong_p": 0.08093796833051889,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "64",
+            "alpha": 0.08085987281637116,
+            "learning_rate_init": 0.0007262373275148985,
+            "batch_size": 128,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2229,
+            "brier_calibrado": 0.1198,
+            "brier_por_metodo": {
+              "platt": 0.1198,
+              "isotonica": 0.1202
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6893,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6852,
+              "pr_auc": 0.3352,
+              "brier": 0.1489
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6811,
+              "pr_auc": 0.2524,
+              "brier": 0.111
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6752,
+              "pr_auc": 0.2468,
+              "brier": 0.118
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6944,
+              "pr_auc": 0.3073,
+              "brier": 0.1297
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6589,
+              "pr_auc": 0.1917,
+              "brier": 0.0901
+            }
+          ],
+          "roc_auc_media": 0.679,
+          "roc_auc_desv": 0.0132,
+          "roc_auc_oof": 0.6885,
+          "pr_auc_oof": 0.2767,
+          "brier_oof": 0.1198,
+          "tiempo_s": 85.4,
+          "roc_auc_con": 0.6885,
+          "roc_auc_sin": 0.6909,
+          "diferencia": -0.0023,
+          "ic95_bootstrap": [
+            -0.0087,
+            0.004
+          ],
+          "delong_p": 0.4789430778859044,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "apilamiento",
+          "base": [
+            "rl",
+            "rf",
+            "gb",
+            "xgb",
+            "lgbm",
+            "catboost",
+            "mlp"
+          ],
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6984,
+              "pr_auc": 0.3623,
+              "brier": 0.1492
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6852,
+              "pr_auc": 0.2418,
+              "brier": 0.111
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7029,
+              "pr_auc": 0.271,
+              "brier": 0.1158
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.7009,
+              "pr_auc": 0.3157,
+              "brier": 0.1287
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6857,
+              "pr_auc": 0.1969,
+              "brier": 0.0897
+            }
+          ],
+          "roc_auc_media": 0.6946,
+          "roc_auc_desv": 0.0085,
+          "roc_auc_oof": 0.6957,
+          "pr_auc_oof": 0.2814,
+          "brier_oof": 0.1191,
+          "tiempo_s": 432.7,
+          "roc_auc_con": 0.6957,
+          "roc_auc_sin": 0.6941,
+          "diferencia": 0.0016,
+          "ic95_bootstrap": [
+            -0.0004,
+            0.0034
+          ],
+          "delong_p": 0.10627452845852367,
+          "alcanza_margen": false
+        }
+      ],
+      "mejores": {
+        "mejor_con": "rl",
+        "mejor_sin": "apilamiento",
+        "roc_auc_con": 0.6957,
+        "roc_auc_sin": 0.6941,
+        "diferencia": 0.0016,
+        "ic95_bootstrap": [
+          -0.0014,
+          0.0045
+        ],
+        "delong_p": 0.28449841406322973,
+        "alcanza_margen": false
+      },
+      "tiempo_s": 1439.9
+    },
+    {
+      "semana": 12,
+      "n": 17146,
+      "retiros": 2154,
+      "mejor_automl_principal": "apilamiento",
+      "desplegado_principal": "rl",
+      "por_modelo": [
+        {
+          "modelo": "rl",
+          "hiperparametros": {
+            "C": 0.06969807555546856,
+            "l1_ratio": 0.0,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.2142,
+            "brier_calibrado": 0.1035,
+            "brier_por_metodo": {
+              "platt": 0.1035,
+              "isotonica": 0.1035
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7052,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6891,
+              "pr_auc": 0.3284,
+              "brier": 0.1346
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7037,
+              "pr_auc": 0.2361,
+              "brier": 0.0947
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7115,
+              "pr_auc": 0.2434,
+              "brier": 0.0985
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6911,
+              "pr_auc": 0.2664,
+              "brier": 0.1149
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6828,
+              "pr_auc": 0.1839,
+              "brier": 0.0733
+            }
+          ],
+          "roc_auc_media": 0.6956,
+          "roc_auc_desv": 0.0117,
+          "roc_auc_oof": 0.7032,
+          "pr_auc_oof": 0.2484,
+          "brier_oof": 0.1035,
+          "tiempo_s": 25.4,
+          "roc_auc_con": 0.7032,
+          "roc_auc_sin": 0.6956,
+          "diferencia": 0.0076,
+          "ic95_bootstrap": [
+            0.0042,
+            0.0109
+          ],
+          "delong_p": 1.2883463683697981e-05,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "rf",
+          "hiperparametros": {
+            "n_estimators": 407,
+            "max_depth": 15,
+            "min_samples_leaf": 15,
+            "max_features": "sqrt",
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1039,
+            "brier_calibrado": 0.1034,
+            "brier_por_metodo": {
+              "platt": 0.1034,
+              "isotonica": 0.1039
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6997,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6947,
+              "pr_auc": 0.3264,
+              "brier": 0.1325
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7014,
+              "pr_auc": 0.2166,
+              "brier": 0.0946
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7051,
+              "pr_auc": 0.2371,
+              "brier": 0.0992
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6868,
+              "pr_auc": 0.264,
+              "brier": 0.1156
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6876,
+              "pr_auc": 0.1853,
+              "brier": 0.0733
+            }
+          ],
+          "roc_auc_media": 0.6951,
+          "roc_auc_desv": 0.0081,
+          "roc_auc_oof": 0.7008,
+          "pr_auc_oof": 0.2492,
+          "brier_oof": 0.1034,
+          "tiempo_s": 111.0,
+          "roc_auc_con": 0.7008,
+          "roc_auc_sin": 0.6999,
+          "diferencia": 0.0009,
+          "ic95_bootstrap": [
+            -0.0018,
+            0.0037
+          ],
+          "delong_p": 0.5101966548159897,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "gb",
+          "hiperparametros": {
+            "learning_rate": 0.01776747925153677,
+            "max_iter": 346,
+            "max_leaf_nodes": 8,
+            "min_samples_leaf": 178,
+            "l2_regularization": 0.002419703850797469,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.197,
+            "brier_calibrado": 0.1035,
+            "brier_por_metodo": {
+              "platt": 0.1035,
+              "isotonica": 0.1036
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7007,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6901,
+              "pr_auc": 0.3288,
+              "brier": 0.1333
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7014,
+              "pr_auc": 0.217,
+              "brier": 0.0949
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7075,
+              "pr_auc": 0.2514,
+              "brier": 0.0981
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6829,
+              "pr_auc": 0.2602,
+              "brier": 0.1156
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6888,
+              "pr_auc": 0.1721,
+              "brier": 0.074
+            }
+          ],
+          "roc_auc_media": 0.6941,
+          "roc_auc_desv": 0.01,
+          "roc_auc_oof": 0.6974,
+          "pr_auc_oof": 0.2447,
+          "brier_oof": 0.1035,
+          "tiempo_s": 211.6,
+          "roc_auc_con": 0.6974,
+          "roc_auc_sin": 0.6984,
+          "diferencia": -0.001,
+          "ic95_bootstrap": [
+            -0.0033,
+            0.0013
+          ],
+          "delong_p": 0.4067398917188427,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "xgb",
+          "hiperparametros": {
+            "n_estimators": 270,
+            "learning_rate": 0.015569349458963988,
+            "max_depth": 4,
+            "min_child_weight": 17.613366317498777,
+            "subsample": 0.5460777779224144,
+            "colsample_bytree": 0.7224729107379807,
+            "reg_lambda": 0.7540835316676694,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1033,
+            "brier_calibrado": 0.103,
+            "brier_por_metodo": {
+              "platt": 0.1038,
+              "isotonica": 0.103
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7052,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6967,
+              "pr_auc": 0.3221,
+              "brier": 0.1324
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7147,
+              "pr_auc": 0.2239,
+              "brier": 0.0939
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7109,
+              "pr_auc": 0.2445,
+              "brier": 0.0981
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6913,
+              "pr_auc": 0.2567,
+              "brier": 0.1151
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6884,
+              "pr_auc": 0.1751,
+              "brier": 0.0737
+            }
+          ],
+          "roc_auc_media": 0.7004,
+          "roc_auc_desv": 0.0118,
+          "roc_auc_oof": 0.7053,
+          "pr_auc_oof": 0.2492,
+          "brier_oof": 0.103,
+          "tiempo_s": 51.3,
+          "roc_auc_con": 0.7053,
+          "roc_auc_sin": 0.7018,
+          "diferencia": 0.0034,
+          "ic95_bootstrap": [
+            0.0005,
+            0.0065
+          ],
+          "delong_p": 0.026401498184480728,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "lgbm",
+          "hiperparametros": {
+            "n_estimators": 393,
+            "learning_rate": 0.010318048960159257,
+            "num_leaves": 127,
+            "min_child_samples": 207,
+            "subsample": 0.6424173550453424,
+            "colsample_bytree": 0.43592430173468344,
+            "reg_lambda": 0.052419784154173796,
+            "class_weight": "balanced"
+          },
+          "calibracion": {
+            "metodo": "platt",
+            "brier_sin_calibrar": 0.1889,
+            "brier_calibrado": 0.1031,
+            "brier_por_metodo": {
+              "platt": 0.1031,
+              "isotonica": 0.104
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7047,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6956,
+              "pr_auc": 0.3353,
+              "brier": 0.1325
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.711,
+              "pr_auc": 0.217,
+              "brier": 0.0944
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7096,
+              "pr_auc": 0.2506,
+              "brier": 0.098
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6854,
+              "pr_auc": 0.2605,
+              "brier": 0.1153
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6791,
+              "pr_auc": 0.1787,
+              "brier": 0.0739
+            }
+          ],
+          "roc_auc_media": 0.6961,
+          "roc_auc_desv": 0.0142,
+          "roc_auc_oof": 0.7026,
+          "pr_auc_oof": 0.2492,
+          "brier_oof": 0.1031,
+          "tiempo_s": 45.3,
+          "roc_auc_con": 0.7026,
+          "roc_auc_sin": 0.7006,
+          "diferencia": 0.002,
+          "ic95_bootstrap": [
+            -0.0008,
+            0.0049
+          ],
+          "delong_p": 0.17041106844271126,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "catboost",
+          "hiperparametros": {
+            "iterations": 620,
+            "learning_rate": 0.018613902273988923,
+            "depth": 4,
+            "l2_leaf_reg": 23.848922988542277,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1035,
+            "brier_calibrado": 0.1036,
+            "brier_por_metodo": {
+              "platt": 0.1038,
+              "isotonica": 0.1036
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.7008,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6926,
+              "pr_auc": 0.3108,
+              "brier": 0.1324
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7057,
+              "pr_auc": 0.2076,
+              "brier": 0.0945
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7074,
+              "pr_auc": 0.2405,
+              "brier": 0.1001
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6832,
+              "pr_auc": 0.2537,
+              "brier": 0.1158
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6896,
+              "pr_auc": 0.1696,
+              "brier": 0.0737
+            }
+          ],
+          "roc_auc_media": 0.6957,
+          "roc_auc_desv": 0.0105,
+          "roc_auc_oof": 0.7006,
+          "pr_auc_oof": 0.2455,
+          "brier_oof": 0.1036,
+          "tiempo_s": 299.1,
+          "roc_auc_con": 0.7006,
+          "roc_auc_sin": 0.698,
+          "diferencia": 0.0026,
+          "ic95_bootstrap": [
+            -0.0006,
+            0.006
+          ],
+          "delong_p": 0.13963192770000696,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "mlp",
+          "hiperparametros": {
+            "hidden_layer_sizes": "128",
+            "alpha": 0.05645342572603958,
+            "learning_rate_init": 0.0008474996976951532,
+            "batch_size": 128,
+            "class_weight": null
+          },
+          "calibracion": {
+            "metodo": "isotonica",
+            "brier_sin_calibrar": 0.1041,
+            "brier_calibrado": 0.104,
+            "brier_por_metodo": {
+              "platt": 0.1046,
+              "isotonica": 0.104
+            },
+            "anidada": true
+          },
+          "roc_auc_oof_sin_calibrar": 0.6942,
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6689,
+              "pr_auc": 0.2869,
+              "brier": 0.1344
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.6998,
+              "pr_auc": 0.2089,
+              "brier": 0.0946
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.6872,
+              "pr_auc": 0.2345,
+              "brier": 0.1007
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6821,
+              "pr_auc": 0.2533,
+              "brier": 0.1152
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6795,
+              "pr_auc": 0.1692,
+              "brier": 0.074
+            }
+          ],
+          "roc_auc_media": 0.6835,
+          "roc_auc_desv": 0.0113,
+          "roc_auc_oof": 0.6918,
+          "pr_auc_oof": 0.241,
+          "brier_oof": 0.104,
+          "tiempo_s": 154.1,
+          "roc_auc_con": 0.6918,
+          "roc_auc_sin": 0.6816,
+          "diferencia": 0.0102,
+          "ic95_bootstrap": [
+            0.0017,
+            0.0187
+          ],
+          "delong_p": 0.015491820865164997,
+          "alcanza_margen": false
+        },
+        {
+          "modelo": "apilamiento",
+          "base": [
+            "rl",
+            "rf",
+            "gb",
+            "xgb",
+            "lgbm",
+            "catboost",
+            "mlp"
+          ],
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "por_pliegue": [
+            {
+              "pliegue": 1,
+              "roc_auc": 0.6996,
+              "pr_auc": 0.3428,
+              "brier": 0.1319
+            },
+            {
+              "pliegue": 2,
+              "roc_auc": 0.7132,
+              "pr_auc": 0.2303,
+              "brier": 0.0939
+            },
+            {
+              "pliegue": 3,
+              "roc_auc": 0.7132,
+              "pr_auc": 0.2601,
+              "brier": 0.0974
+            },
+            {
+              "pliegue": 4,
+              "roc_auc": 0.6974,
+              "pr_auc": 0.2774,
+              "brier": 0.1142
+            },
+            {
+              "pliegue": 5,
+              "roc_auc": 0.6919,
+              "pr_auc": 0.1868,
+              "brier": 0.073
+            }
+          ],
+          "roc_auc_media": 0.7031,
+          "roc_auc_desv": 0.0097,
+          "roc_auc_oof": 0.7109,
+          "pr_auc_oof": 0.26,
+          "brier_oof": 0.1024,
+          "tiempo_s": 451.3,
+          "roc_auc_con": 0.7109,
+          "roc_auc_sin": 0.7082,
+          "diferencia": 0.0026,
+          "ic95_bootstrap": [
+            -0.0003,
+            0.0055
+          ],
+          "delong_p": 0.0756290916059472,
+          "alcanza_margen": false
+        }
+      ],
+      "mejores": {
+        "mejor_con": "apilamiento",
+        "mejor_sin": "apilamiento",
+        "roc_auc_con": 0.7109,
+        "roc_auc_sin": 0.7082,
+        "diferencia": 0.0026,
+        "ic95_bootstrap": [
+          -0.0003,
+          0.0055
+        ],
+        "delong_p": 0.0756290916059472,
+        "alcanza_margen": false
+      },
+      "tiempo_s": 1478.7
+    }
+  ],
+  "salvaguarda_d38": {
+    "regla": "D38: si excluir las sensibles cuesta ≥ 0,02 de ROC-AUC out-of-fold calibrada (estimación puntual) en algún momento, en algún candidato o entre los mejores de cada variante, la configuración principal pasa a ser 'con' y se repite la búsqueda",
+    "margen": 0.02,
+    "activada": false,
+    "activadores": []
+  },
+  "metricas_test": null,
+  "motivos_null": {
+    "metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3"
+  },
+  "predicciones_oof_sha256": {
+    "carpeta": "data/procesado/oof",
+    "exp-2026-10-28-01_semana_0.parquet": "7f742dd00427f65fd7e74a8c0028a6e6118c0931ac71f4cfdebe7d68f47fa4cf",
+    "exp-2026-10-28-01_semana_4.parquet": "f6292490290b2e6adf5fdc9f8194cd2fb782d014e734fcb1d09464340eb3b528",
+    "exp-2026-10-28-01_semana_8.parquet": "9ed91224a1c9c3c961a28097b3f73bb301e175c9044c721d8812c0020deb5c57",
+    "exp-2026-10-28-01_semana_12.parquet": "04f2af1321cccaebce1e32def51f068cd765b422419d8a2f852e8e00419fb668"
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "optuna": "5.0.0",
+    "xgboost": "3.4.1",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
+    "pytest": "9.1.1"
+  },
+  "hardware": {
+    "procesador": "AMD Ryzen 7 4800H with Radeon Graphics",
+    "nucleos_fisicos": 8,
+    "nucleos_logicos": 16,
+    "memoria_gb": 15.4,
+    "sistema": "Windows 11"
+  },
+  "n_jobs": {
+    "valor": 8,
+    "nivel": "n_jobs actúa dentro de cada modelo: hilos de rf, xgb, lgbm y catboost. Los ensayos de Optuna, los pliegues, la calibración y el apilamiento se ejecutan en serie. rl (liblinear) usa un hilo; gb (OpenMP) y mlp (BLAS de numpy) usan el paralelismo interno de su biblioteca, que n_jobs no controla"
+  },
+  "pruebas": {
+    "informe": "pruebas/exp-2026-10-28-01_pruebas.xml",
+    "superadas": 115,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "tiempo_ejecucion_s": 6101.7,
+  "figuras": [
+    "figuras/exp-2026-10-28-01_coste_excluir_sensibles.png"
+  ]
+}
