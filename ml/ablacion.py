@@ -139,29 +139,31 @@ def lista_figuras(id_exp: str, sufijo: str = "") -> list[tuple[str, str]]:
 
 def figura_perdidas(momentos: list[dict], ruta: Path) -> None:
     """Un panel por momento con eje x común; en cada grupo, el mejor AutoML y la RL desplegada."""
-    fig, ejes = plt.subplots(1, len(momentos), figsize=(3.6 * len(momentos), 4.2), sharex=True, sharey=True,
-                             squeeze=False)
+    fig, ejes = plt.subplots(1, len(momentos), figsize=(max(3.6 * len(momentos) + 1.6, 8), 4.6), sharex=True,
+                             sharey=True, squeeze=False)
     estilos = {"mejor_automl": ("o", SERIES[0][0], -0.15), "rl_desplegada": ("s", SERIES[1][0], 0.15)}
     for ax, m in zip(ejes[0], momentos):
         for resumen in m["modelos"]:
             marcador, color, desplazamiento = estilos[resumen["papel"]]
             valores = np.array([g["perdida"] for g in resumen["grupos"]])
             ic = np.array([g["ic95_bootstrap"] for g in resumen["grupos"]])
-            etiqueta = "RL desplegada" if resumen["papel"] == "rl_desplegada" else f"mejor AutoML ({resumen['modelo']})"
+            etiqueta = "RL desplegada" if resumen["papel"] == "rl_desplegada" else "mejor AutoML (modelo en el título)"
             ax.errorbar(valores, np.arange(len(valores)) + desplazamiento,
                         xerr=[valores - ic[:, 0], ic[:, 1] - valores], fmt=marcador, markersize=5, color=color,
                         ecolor=TINTA_SECUNDARIA, elinewidth=1, capsize=0, label=etiqueta)
         ax.axvline(0, color=TINTA_SECUNDARIA, linewidth=0.8)
         ax.set_yticks(np.arange(len(GRUPOS)), [NOMBRE_GRUPO[g] for g in GRUPOS])
-        ax.set(title=f"Semana {m['semana']}", xlabel="ROC-AUC completo − sin el grupo")
-        ax.xaxis.set_major_locator(ticker.MaxNLocator(5))
-        ax.legend(loc="lower right", fontsize=7, frameon=False)
+        mejor = next(r["modelo"] for r in m["modelos"] if r["papel"] == "mejor_automl")
+        ax.set(title=f"Semana {m['semana']} (mejor AutoML: {mejor})", xlabel="ROC-AUC completo − sin el grupo")
+        ax.title.set_fontsize(9)
+        ax.xaxis.set_major_locator(ticker.MaxNLocator(4))
         _estilo(ax)
     ejes[0][0].invert_yaxis()
+    fig.legend(*ejes[0][0].get_legend_handles_labels(), loc="lower center", ncol=2, fontsize=8, frameon=False)
     fig.suptitle("Ablación por grupos de variables (D46): pérdida de ROC-AUC out-of-fold con IC 95 %\n"
                  "hiperparámetros del principal (D38): la pérdida es una cota superior de la contribución",
                  color=TINTA, fontsize=10)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.06, 1, 1))
     fig.savefig(ruta, dpi=DPI)
     plt.close(fig)
 
