@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-27T10:47:53",
-  "commit": "e49f339",
+  "generado": "2026-10-27T20:07:15",
+  "commit": "193340c",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -78,6 +78,21 @@
     {
       "archivo": "figuras/exp-2026-10-27-01_familias_roc_auc.png",
       "descripcion": "ROC-AUC out-of-fold por familia y referencia, por momento",
+      "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-27-01_roc_pr_oof_v2.png",
+      "descripcion": "Curvas ROC y PR out-of-fold por momento: desplegado, mejor AutoML y RL optimizada (redibujada con el commit 193340c desde las predicciones out-of-fold, sin reentrenar)",
+      "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-27-01_calibracion_oof_v2.png",
+      "descripcion": "Curva de calibración out-of-fold del modelo desplegado por momento (redibujada con el commit 193340c desde las predicciones out-of-fold, sin reentrenar)",
+      "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-27-01_familias_roc_auc_v2.png",
+      "descripcion": "ROC-AUC out-of-fold por familia y referencia, por momento (redibujada con el commit 193340c desde las predicciones out-of-fold, sin reentrenar)",
       "experimento": "exp-2026-10-27-01"
     }
   ],
