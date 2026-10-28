@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-28T09:38:45",
-  "commit": "20ebcfa",
+  "generado": "2026-10-28T17:05:11",
+  "commit": "4588c02",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -99,6 +99,11 @@
     {
       "archivo": "figuras/exp-2026-10-28-01_coste_excluir_sensibles.png",
       "descripcion": "Diferencia de ROC-AUC out-of-fold con − sin variables sensibles por modelo y momento (D8, D38)",
+      "experimento": "exp-2026-10-28-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-28-01_coste_excluir_sensibles_v2.png",
+      "descripcion": "Diferencia de ROC-AUC out-of-fold con − sin variables sensibles por modelo y momento, y entre el mejor candidato de cada variante (D8, D38) (redibujada con el commit 4588c02 desde el JSON del experimento, sin reentrenar)",
       "experimento": "exp-2026-10-28-01"
     }
   ],
