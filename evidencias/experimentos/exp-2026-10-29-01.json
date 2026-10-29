@@ -1,0 +1,507 @@
+{
+  "id": "exp-2026-10-29-01",
+  "tipo": "modelado",
+  "fecha": "2026-10-29T10:05:59",
+  "commit": "07d7cbc",
+  "descripcion": "Sensibilidad a la fuga (D20, D39), sin nueva búsqueda: el mejor AutoML (D44) y la RL optimizada desplegada (D49-rev) con los hiperparámetros del experimento principal (D38), reentrenados en la población que no excluye a los ya retirados; inflación de la ROC-AUC out-of-fold frente al principal (cota inferior) y su descomposición en evaluar y entrenar con los retirados; solo validación cruzada. Configuración: ml/configs/sin_exclusion_retirados.json.",
+  "variante": "sin_exclusion_retirados",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "configuracion": {
+    "nombre": "sin_exclusion_retirados",
+    "variante": "sin_exclusion_retirados",
+    "descripcion": "Sensibilidad a la fuga (D20, D39), sin nueva búsqueda: el mejor AutoML (D44) y la RL optimizada desplegada (D49-rev) con los hiperparámetros del experimento principal (D38), reentrenados en la población que no excluye a los ya retirados; inflación de la ROC-AUC out-of-fold frente al principal (cota inferior) y su descomposición en evaluar y entrenar con los retirados; solo validación cruzada.",
+    "hiperparametros_de": "exp-2026-10-27-01",
+    "n_bootstrap": 2000,
+    "n_jobs": 8
+  },
+  "experimento_cortes": "exp-2026-10-23-02",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    },
+    "cortes_sha256": {
+      "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c",
+      "semana_0_sin_exclusion_retirados.parquet": "798274d4b635d2b1f62e8450c765a8e8f63edae78aa60e58d7201996e2b249fa",
+      "semana_4.parquet": "1678b4c811fc1e676d757cae2eb782c38214c8b1aca27ae5912e0744217ee1ee",
+      "semana_4_sin_exclusion_retirados.parquet": "c50ad926b1ee0f925ae02c2365daf09beea1bd424cd1a030a6758e71f05d77bc",
+      "semana_8.parquet": "1fba8c215aa58b96b49096c36c69c52fce38ca755995cceccdc287c545e4f76e",
+      "semana_8_sin_exclusion_retirados.parquet": "90c9ecb741e1bbcec6160ab28d2ceca401056fdf663c559c68276b6e54f5ce55",
+      "semana_12.parquet": "aea7eba703e29f0412746b681fa91226e88942059e0d75e890028640029ad8cf",
+      "semana_12_sin_exclusion_retirados.parquet": "62e25614364486baf1f643e5c5df3ad6bba959eb28eee5ee40f52fd5f3f54c68"
+    }
+  },
+  "variables": {
+    "numericas": [
+      "module_presentation_length",
+      "num_of_prev_attempts",
+      "studied_credits",
+      "date_registration",
+      "falta_date_registration",
+      "clics_total",
+      "dias_activos",
+      "clics_dataplus",
+      "clics_dualpane",
+      "clics_externalquiz",
+      "clics_folder",
+      "clics_forumng",
+      "clics_glossary",
+      "clics_homepage",
+      "clics_oucollaborate",
+      "clics_oucontent",
+      "clics_ouelluminate",
+      "clics_ouwiki",
+      "clics_page",
+      "clics_questionnaire",
+      "clics_quiz",
+      "clics_repeatactivity",
+      "clics_resource",
+      "clics_sharedsubpage",
+      "clics_subpage",
+      "clics_url",
+      "clics_ventana_1",
+      "clics_ventana_2",
+      "clics_ventana_3",
+      "clics_ventana_4",
+      "proporcion_dias_activos_28d",
+      "sin_actividad",
+      "dias_desde_ultima_actividad",
+      "tendencia_4s",
+      "cv_clics_4s",
+      "percentil_clics_total_cohorte",
+      "percentil_dias_activos_cohorte",
+      "percentil_clics_ventana_1_cohorte",
+      "n_evaluaciones_vencidas",
+      "n_entregadas",
+      "proporcion_entregadas",
+      "antelacion_media",
+      "n_entregas_tardias",
+      "n_cma_calificadas",
+      "nota_media_cma",
+      "n_convalidadas",
+      "nota_media_convalidada"
+    ],
+    "categoricas": [
+      "code_module",
+      "tipo_presentacion",
+      "region",
+      "highest_education"
+    ],
+    "imputar_mediana": [
+      "date_registration"
+    ]
+  },
+  "poblacion": "D39: la población con fuga solo deja de excluir a los ya retirados (date_unregistration ≤ 7k con fecha ≥ 0); se mantienen la exclusión de las bajas anteriores al día 0 (D24), la matrícula tardía (D34) y las eliminaciones de D26 y D27. Contiene a la principal: los retirados añadidos entran en el pliegue de su presentación. En las filas comunes cambian solo los percentiles de cohorte, que se calculan sobre la población de cada corte",
+  "particion": {
+    "estrategia": "temporal",
+    "entrenamiento": "presentaciones anteriores a 2014J (15)",
+    "prueba": "2014J (7)",
+    "validacion": "5 pliegues agrupados por presentación (D29-rev)",
+    "semillas": {
+      "optuna": 42,
+      "modelos": 42,
+      "bootstrap": 42
+    }
+  },
+  "reentrenamiento": "sin nueva búsqueda (D38): hiperparámetros de cada modelo y momento tomados de exp-2026-10-27-01; mismos pliegues por presentación y semillas. Las familias usan el método de calibración que eligió el principal; el apilamiento, la salida del metamodelo (D52), y solo se reentrena el apilamiento (misma ruta que la ablación; test_oulad_ruta_abreviada_reproduce_el_principal_en_la_semana_8 en el JUnit). Los hiperparámetros se buscaron sin fuga: la inflación es una cota inferior (D38)",
+  "comparacion": "por modelo y momento: inflación = ROC-AUC out-of-fold del modelo con fuga en su población − la del principal (exp-2026-10-27-01, SHA-256 comprobado) en la suya (lectura primaria, D20). Descomposición: efecto_evaluar = con fuga en su población − con fuga en las filas comunes; efecto_entrenar = con fuga − principal en las filas comunes (pareada, p de DeLong que solo se informa); inflación = efecto_evaluar + efecto_entrenar, comprobado sin redondear. IC del 95 % sin ajustar de un mismo bootstrap por estudiante (todas sus matrículas) sobre la población con fuga: en cada réplica, la ROC-AUC con fuga sobre la réplica y sobre sus filas comunes y la del principal sobre esas filas comunes. El IC condiciona a las predicciones ajustadas y no recoge la variabilidad del reentrenamiento (M1 de la auditoría de exp-2026-10-28-03: del orden de ±0,002-0,005), así que las diferencias de ese orden no se leen como efecto",
+  "calibracion_definicion": "D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, isotonic) con los otros 4 pliegues como divisiones internas y ensemble=False: el calibrador se ajusta con las predicciones out-of-fold de esas divisiones y el modelo base se reentrena con los 4 pliegues; método por Brier out-of-fold; métricas por pliegue y out-of-fold sobre las probabilidades calibradas",
+  "evaluado_en_prueba": false,
+  "momentos": [
+    {
+      "semana": 0,
+      "poblaciones": {
+        "principal": {
+          "n": 19023,
+          "retiros": 4111,
+          "prevalencia": 0.2161
+        },
+        "con_fuga": {
+          "n": 19434,
+          "retiros": 4522,
+          "prevalencia": 0.2327
+        },
+        "retirados_anadidos": 411
+      },
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "roc_auc_fuga_su_poblacion": 0.6646,
+          "roc_auc_fuga_comunes": 0.6479,
+          "roc_auc_principal": 0.6507,
+          "inflacion": {
+            "valor": 0.0139,
+            "ic95_bootstrap": [
+              0.0105,
+              0.0172
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.0167,
+            "ic95_bootstrap": [
+              0.0143,
+              0.0191
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.0028,
+            "ic95_bootstrap": [
+              -0.0053,
+              -0.0003
+            ],
+            "delong_p": 0.027660387566633863
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 536.0
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "isotonica",
+          "roc_auc_fuga_su_poblacion": 0.6613,
+          "roc_auc_fuga_comunes": 0.6455,
+          "roc_auc_principal": 0.6456,
+          "inflacion": {
+            "valor": 0.0156,
+            "ic95_bootstrap": [
+              0.0118,
+              0.0198
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.0158,
+            "ic95_bootstrap": [
+              0.0135,
+              0.0182
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.0002,
+            "ic95_bootstrap": [
+              -0.0035,
+              0.0035
+            ],
+            "delong_p": 0.930773161126863
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 207.0
+        }
+      ],
+      "tiempo_s": 743.2
+    },
+    {
+      "semana": 4,
+      "poblaciones": {
+        "principal": {
+          "n": 18304,
+          "retiros": 3320,
+          "prevalencia": 0.1814
+        },
+        "con_fuga": {
+          "n": 19526,
+          "retiros": 4542,
+          "prevalencia": 0.2326
+        },
+        "retirados_anadidos": 1222
+      },
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "catboost",
+          "calibracion": "isotonica",
+          "roc_auc_fuga_su_poblacion": 0.748,
+          "roc_auc_fuga_comunes": 0.6739,
+          "roc_auc_principal": 0.6802,
+          "inflacion": {
+            "valor": 0.0678,
+            "ic95_bootstrap": [
+              0.0621,
+              0.0739
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.0741,
+            "ic95_bootstrap": [
+              0.0695,
+              0.0788
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.0063,
+            "ic95_bootstrap": [
+              -0.0101,
+              -0.0026
+            ],
+            "delong_p": 0.0009850876052468081
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 392.7
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "platt",
+          "roc_auc_fuga_su_poblacion": 0.7439,
+          "roc_auc_fuga_comunes": 0.6723,
+          "roc_auc_principal": 0.6775,
+          "inflacion": {
+            "valor": 0.0664,
+            "ic95_bootstrap": [
+              0.0614,
+              0.0719
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.0716,
+            "ic95_bootstrap": [
+              0.0673,
+              0.0765
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.0052,
+            "ic95_bootstrap": [
+              -0.0083,
+              -0.0021
+            ],
+            "delong_p": 0.001133192049905514
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 53.9
+        }
+      ],
+      "tiempo_s": 446.6
+    },
+    {
+      "semana": 8,
+      "poblaciones": {
+        "principal": {
+          "n": 17629,
+          "retiros": 2641,
+          "prevalencia": 0.1498
+        },
+        "con_fuga": {
+          "n": 19530,
+          "retiros": 4542,
+          "prevalencia": 0.2326
+        },
+        "retirados_anadidos": 1901
+      },
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "roc_auc_fuga_su_poblacion": 0.7982,
+          "roc_auc_fuga_comunes": 0.6861,
+          "roc_auc_principal": 0.6941,
+          "inflacion": {
+            "valor": 0.104,
+            "ic95_bootstrap": [
+              0.0973,
+              0.1111
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.1121,
+            "ic95_bootstrap": [
+              0.1059,
+              0.118
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.008,
+            "ic95_bootstrap": [
+              -0.0121,
+              -0.0039
+            ],
+            "delong_p": 0.00012201751443162617
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 630.9
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "platt",
+          "roc_auc_fuga_su_poblacion": 0.7923,
+          "roc_auc_fuga_comunes": 0.6816,
+          "roc_auc_principal": 0.6937,
+          "inflacion": {
+            "valor": 0.0986,
+            "ic95_bootstrap": [
+              0.0919,
+              0.1053
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.1108,
+            "ic95_bootstrap": [
+              0.1046,
+              0.1169
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.0122,
+            "ic95_bootstrap": [
+              -0.0159,
+              -0.0082
+            ],
+            "delong_p": 2.996074551087152e-10
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 62.1
+        }
+      ],
+      "tiempo_s": 693.1
+    },
+    {
+      "semana": 12,
+      "poblaciones": {
+        "principal": {
+          "n": 17146,
+          "retiros": 2154,
+          "prevalencia": 0.1256
+        },
+        "con_fuga": {
+          "n": 19534,
+          "retiros": 4542,
+          "prevalencia": 0.2325
+        },
+        "retirados_anadidos": 2388
+      },
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "roc_auc_fuga_su_poblacion": 0.8266,
+          "roc_auc_fuga_comunes": 0.6902,
+          "roc_auc_principal": 0.7082,
+          "inflacion": {
+            "valor": 0.1184,
+            "ic95_bootstrap": [
+              0.1098,
+              0.1267
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.1364,
+            "ic95_bootstrap": [
+              0.1292,
+              0.1435
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.018,
+            "ic95_bootstrap": [
+              -0.0236,
+              -0.0126
+            ],
+            "delong_p": 2.1451502501959247e-11
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 748.3
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "isotonica",
+          "roc_auc_fuga_su_poblacion": 0.8183,
+          "roc_auc_fuga_comunes": 0.6848,
+          "roc_auc_principal": 0.6956,
+          "inflacion": {
+            "valor": 0.1227,
+            "ic95_bootstrap": [
+              0.1139,
+              0.1316
+            ]
+          },
+          "efecto_evaluar": {
+            "valor": 0.1336,
+            "ic95_bootstrap": [
+              0.1265,
+              0.1406
+            ]
+          },
+          "efecto_entrenar": {
+            "valor": -0.0109,
+            "ic95_bootstrap": [
+              -0.0173,
+              -0.0045
+            ],
+            "delong_p": 0.000983959509355316
+          },
+          "suma_comprobada": true,
+          "tiempo_s": 58.3
+        }
+      ],
+      "tiempo_s": 806.7
+    }
+  ],
+  "metricas_test": null,
+  "motivos_null": {
+    "metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3"
+  },
+  "predicciones_oof_sha256": {
+    "carpeta": "data/procesado/oof",
+    "exp-2026-10-29-01_semana_0.parquet": "a6fc90475ef890308f460b92f8fa0236e83ee90efa6b37a9689a8de5d81ac2ed",
+    "exp-2026-10-29-01_semana_4.parquet": "f0182bff2412e0f8a5df35b8efcfe27b240dbdbd549506330368788c1f866a8d",
+    "exp-2026-10-29-01_semana_8.parquet": "15989e6c8231a5fba371f17d167248f9fa3c068a566e54b733ed309fc78cc497",
+    "exp-2026-10-29-01_semana_12.parquet": "463f6779f9a09c84867c0cf2b0de99ad23955382766646ab0cc5b53d98a2d5b0"
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "optuna": "5.0.0",
+    "xgboost": "3.4.1",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
+    "pytest": "9.1.1"
+  },
+  "hardware": {
+    "procesador": "AMD Ryzen 7 4800H with Radeon Graphics",
+    "nucleos_fisicos": 8,
+    "nucleos_logicos": 16,
+    "memoria_gb": 15.4,
+    "sistema": "Windows 11"
+  },
+  "n_jobs": {
+    "valor": 8,
+    "nivel": "n_jobs actúa dentro de cada modelo: hilos de rf, xgb, lgbm y catboost. Los ensayos de Optuna, los pliegues, la calibración y el apilamiento se ejecutan en serie. rl (liblinear) usa un hilo; gb (OpenMP) y mlp (BLAS de numpy) usan el paralelismo interno de su biblioteca, que n_jobs no controla"
+  },
+  "pruebas": {
+    "informe": "pruebas/exp-2026-10-29-01_pruebas.xml",
+    "superadas": 127,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "tiempo_ejecucion_s": 3341.6,
+  "figuras": [
+    "figuras/exp-2026-10-29-01_sensibilidad_fuga.png"
+  ]
+}
