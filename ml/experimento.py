@@ -48,6 +48,7 @@ from evidencias import (  # noqa: E402
     comprobar_arbol_limpio,
     escribir_json,
     hardware,
+    ruta_registrada,
     sha256,
     siguiente_id,
     versiones_entorno,
@@ -481,7 +482,7 @@ def main() -> None:
         "motivos_null": {"metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3",
                          "momentos.shap": "SHAP y su estabilidad se calculan en la F3, sobre la configuración principal "
                                           "ya fijada tras la salvaguarda de D38"},
-        "predicciones_oof_sha256": {"carpeta": OOF.relative_to(RAIZ).as_posix()} | oof_sha256,
+        "predicciones_oof_sha256": {"carpeta": ruta_registrada(carpeta_oof)} | oof_sha256,
         "entorno": versiones_entorno("pandas", "numpy", "pyarrow", "sklearn", "optuna", "xgboost", "lightgbm",
                                      "catboost", "scipy", "matplotlib", "pytest"),
         "hardware": hardware(),

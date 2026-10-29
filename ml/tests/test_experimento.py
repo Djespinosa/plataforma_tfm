@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import inspect
+import tempfile
+from pathlib import Path
+
 import pandas as pd
 
 import cortes_oulad as co
 import experimento as ex
+from evidencias import ruta_registrada
 from test_cortes_oulad import tablas_sinteticas
 
 
@@ -58,3 +63,13 @@ def test_rl_defecto_con_la_misma_calibracion_anidada_que_los_candidatos():
     np.testing.assert_allclose(predicciones["ref_rl_defecto"], oof[metodo])
     assert not np.allclose(predicciones["ref_rl_defecto"], oof["sin_calibrar"])
     assert rl["roc_auc_oof_sin_calibrar"] == round(roc_auc_score(y, oof["sin_calibrar"]), 4)
+
+
+def test_carpeta_de_los_oof_registrada_es_la_real():
+    """m2 de la auditoría de exp-2026-10-28-01, aplicado a experimento.py: en un ensayo, la carpeta registrada es la del
+    ensayo (absoluta, fuera del repositorio) y en una exportación, data/procesado/oof (relativa)."""
+    assert ruta_registrada(ex.OOF) == "data/procesado/oof"
+    fuera = Path(tempfile.gettempdir()) / "ensayo" / "oof"
+    assert ruta_registrada(fuera) == fuera.resolve().as_posix()
+    fuente = inspect.getsource(ex.main)
+    assert '"carpeta": ruta_registrada(carpeta_oof)' in fuente and "OOF.relative_to" not in fuente

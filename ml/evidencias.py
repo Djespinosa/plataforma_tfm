@@ -52,6 +52,13 @@ def sha256(ruta: Path) -> str:
     return h.hexdigest()
 
 
+def ruta_registrada(carpeta: Path) -> str:
+    """Carpeta real de unas salidas tal como se registra en el JSON: relativa a la raíz del repositorio si está dentro
+    (data/procesado/oof en una exportación) y absoluta si no (la carpeta de un ensayo)."""
+    real = carpeta.resolve()
+    return (real.relative_to(RAIZ) if real.is_relative_to(RAIZ) else real).as_posix()
+
+
 def versiones_entorno(*modulos: str) -> dict:
     """Versión de Python y de cada módulo; la clave es el nombre del paquete (scikit-learn para sklearn)."""
     nombres = {"sklearn": "scikit-learn"}

@@ -286,8 +286,9 @@ def main() -> None:
                        "ajustar de un mismo bootstrap por estudiante (todas sus matrículas) sobre la población con fuga: "
                        "en cada réplica, la ROC-AUC con fuga sobre la réplica y sobre sus filas comunes y la del "
                        "principal sobre esas filas comunes. El IC condiciona a las predicciones ajustadas y no recoge la "
-                       "variabilidad del reentrenamiento (M1 de la auditoría de exp-2026-10-28-03: del orden de "
-                       "±0,002-0,005), así que las diferencias de ese orden no se leen como efecto",
+                       "variabilidad del reentrenamiento (M1 de la auditoría de exp-2026-10-28-03; único control "
+                       "documentado, en la semana 0: +0,0045 en el apilamiento y −0,0023 en la RL), así que las "
+                       "diferencias de ese orden no se leen como efecto",
         "calibracion_definicion": CALIBRACION_DEFINICION,
         "evaluado_en_prueba": False,
         "momentos": momentos,

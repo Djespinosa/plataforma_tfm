@@ -89,3 +89,29 @@ def test_oulad_umbral_recalculado_es_el_del_principal():
         oof = predicciones_principal(pd.read_parquet(OOF / f"exp-2026-10-27-01_semana_{semana}.parquet"), datos_)
         corte = umbral(datos_["etiqueta"], oof["p_rl"].to_numpy(), principal["configuracion"]["sensibilidad_minima"])
         assert round(corte, 6) == resumen["punto_operacion_oof"]["umbral"]
+
+
+def test_ajustar_exige_el_umbral_registrado():
+    X, y, pliegue = datos()
+    tabla = X.assign(etiqueta=y, pliegue=pliegue)
+    p = np.random.default_rng(0).random(len(y))
+    corte = round(umbral(y, p, 0.7), 6)
+    origen = {"semana": 4, "umbral_de": "prueba"}
+    resumen, paquete = mf.ajustar(tabla, COLUMNAS, RL, "platt", p, corte, 0.7, 42, 1, origen)
+    assert resumen["umbral"]["valor"] == corte == round(paquete["umbral"], 6)
+    with pytest.raises(ValueError, match="no coincide"):
+        mf.ajustar(tabla, COLUMNAS, RL, "platt", p, corte + 0.01, 0.7, 42, 1, origen)
+
+
+def test_oulad_umbral_de_la_variante_con_sensibles_es_el_registrado():
+    """P-13: el umbral de la variante con sensibles se recalcula desde sus OOF (exp-2026-10-28-01) y coincide con el
+    registrado en su análisis de equidad (exp-2026-10-28-02) en los 4 momentos."""
+    if not (OOF / "exp-2026-10-28-01_semana_0.parquet").exists():
+        pytest.skip("Sin las predicciones out-of-fold de exp-2026-10-28-01 en data/procesado/oof")
+    leer = lambda i: json.loads((EVIDENCIAS / "experimentos" / f"{i}.json").read_text(encoding="utf-8"))  # noqa: E731
+    con, equidad = leer("exp-2026-10-28-01"), leer("exp-2026-10-28-02")
+    cortes, _ = cargar_cortes(con["experimento_cortes"])
+    for m in equidad["momentos"]:
+        datos_ = cargar_entrenamiento(m["semana"], cortes)
+        p = mf.leer_oof(con, m["semana"], datos_)["p_rl"].to_numpy()
+        assert round(umbral(datos_["etiqueta"], p, 0.7), 6) == m["con"]["punto_operacion_oof"]["umbral"]

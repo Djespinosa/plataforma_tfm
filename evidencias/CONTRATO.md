@@ -150,7 +150,10 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   hiperparametros, calibracion: {metodo, cv, ensemble}, umbral: {valor, origen, punto_operacion_oof}, explicador,
   coeficientes_no_nulos, columnas_transformadas, aditividad_error_max, tiempo_s}`. Los paquetes del modelo (modelo
   calibrado, umbral, columnas y fondo del explicador) van en `data/procesado/modelos/<id>_semana_<k>.joblib`, no
-  versionados, con su SHA-256 en `modelos_sha256`.
+  versionados, con su SHA-256 en `modelos_sha256`. Cada momento lleva además `con_sensibles` (P-13): `{desplegado:
+  false}` y los mismos campos para la variante con sensibles, con su método de calibración y su umbral out-of-fold
+  (paquete `<id>_con_sensibles_semana_<k>.joblib`); a nivel raíz, `variables_con_sensibles`, `con_sensibles` (texto) y
+  `optuna` (parámetros efectivos del muestreador y el podador, con `vale_para`, P-4).
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
   candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
   `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.
@@ -175,6 +178,15 @@ Con `analisis: "equidad_con_sensibles"` (D8, D50, `ml/equidad_variante.py`), sol
 principal; `con` y `sin` llevan `calibracion`, `punto_operacion_oof` (umbral out-of-fold propio de cada variante, D45)
 y `equidad_oof` con el esquema de D50. `sin` se recalcula desde las predicciones del principal y debe coincidir con su
 JSON.
+
+Con `analisis: "shap_estabilidad_y_extremos"` (D9, D32, `ml/shap_analisis.py`), desde un experimento `shap` sin
+reentrenar: `metodo` (texto: `estabilidad`, `extremos`) y `lectura`; por momento `{semana, modelos}`, y cada modelo
+`{papel, modelo, estabilidad: {todas, sin_nulas, variables_nulas}}` (cada versión con `variables` y los campos de
+estabilidad del esquema `shap`; `todas` reproduce el experimento de origen y `sin_nulas` es la lectura principal). La RL
+desplegada añade `extremos`: `{n, filas_con_extremo, proporcion, shap_abs_max, variables, alerta}`, con `variables` =
+lista de `{variable, filas, shap_min, shap_max}` más `valor_min`, `valor_max`, `percentil_min` y `percentil_max` (o
+`valores` si es categórica) y `alerta` = `{alertadas, cambian_al_acotar, dejan_de_alertar, pasan_a_alertar,
+cambian_entre_filas_con_extremo}`.
 
 ## `manifest.json`
 
