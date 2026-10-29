@@ -1,0 +1,856 @@
+{
+  "id": "exp-2026-10-28-03",
+  "tipo": "modelado",
+  "fecha": "2026-10-28T18:14:54",
+  "commit": "5828399",
+  "descripcion": "Ablación D46 por los 5 grupos de variables (D51-rev), sin nueva búsqueda: hiperparámetros del experimento principal (D38) para el mejor AutoML (D44) y la RL optimizada desplegada (D49-rev); pérdida = ROC-AUC out-of-fold completo − sin el grupo, cota superior de la contribución; solo validación cruzada. Configuración: ml/configs/ablacion.json.",
+  "variante": "ablacion",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "configuracion": {
+    "nombre": "ablacion",
+    "variante": "ablacion",
+    "descripcion": "Ablación D46 por los 5 grupos de variables (D51-rev), sin nueva búsqueda: hiperparámetros del experimento principal (D38) para el mejor AutoML (D44) y la RL optimizada desplegada (D49-rev); pérdida = ROC-AUC out-of-fold completo − sin el grupo, cota superior de la contribución; solo validación cruzada.",
+    "hiperparametros_de": "exp-2026-10-27-01",
+    "n_bootstrap": 2000,
+    "n_jobs": 8
+  },
+  "experimento_cortes": "exp-2026-10-23-02",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    },
+    "cortes_sha256": {
+      "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c",
+      "semana_4.parquet": "1678b4c811fc1e676d757cae2eb782c38214c8b1aca27ae5912e0744217ee1ee",
+      "semana_8.parquet": "1fba8c215aa58b96b49096c36c69c52fce38ca755995cceccdc287c545e4f76e",
+      "semana_12.parquet": "aea7eba703e29f0412746b681fa91226e88942059e0d75e890028640029ad8cf"
+    }
+  },
+  "variables": {
+    "numericas": [
+      "module_presentation_length",
+      "num_of_prev_attempts",
+      "studied_credits",
+      "date_registration",
+      "falta_date_registration",
+      "clics_total",
+      "dias_activos",
+      "clics_dataplus",
+      "clics_dualpane",
+      "clics_externalquiz",
+      "clics_folder",
+      "clics_forumng",
+      "clics_glossary",
+      "clics_homepage",
+      "clics_oucollaborate",
+      "clics_oucontent",
+      "clics_ouelluminate",
+      "clics_ouwiki",
+      "clics_page",
+      "clics_questionnaire",
+      "clics_quiz",
+      "clics_repeatactivity",
+      "clics_resource",
+      "clics_sharedsubpage",
+      "clics_subpage",
+      "clics_url",
+      "clics_ventana_1",
+      "clics_ventana_2",
+      "clics_ventana_3",
+      "clics_ventana_4",
+      "proporcion_dias_activos_28d",
+      "sin_actividad",
+      "dias_desde_ultima_actividad",
+      "tendencia_4s",
+      "cv_clics_4s",
+      "percentil_clics_total_cohorte",
+      "percentil_dias_activos_cohorte",
+      "percentil_clics_ventana_1_cohorte",
+      "n_evaluaciones_vencidas",
+      "n_entregadas",
+      "proporcion_entregadas",
+      "antelacion_media",
+      "n_entregas_tardias",
+      "n_cma_calificadas",
+      "nota_media_cma",
+      "n_convalidadas",
+      "nota_media_convalidada"
+    ],
+    "categoricas": [
+      "code_module",
+      "tipo_presentacion",
+      "region",
+      "highest_education"
+    ],
+    "imputar_mediana": [
+      "date_registration"
+    ]
+  },
+  "grupos": {
+    "demograficas_matricula": {
+      "nombre": "demográficas y matrícula",
+      "variables": [
+        "num_of_prev_attempts",
+        "studied_credits",
+        "date_registration",
+        "falta_date_registration",
+        "region",
+        "highest_education"
+      ]
+    },
+    "aula_virtual_clics": {
+      "nombre": "aula virtual: clics",
+      "variables": [
+        "clics_total",
+        "dias_activos",
+        "clics_dataplus",
+        "clics_dualpane",
+        "clics_externalquiz",
+        "clics_folder",
+        "clics_forumng",
+        "clics_glossary",
+        "clics_homepage",
+        "clics_oucollaborate",
+        "clics_oucontent",
+        "clics_ouelluminate",
+        "clics_ouwiki",
+        "clics_page",
+        "clics_questionnaire",
+        "clics_quiz",
+        "clics_repeatactivity",
+        "clics_resource",
+        "clics_sharedsubpage",
+        "clics_subpage",
+        "clics_url",
+        "clics_ventana_1",
+        "clics_ventana_2",
+        "clics_ventana_3",
+        "clics_ventana_4"
+      ]
+    },
+    "aula_virtual_derivadas": {
+      "nombre": "aula virtual: derivadas",
+      "variables": [
+        "proporcion_dias_activos_28d",
+        "sin_actividad",
+        "dias_desde_ultima_actividad",
+        "tendencia_4s",
+        "cv_clics_4s",
+        "percentil_clics_total_cohorte",
+        "percentil_dias_activos_cohorte",
+        "percentil_clics_ventana_1_cohorte"
+      ]
+    },
+    "evaluaciones": {
+      "nombre": "evaluaciones",
+      "variables": [
+        "n_evaluaciones_vencidas",
+        "n_entregadas",
+        "proporcion_entregadas",
+        "antelacion_media",
+        "n_entregas_tardias",
+        "n_cma_calificadas",
+        "nota_media_cma",
+        "n_convalidadas",
+        "nota_media_convalidada"
+      ]
+    },
+    "contexto_modulo": {
+      "nombre": "contexto del módulo",
+      "variables": [
+        "module_presentation_length",
+        "code_module",
+        "tipo_presentacion"
+      ]
+    }
+  },
+  "particion": {
+    "estrategia": "temporal",
+    "entrenamiento": "presentaciones anteriores a 2014J (15)",
+    "prueba": "2014J (7)",
+    "validacion": "5 pliegues agrupados por presentación (D29-rev)",
+    "semillas": {
+      "optuna": 42,
+      "modelos": 42,
+      "bootstrap": 42
+    }
+  },
+  "reentrenamiento": "sin nueva búsqueda (D38): hiperparámetros de cada modelo y momento tomados de exp-2026-10-27-01; mismos pliegues, filas y semillas. Las familias usan el método de calibración que eligió el principal; el apilamiento, la salida del metamodelo (D52), y solo se reentrena el apilamiento (la calibración por familia no interviene en él; con todas las variables reproduce el apilamiento del principal en la semana 8 con ROC-AUC idéntica y diferencias ≤ 1e-9 por coma flotante en paralelo: test_oulad_ruta_abreviada_reproduce_el_principal_en_la_semana_8 en el JUnit). Los hiperparámetros se buscaron con todas las variables: la pérdida es una cota superior de la contribución de cada grupo (D46)",
+  "comparacion": "por modelo y grupo, ROC-AUC out-of-fold completo − sin el grupo sobre las mismas filas; las predicciones 'completo' son las de exp-2026-10-27-01 (SHA-256 comprobado); IC bootstrap pareado del 95 % sin ajustar y p de DeLong, que solo se informa",
+  "calibracion_definicion": "D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, isotonic) con los otros 4 pliegues como divisiones internas y ensemble=False: el calibrador se ajusta con las predicciones out-of-fold de esas divisiones y el modelo base se reentrena con los 4 pliegues; método por Brier out-of-fold; métricas por pliegue y out-of-fold sobre las probabilidades calibradas",
+  "evaluado_en_prueba": false,
+  "momentos": [
+    {
+      "semana": 0,
+      "n": 19023,
+      "retiros": 4111,
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.6507,
+              "roc_auc_sin_grupo": 0.6155,
+              "perdida": 0.0352,
+              "ic95_bootstrap": [
+                0.0285,
+                0.0419
+              ],
+              "delong_p": 2.4963349861987212e-23,
+              "tiempo_s": 394.7
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.6507,
+              "roc_auc_sin_grupo": 0.6521,
+              "perdida": -0.0014,
+              "ic95_bootstrap": [
+                -0.0038,
+                0.0009
+              ],
+              "delong_p": 0.2636241779294709,
+              "tiempo_s": 341.8
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.6507,
+              "roc_auc_sin_grupo": 0.645,
+              "perdida": 0.0058,
+              "ic95_bootstrap": [
+                0.0029,
+                0.0086
+              ],
+              "delong_p": 8.251280171310602e-05,
+              "tiempo_s": 415.2
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.6507,
+              "roc_auc_sin_grupo": 0.6463,
+              "perdida": 0.0044,
+              "ic95_bootstrap": [
+                0.0023,
+                0.0065
+              ],
+              "delong_p": 1.8028950398814197e-05,
+              "tiempo_s": 444.4
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.6507,
+              "roc_auc_sin_grupo": 0.6211,
+              "perdida": 0.0296,
+              "ic95_bootstrap": [
+                0.0241,
+                0.0352
+              ],
+              "delong_p": 8.763069480484681e-27,
+              "tiempo_s": 470.3
+            }
+          ]
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "isotonica",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.6456,
+              "roc_auc_sin_grupo": 0.6167,
+              "perdida": 0.029,
+              "ic95_bootstrap": [
+                0.0226,
+                0.0355
+              ],
+              "delong_p": 2.3687772602294902e-18,
+              "tiempo_s": 141.4
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.6456,
+              "roc_auc_sin_grupo": 0.649,
+              "perdida": -0.0033,
+              "ic95_bootstrap": [
+                -0.0063,
+                -0.0003
+              ],
+              "delong_p": 0.029493920334570194,
+              "tiempo_s": 104.7
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.6456,
+              "roc_auc_sin_grupo": 0.6425,
+              "perdida": 0.0032,
+              "ic95_bootstrap": [
+                -0.0001,
+                0.0062
+              ],
+              "delong_p": 0.05440684467648699,
+              "tiempo_s": 204.0
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.6456,
+              "roc_auc_sin_grupo": 0.6448,
+              "perdida": 0.0008,
+              "ic95_bootstrap": [
+                -0.0015,
+                0.003
+              ],
+              "delong_p": 0.47116638277955847,
+              "tiempo_s": 212.8
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.6456,
+              "roc_auc_sin_grupo": 0.6216,
+              "perdida": 0.024,
+              "ic95_bootstrap": [
+                0.0164,
+                0.0316
+              ],
+              "delong_p": 2.6560560479335295e-10,
+              "tiempo_s": 269.2
+            }
+          ]
+        }
+      ],
+      "tiempo_s": 2998.5
+    },
+    {
+      "semana": 4,
+      "n": 18304,
+      "retiros": 3320,
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "catboost",
+          "calibracion": "isotonica",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.6802,
+              "roc_auc_sin_grupo": 0.6594,
+              "perdida": 0.0207,
+              "ic95_bootstrap": [
+                0.0152,
+                0.0263
+              ],
+              "delong_p": 1.001446760701918e-14,
+              "tiempo_s": 291.6
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.6802,
+              "roc_auc_sin_grupo": 0.6809,
+              "perdida": -0.0007,
+              "ic95_bootstrap": [
+                -0.0038,
+                0.0026
+              ],
+              "delong_p": 0.6791008641580225,
+              "tiempo_s": 282.9
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.6802,
+              "roc_auc_sin_grupo": 0.6677,
+              "perdida": 0.0125,
+              "ic95_bootstrap": [
+                0.009,
+                0.0161
+              ],
+              "delong_p": 1.1662407159993924e-11,
+              "tiempo_s": 292.9
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.6802,
+              "roc_auc_sin_grupo": 0.6321,
+              "perdida": 0.048,
+              "ic95_bootstrap": [
+                0.0401,
+                0.0559
+              ],
+              "delong_p": 4.220099280283512e-32,
+              "tiempo_s": 293.6
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.6802,
+              "roc_auc_sin_grupo": 0.6689,
+              "perdida": 0.0113,
+              "ic95_bootstrap": [
+                0.0079,
+                0.0147
+              ],
+              "delong_p": 9.817655443583449e-11,
+              "tiempo_s": 300.3
+            }
+          ]
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "platt",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.6775,
+              "roc_auc_sin_grupo": 0.6637,
+              "perdida": 0.0138,
+              "ic95_bootstrap": [
+                0.01,
+                0.0176
+              ],
+              "delong_p": 5.567270804186863e-13,
+              "tiempo_s": 31.2
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.6775,
+              "roc_auc_sin_grupo": 0.6745,
+              "perdida": 0.0031,
+              "ic95_bootstrap": [
+                0.0001,
+                0.0058
+              ],
+              "delong_p": 0.04151716739326419,
+              "tiempo_s": 30.6
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.6775,
+              "roc_auc_sin_grupo": 0.6738,
+              "perdida": 0.0037,
+              "ic95_bootstrap": [
+                0.0012,
+                0.0063
+              ],
+              "delong_p": 0.004104072161601141,
+              "tiempo_s": 34.5
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.6775,
+              "roc_auc_sin_grupo": 0.6275,
+              "perdida": 0.05,
+              "ic95_bootstrap": [
+                0.0418,
+                0.0586
+              ],
+              "delong_p": 2.0044781902050437e-31,
+              "tiempo_s": 31.8
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.6775,
+              "roc_auc_sin_grupo": 0.6775,
+              "perdida": -0.0,
+              "ic95_bootstrap": [
+                -0.0019,
+                0.0018
+              ],
+              "delong_p": 0.9782786726630875,
+              "tiempo_s": 32.8
+            }
+          ]
+        }
+      ],
+      "tiempo_s": 1622.2
+    },
+    {
+      "semana": 8,
+      "n": 17629,
+      "retiros": 2641,
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.6941,
+              "roc_auc_sin_grupo": 0.6862,
+              "perdida": 0.0079,
+              "ic95_bootstrap": [
+                0.0046,
+                0.011
+              ],
+              "delong_p": 1.7838813642476628e-06,
+              "tiempo_s": 391.6
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.6941,
+              "roc_auc_sin_grupo": 0.6909,
+              "perdida": 0.0032,
+              "ic95_bootstrap": [
+                0.0,
+                0.0062
+              ],
+              "delong_p": 0.053816481084202276,
+              "tiempo_s": 362.8
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.6941,
+              "roc_auc_sin_grupo": 0.6901,
+              "perdida": 0.004,
+              "ic95_bootstrap": [
+                0.002,
+                0.0061
+              ],
+              "delong_p": 0.00010891911903581349,
+              "tiempo_s": 420.2
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.6941,
+              "roc_auc_sin_grupo": 0.644,
+              "perdida": 0.0501,
+              "ic95_bootstrap": [
+                0.0402,
+                0.06
+              ],
+              "delong_p": 4.450837820107719e-23,
+              "tiempo_s": 468.9
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.6941,
+              "roc_auc_sin_grupo": 0.6869,
+              "perdida": 0.0072,
+              "ic95_bootstrap": [
+                0.0047,
+                0.0096
+              ],
+              "delong_p": 9.272884627686598e-09,
+              "tiempo_s": 480.9
+            }
+          ]
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "platt",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.6937,
+              "roc_auc_sin_grupo": 0.6884,
+              "perdida": 0.0053,
+              "ic95_bootstrap": [
+                0.0022,
+                0.0084
+              ],
+              "delong_p": 0.0007840908815610133,
+              "tiempo_s": 33.7
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.6937,
+              "roc_auc_sin_grupo": 0.6871,
+              "perdida": 0.0066,
+              "ic95_bootstrap": [
+                0.0031,
+                0.0101
+              ],
+              "delong_p": 0.00030415539213030535,
+              "tiempo_s": 30.2
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.6937,
+              "roc_auc_sin_grupo": 0.6904,
+              "perdida": 0.0033,
+              "ic95_bootstrap": [
+                0.0012,
+                0.0055
+              ],
+              "delong_p": 0.0028373662775707732,
+              "tiempo_s": 33.6
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.6937,
+              "roc_auc_sin_grupo": 0.6316,
+              "perdida": 0.0621,
+              "ic95_bootstrap": [
+                0.0525,
+                0.0718
+              ],
+              "delong_p": 4.541369460420987e-33,
+              "tiempo_s": 32.7
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.6937,
+              "roc_auc_sin_grupo": 0.6862,
+              "perdida": 0.0076,
+              "ic95_bootstrap": [
+                0.0053,
+                0.0097
+              ],
+              "delong_p": 2.603114304694004e-11,
+              "tiempo_s": 34.7
+            }
+          ]
+        }
+      ],
+      "tiempo_s": 2289.4
+    },
+    {
+      "semana": 12,
+      "n": 17146,
+      "retiros": 2154,
+      "modelos": [
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "calibracion": "salida del metamodelo logístico, sin calibración adicional (D52)",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.7082,
+              "roc_auc_sin_grupo": 0.7037,
+              "perdida": 0.0045,
+              "ic95_bootstrap": [
+                0.0012,
+                0.0073
+              ],
+              "delong_p": 0.004079061143151142,
+              "tiempo_s": 439.3
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.7082,
+              "roc_auc_sin_grupo": 0.7033,
+              "perdida": 0.0049,
+              "ic95_bootstrap": [
+                0.0008,
+                0.0088
+              ],
+              "delong_p": 0.01761002123609463,
+              "tiempo_s": 381.5
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.7082,
+              "roc_auc_sin_grupo": 0.7045,
+              "perdida": 0.0037,
+              "ic95_bootstrap": [
+                0.0005,
+                0.0069
+              ],
+              "delong_p": 0.023871683364162868,
+              "tiempo_s": 421.5
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.7082,
+              "roc_auc_sin_grupo": 0.6461,
+              "perdida": 0.0621,
+              "ic95_bootstrap": [
+                0.0525,
+                0.0713
+              ],
+              "delong_p": 1.80842150918379e-35,
+              "tiempo_s": 437.8
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.7082,
+              "roc_auc_sin_grupo": 0.7065,
+              "perdida": 0.0017,
+              "ic95_bootstrap": [
+                -0.0007,
+                0.0042
+              ],
+              "delong_p": 0.1566211205405714,
+              "tiempo_s": 444.5
+            }
+          ]
+        },
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "calibracion": "isotonica",
+          "grupos": [
+            {
+              "grupo": "demograficas_matricula",
+              "variables_quitadas": 6,
+              "roc_auc_completo": 0.6956,
+              "roc_auc_sin_grupo": 0.6883,
+              "perdida": 0.0073,
+              "ic95_bootstrap": [
+                0.0031,
+                0.0111
+              ],
+              "delong_p": 0.00031958717015180793,
+              "tiempo_s": 29.5
+            },
+            {
+              "grupo": "aula_virtual_clics",
+              "variables_quitadas": 25,
+              "roc_auc_completo": 0.6956,
+              "roc_auc_sin_grupo": 0.7021,
+              "perdida": -0.0065,
+              "ic95_bootstrap": [
+                -0.0112,
+                -0.0018
+              ],
+              "delong_p": 0.00577609698581296,
+              "tiempo_s": 25.9
+            },
+            {
+              "grupo": "aula_virtual_derivadas",
+              "variables_quitadas": 8,
+              "roc_auc_completo": 0.6956,
+              "roc_auc_sin_grupo": 0.6872,
+              "perdida": 0.0084,
+              "ic95_bootstrap": [
+                0.0044,
+                0.0123
+              ],
+              "delong_p": 2.3932601494116776e-05,
+              "tiempo_s": 31.1
+            },
+            {
+              "grupo": "evaluaciones",
+              "variables_quitadas": 9,
+              "roc_auc_completo": 0.6956,
+              "roc_auc_sin_grupo": 0.6389,
+              "perdida": 0.0567,
+              "ic95_bootstrap": [
+                0.0463,
+                0.0667
+              ],
+              "delong_p": 1.1839982772518357e-27,
+              "tiempo_s": 30.0
+            },
+            {
+              "grupo": "contexto_modulo",
+              "variables_quitadas": 3,
+              "roc_auc_completo": 0.6956,
+              "roc_auc_sin_grupo": 0.6915,
+              "perdida": 0.0041,
+              "ic95_bootstrap": [
+                0.0,
+                0.0083
+              ],
+              "delong_p": 0.04606656139946974,
+              "tiempo_s": 31.2
+            }
+          ]
+        }
+      ],
+      "tiempo_s": 2272.4
+    }
+  ],
+  "metricas_test": null,
+  "motivos_null": {
+    "metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3"
+  },
+  "predicciones_oof_sha256": {
+    "carpeta": "data/procesado/oof",
+    "exp-2026-10-28-03_semana_0.parquet": "26f68889a80ff1b735ac0f5a8c32723aeb6ad291a489b6bfc079e01ae3553790",
+    "exp-2026-10-28-03_semana_4.parquet": "9dec6ea36ee7a5c92ce60a673271a6d2a1d03d67095deac85012e3272e84f3a8",
+    "exp-2026-10-28-03_semana_8.parquet": "0bc8dfe45a8886c782dc0ecca17d910942e3782676d8b468b9858b6eb31e36be",
+    "exp-2026-10-28-03_semana_12.parquet": "5e54d0a6101a425e7af0d072009bfc071470a5f084328cadc582bcca95781d7c"
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "optuna": "5.0.0",
+    "xgboost": "3.4.1",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
+    "pytest": "9.1.1"
+  },
+  "hardware": {
+    "procesador": "AMD Ryzen 7 4800H with Radeon Graphics",
+    "nucleos_fisicos": 8,
+    "nucleos_logicos": 16,
+    "memoria_gb": 15.4,
+    "sistema": "Windows 11"
+  },
+  "n_jobs": {
+    "valor": 8,
+    "nivel": "n_jobs actúa dentro de cada modelo: hilos de rf, xgb, lgbm y catboost. Los ensayos de Optuna, los pliegues, la calibración y el apilamiento se ejecutan en serie. rl (liblinear) usa un hilo; gb (OpenMP) y mlp (BLAS de numpy) usan el paralelismo interno de su biblioteca, que n_jobs no controla"
+  },
+  "pruebas": {
+    "informe": "pruebas/exp-2026-10-28-03_pruebas.xml",
+    "superadas": 122,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "tiempo_ejecucion_s": 9663.4,
+  "figuras": [
+    "figuras/exp-2026-10-28-03_ablacion.png"
+  ]
+}

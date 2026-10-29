@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-28T17:05:49",
-  "commit": "f26886b",
+  "generado": "2026-10-28T18:14:54",
+  "commit": "5828399",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -9,7 +9,8 @@
     "experimentos/exp-2026-10-26-01.json",
     "experimentos/exp-2026-10-27-01.json",
     "experimentos/exp-2026-10-28-01.json",
-    "experimentos/exp-2026-10-28-02.json"
+    "experimentos/exp-2026-10-28-02.json",
+    "experimentos/exp-2026-10-28-03.json"
   ],
   "figuras": [
     {
@@ -106,6 +107,11 @@
       "archivo": "figuras/exp-2026-10-28-01_coste_excluir_sensibles_v2.png",
       "descripcion": "Diferencia de ROC-AUC out-of-fold con − sin variables sensibles por modelo y momento, y entre el mejor candidato de cada variante (D8, D38) (redibujada con el commit 4588c02 desde el JSON del experimento, sin reentrenar)",
       "experimento": "exp-2026-10-28-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-28-03_ablacion.png",
+      "descripcion": "Pérdida de ROC-AUC out-of-fold al quitar cada grupo de variables (completo − sin el grupo), mejor AutoML y RL desplegada por momento (D46)",
+      "experimento": "exp-2026-10-28-03"
     }
   ],
   "capturas": [],
@@ -135,6 +141,16 @@
       "archivo": "pruebas/exp-2026-10-28-01_auditoria.md",
       "descripcion": "Auditoría de fugas (agente revisor-fuga) de exp-2026-10-28-01 sobre el commit 20ebcfa: apto con observaciones",
       "experimento": "exp-2026-10-28-01"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-28-03_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de ml/tests en el commit del experimento",
+      "experimento": "exp-2026-10-28-03"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-28-03_auditoria.md",
+      "descripcion": "Auditoría de fugas (agente revisor-fuga) de exp-2026-10-28-03 sobre el commit 5828399: apto con observaciones",
+      "experimento": "exp-2026-10-28-03"
     }
   ],
   "usabilidad": []
