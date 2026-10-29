@@ -1,0 +1,8 @@
+{
+  "nombre": "sin_exclusion_retirados",
+  "variante": "sin_exclusion_retirados",
+  "descripcion": "Sensibilidad a la fuga (D20, D39), sin nueva búsqueda: el mejor AutoML (D44) y la RL optimizada desplegada (D49-rev) con los hiperparámetros del experimento principal (D38), reentrenados en la población que no excluye a los ya retirados; inflación de la ROC-AUC out-of-fold frente al principal (cota inferior) y su descomposición en evaluar y entrenar con los retirados; solo validación cruzada.",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "n_bootstrap": 2000,
+  "n_jobs": 8
+}

@@ -127,6 +127,14 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   `papel` = `mejor_automl` (D44) o `rl_desplegada` (D49-rev), y cada fila de `grupos` lleva `grupo`,
   `variables_quitadas`, `roc_auc_completo`, `roc_auc_sin_grupo`, `perdida` (completo − sin el grupo; cota superior de
   la contribución), `ic95_bootstrap` (pareado), `delong_p` y `tiempo_s`.
+- `sin_exclusion_retirados` (D20, D39, `ml/sensibilidad_fuga.py`): sin búsqueda; mismos papeles que `ablacion`;
+  `poblacion`, `reentrenamiento` y `comparacion` (texto). Por momento `{semana, poblaciones, modelos, tiempo_s}`, con
+  `poblaciones` = `{principal: {n, retiros, prevalencia}, con_fuga: {n, retiros, prevalencia}, retirados_anadidos}`.
+  Cada elemento de `modelos` es `{papel, modelo, calibracion, roc_auc_fuga_su_poblacion, roc_auc_fuga_comunes,
+  roc_auc_principal, inflacion, efecto_evaluar, efecto_entrenar, suma_comprobada, tiempo_s}`; cada componente es
+  `{valor, ic95_bootstrap}` (`efecto_entrenar` añade `delong_p`). `inflacion` = con fuga en su población − principal
+  (lectura primaria, cota inferior por D38) = `efecto_evaluar` + `efecto_entrenar`. Los IC salen de un mismo bootstrap
+  por estudiante sobre la población con fuga.
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
   candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
   `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.

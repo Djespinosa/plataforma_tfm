@@ -91,9 +91,10 @@ def columnas_modelo(catalogo: pd.DataFrame, sin_sensibles: bool) -> dict:
             "imputar_mediana": [c for c in IMPUTAR_MEDIANA if c in numericas]}
 
 
-def cargar_entrenamiento(semana: int, cortes: dict) -> pd.DataFrame:
-    """Filas de entrenamiento del corte; comprueba el SHA-256 registrado en el experimento de cortes."""
-    nombre = f"semana_{semana}.parquet"
+def cargar_entrenamiento(semana: int, cortes: dict, sufijo: str = "") -> pd.DataFrame:
+    """Filas de entrenamiento del corte (sufijo "_sin_exclusion_retirados" para D20); comprueba el SHA-256 registrado en
+    el experimento de cortes."""
+    nombre = f"semana_{semana}{sufijo}.parquet"
     ruta = PROCESADO / nombre
     if sha256(ruta) != cortes["salidas_sha256"][nombre]:
         raise ValueError(f"{nombre} no coincide con el SHA-256 de {cortes['id']}: regenera los cortes")
