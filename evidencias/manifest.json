@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T10:05:59",
-  "commit": "07d7cbc",
+  "generado": "2026-10-29T15:38:49",
+  "commit": "870b8d8",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -11,7 +11,8 @@
     "experimentos/exp-2026-10-28-01.json",
     "experimentos/exp-2026-10-28-02.json",
     "experimentos/exp-2026-10-28-03.json",
-    "experimentos/exp-2026-10-29-01.json"
+    "experimentos/exp-2026-10-29-01.json",
+    "experimentos/exp-2026-10-29-02.json"
   ],
   "figuras": [
     {
@@ -118,6 +119,16 @@
       "archivo": "figuras/exp-2026-10-29-01_sensibilidad_fuga.png",
       "descripcion": "Inflación de la ROC-AUC out-of-fold por no excluir a los ya retirados y su descomposición (evaluar y entrenar con ellos), mejor AutoML y RL desplegada por momento (D20, D39)",
       "experimento": "exp-2026-10-29-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-29-02_shap_rl_desplegada.png",
+      "descripcion": "Importancia SHAP global out-of-fold (media de |SHAP| en log-odds sin calibrar) de la RL desplegada por momento, con el rango entre pliegues y la estabilidad entre pliegues (D9, D32)",
+      "experimento": "exp-2026-10-29-02"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-29-02_shap_mejor_automl.png",
+      "descripcion": "Importancia SHAP global out-of-fold (media de |SHAP| en log-odds sin calibrar) de el mejor AutoML de árboles por momento, con el rango entre pliegues y la estabilidad entre pliegues (D9, D32)",
+      "experimento": "exp-2026-10-29-02"
     }
   ],
   "capturas": [],
@@ -167,6 +178,16 @@
       "archivo": "pruebas/exp-2026-10-29-01_auditoria.md",
       "descripcion": "Auditoría de fugas (agente revisor-fuga) de exp-2026-10-29-01 sobre el commit 07d7cbc: apto con observaciones",
       "experimento": "exp-2026-10-29-01"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-29-02_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de ml/tests en el commit del experimento",
+      "experimento": "exp-2026-10-29-02"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-29-02_auditoria.md",
+      "descripcion": "Auditoría de fugas (agente revisor-fuga) de exp-2026-10-29-02 sobre el commit 870b8d8: apto con observaciones",
+      "experimento": "exp-2026-10-29-02"
     }
   ],
   "usabilidad": []

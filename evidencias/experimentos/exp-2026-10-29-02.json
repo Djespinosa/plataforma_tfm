@@ -1,0 +1,2385 @@
+{
+  "id": "exp-2026-10-29-02",
+  "tipo": "modelado",
+  "fecha": "2026-10-29T15:38:49",
+  "commit": "870b8d8",
+  "descripcion": "SHAP out-of-fold y su estabilidad entre pliegues (D9, D32, D33), sin nueva búsqueda: modelo base sin calibrar con los hiperparámetros del experimento principal (D38) para la RL optimizada desplegada (D49-rev, SHAP lineal exacto) y el mejor AutoML (D44) cuando es de árboles (TreeSHAP); el apilamiento y el MLP (permutación) quedan para la Entrega 3; solo validación cruzada. Configuración: ml/configs/shap.json.",
+  "variante": "shap",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "configuracion": {
+    "nombre": "shap",
+    "variante": "shap",
+    "descripcion": "SHAP out-of-fold y su estabilidad entre pliegues (D9, D32, D33), sin nueva búsqueda: modelo base sin calibrar con los hiperparámetros del experimento principal (D38) para la RL optimizada desplegada (D49-rev, SHAP lineal exacto) y el mejor AutoML (D44) cuando es de árboles (TreeSHAP); el apilamiento y el MLP (permutación) quedan para la Entrega 3; solo validación cruzada.",
+    "hiperparametros_de": "exp-2026-10-27-01",
+    "n_jobs": 8
+  },
+  "experimento_cortes": "exp-2026-10-23-02",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    },
+    "cortes_sha256": {
+      "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c",
+      "semana_4.parquet": "1678b4c811fc1e676d757cae2eb782c38214c8b1aca27ae5912e0744217ee1ee",
+      "semana_8.parquet": "1fba8c215aa58b96b49096c36c69c52fce38ca755995cceccdc287c545e4f76e",
+      "semana_12.parquet": "aea7eba703e29f0412746b681fa91226e88942059e0d75e890028640029ad8cf"
+    }
+  },
+  "variables": {
+    "numericas": [
+      "module_presentation_length",
+      "num_of_prev_attempts",
+      "studied_credits",
+      "date_registration",
+      "falta_date_registration",
+      "clics_total",
+      "dias_activos",
+      "clics_dataplus",
+      "clics_dualpane",
+      "clics_externalquiz",
+      "clics_folder",
+      "clics_forumng",
+      "clics_glossary",
+      "clics_homepage",
+      "clics_oucollaborate",
+      "clics_oucontent",
+      "clics_ouelluminate",
+      "clics_ouwiki",
+      "clics_page",
+      "clics_questionnaire",
+      "clics_quiz",
+      "clics_repeatactivity",
+      "clics_resource",
+      "clics_sharedsubpage",
+      "clics_subpage",
+      "clics_url",
+      "clics_ventana_1",
+      "clics_ventana_2",
+      "clics_ventana_3",
+      "clics_ventana_4",
+      "proporcion_dias_activos_28d",
+      "sin_actividad",
+      "dias_desde_ultima_actividad",
+      "tendencia_4s",
+      "cv_clics_4s",
+      "percentil_clics_total_cohorte",
+      "percentil_dias_activos_cohorte",
+      "percentil_clics_ventana_1_cohorte",
+      "n_evaluaciones_vencidas",
+      "n_entregadas",
+      "proporcion_entregadas",
+      "antelacion_media",
+      "n_entregas_tardias",
+      "n_cma_calificadas",
+      "nota_media_cma",
+      "n_convalidadas",
+      "nota_media_convalidada"
+    ],
+    "categoricas": [
+      "code_module",
+      "tipo_presentacion",
+      "region",
+      "highest_education"
+    ],
+    "imputar_mediana": [
+      "date_registration"
+    ]
+  },
+  "particion": {
+    "estrategia": "temporal",
+    "entrenamiento": "presentaciones anteriores a 2014J (15)",
+    "prueba": "2014J (7)",
+    "validacion": "5 pliegues agrupados por presentación (D29-rev)",
+    "semillas": {
+      "optuna": 42,
+      "modelos": 42,
+      "bootstrap": 42
+    }
+  },
+  "reentrenamiento": "sin nueva búsqueda (D38): en cada pliegue externo, el modelo base sin calibrar con los hiperparámetros y la semilla de exp-2026-10-27-01, ajustado con los otros 4 pliegues: es el modelo base que, con ensemble=False, recibe la calibración del principal (D54). concordancia_con_oof_principal_spearman_min comprueba que su orden coincide con el de las predicciones calibradas del principal (el calibrador es monótono; la isotónica crea empates)",
+  "metodo": "SHAP de las filas de cada pliegue externo en log-odds sin calibrar (D32); los valores de las columnas transformadas se suman por variable original (one-hot e indicador de faltante); las variables que un pliegue descarta por no tener valores reciben 0. Importancia = media de |SHAP| por variable, global (todas las filas out-of-fold) y por pliegue (rango). Estabilidad (D9, D9-concreción): Spearman de las importancias y solapamiento del top-10 entre los 10 pares de pliegues, media y rango, sin umbral. aditividad_error_max = máx. |Σ SHAP + valor base − salida bruta|. SHAP es contribución a la predicción del modelo, no causa",
+  "explicadores": {
+    "rl": "lineal exacto con fondo = filas de ajuste del pliegue",
+    "arboles": "TreeSHAP (D33)",
+    "apilamiento_y_mlp": "explicador de permutación con muestra de fondo (D33): Entrega 3, según la planificación de evidencias de 2026-10-23 (en la Entrega 2, SHAP out-of-fold solo con TreeSHAP y para el modelo desplegado)"
+  },
+  "evaluado_en_prueba": false,
+  "momentos": [
+    {
+      "semana": 0,
+      "n": 19023,
+      "retiros": 4111,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "explicador": "lineal exacto (equivale a shap.LinearExplainer con fondo independiente = filas de ajuste)",
+          "salida": "log-odds sin calibrar (D32)",
+          "coste_s": 23.4,
+          "aditividad_error_max": 5.329070518200751e-15,
+          "concordancia_con_oof_principal_spearman_min": 0.985,
+          "importancia_global": [
+            {
+              "variable": "tipo_presentacion",
+              "media_abs": 0.5865,
+              "rango_pliegues": [
+                0.1537,
+                1.0486
+              ]
+            },
+            {
+              "variable": "module_presentation_length",
+              "media_abs": 0.4543,
+              "rango_pliegues": [
+                0.0166,
+                0.7055
+              ]
+            },
+            {
+              "variable": "code_module",
+              "media_abs": 0.3494,
+              "rango_pliegues": [
+                0.1295,
+                0.6039
+              ]
+            },
+            {
+              "variable": "highest_education",
+              "media_abs": 0.2151,
+              "rango_pliegues": [
+                0.1963,
+                0.2296
+              ]
+            },
+            {
+              "variable": "percentil_clics_total_cohorte",
+              "media_abs": 0.1829,
+              "rango_pliegues": [
+                0.1725,
+                0.1925
+              ]
+            },
+            {
+              "variable": "studied_credits",
+              "media_abs": 0.1773,
+              "rango_pliegues": [
+                0.1379,
+                0.2185
+              ]
+            },
+            {
+              "variable": "dias_activos",
+              "media_abs": 0.084,
+              "rango_pliegues": [
+                0.0312,
+                0.1377
+              ]
+            },
+            {
+              "variable": "cv_clics_4s",
+              "media_abs": 0.0834,
+              "rango_pliegues": [
+                0.0722,
+                0.0993
+              ]
+            },
+            {
+              "variable": "region",
+              "media_abs": 0.0789,
+              "rango_pliegues": [
+                0.0571,
+                0.0951
+              ]
+            },
+            {
+              "variable": "proporcion_dias_activos_28d",
+              "media_abs": 0.0591,
+              "rango_pliegues": [
+                0.0171,
+                0.1013
+              ]
+            },
+            {
+              "variable": "percentil_clics_ventana_1_cohorte",
+              "media_abs": 0.0571,
+              "rango_pliegues": [
+                0.0069,
+                0.1195
+              ]
+            },
+            {
+              "variable": "date_registration",
+              "media_abs": 0.0551,
+              "rango_pliegues": [
+                0.0374,
+                0.0691
+              ]
+            },
+            {
+              "variable": "percentil_dias_activos_cohorte",
+              "media_abs": 0.0529,
+              "rango_pliegues": [
+                0.0038,
+                0.1228
+              ]
+            },
+            {
+              "variable": "clics_subpage",
+              "media_abs": 0.0521,
+              "rango_pliegues": [
+                0.001,
+                0.0988
+              ]
+            },
+            {
+              "variable": "clics_homepage",
+              "media_abs": 0.0471,
+              "rango_pliegues": [
+                0.0353,
+                0.077
+              ]
+            },
+            {
+              "variable": "dias_desde_ultima_actividad",
+              "media_abs": 0.0401,
+              "rango_pliegues": [
+                0.0302,
+                0.0509
+              ]
+            },
+            {
+              "variable": "clics_page",
+              "media_abs": 0.0375,
+              "rango_pliegues": [
+                0.0208,
+                0.0625
+              ]
+            },
+            {
+              "variable": "n_cma_calificadas",
+              "media_abs": 0.0315,
+              "rango_pliegues": [
+                0.0165,
+                0.085
+              ]
+            },
+            {
+              "variable": "clics_ouelluminate",
+              "media_abs": 0.0255,
+              "rango_pliegues": [
+                0.0021,
+                0.1226
+              ]
+            },
+            {
+              "variable": "num_of_prev_attempts",
+              "media_abs": 0.025,
+              "rango_pliegues": [
+                0.0119,
+                0.0372
+              ]
+            },
+            {
+              "variable": "n_convalidadas",
+              "media_abs": 0.021,
+              "rango_pliegues": [
+                0.0149,
+                0.0333
+              ]
+            },
+            {
+              "variable": "sin_actividad",
+              "media_abs": 0.017,
+              "rango_pliegues": [
+                0.0,
+                0.0306
+              ]
+            },
+            {
+              "variable": "nota_media_convalidada",
+              "media_abs": 0.0155,
+              "rango_pliegues": [
+                0.0103,
+                0.0249
+              ]
+            },
+            {
+              "variable": "clics_forumng",
+              "media_abs": 0.0149,
+              "rango_pliegues": [
+                0.0045,
+                0.024
+              ]
+            },
+            {
+              "variable": "clics_ouwiki",
+              "media_abs": 0.0138,
+              "rango_pliegues": [
+                0.0065,
+                0.0275
+              ]
+            },
+            {
+              "variable": "nota_media_cma",
+              "media_abs": 0.0134,
+              "rango_pliegues": [
+                0.0073,
+                0.0296
+              ]
+            },
+            {
+              "variable": "clics_quiz",
+              "media_abs": 0.013,
+              "rango_pliegues": [
+                0.0074,
+                0.0238
+              ]
+            },
+            {
+              "variable": "clics_externalquiz",
+              "media_abs": 0.012,
+              "rango_pliegues": [
+                0.0007,
+                0.0478
+              ]
+            },
+            {
+              "variable": "clics_resource",
+              "media_abs": 0.0094,
+              "rango_pliegues": [
+                0.0018,
+                0.0275
+              ]
+            },
+            {
+              "variable": "clics_oucollaborate",
+              "media_abs": 0.0071,
+              "rango_pliegues": [
+                0.0044,
+                0.0101
+              ]
+            },
+            {
+              "variable": "clics_glossary",
+              "media_abs": 0.0068,
+              "rango_pliegues": [
+                0.0023,
+                0.0251
+              ]
+            },
+            {
+              "variable": "clics_ventana_1",
+              "media_abs": 0.0067,
+              "rango_pliegues": [
+                0.0002,
+                0.0262
+              ]
+            },
+            {
+              "variable": "clics_ventana_2",
+              "media_abs": 0.0063,
+              "rango_pliegues": [
+                0.0,
+                0.0181
+              ]
+            },
+            {
+              "variable": "clics_ventana_3",
+              "media_abs": 0.0037,
+              "rango_pliegues": [
+                0.0001,
+                0.0103
+              ]
+            },
+            {
+              "variable": "clics_oucontent",
+              "media_abs": 0.0033,
+              "rango_pliegues": [
+                0.0,
+                0.0082
+              ]
+            },
+            {
+              "variable": "clics_dualpane",
+              "media_abs": 0.0025,
+              "rango_pliegues": [
+                0.0,
+                0.0075
+              ]
+            },
+            {
+              "variable": "clics_total",
+              "media_abs": 0.0022,
+              "rango_pliegues": [
+                0.0,
+                0.0064
+              ]
+            },
+            {
+              "variable": "clics_url",
+              "media_abs": 0.0019,
+              "rango_pliegues": [
+                0.0005,
+                0.0025
+              ]
+            },
+            {
+              "variable": "tendencia_4s",
+              "media_abs": 0.0015,
+              "rango_pliegues": [
+                0.0,
+                0.006
+              ]
+            },
+            {
+              "variable": "clics_questionnaire",
+              "media_abs": 0.001,
+              "rango_pliegues": [
+                0.0002,
+                0.0027
+              ]
+            },
+            {
+              "variable": "falta_date_registration",
+              "media_abs": 0.0009,
+              "rango_pliegues": [
+                0.0,
+                0.0045
+              ]
+            },
+            {
+              "variable": "clics_sharedsubpage",
+              "media_abs": 0.0005,
+              "rango_pliegues": [
+                0.0002,
+                0.0016
+              ]
+            },
+            {
+              "variable": "clics_ventana_4",
+              "media_abs": 0.0003,
+              "rango_pliegues": [
+                0.0,
+                0.0005
+              ]
+            },
+            {
+              "variable": "clics_dataplus",
+              "media_abs": 0.0003,
+              "rango_pliegues": [
+                0.0,
+                0.0005
+              ]
+            },
+            {
+              "variable": "clics_folder",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "clics_repeatactivity",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "n_entregas_tardias",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "n_evaluaciones_vencidas",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "antelacion_media",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "proporcion_entregadas",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "n_entregadas",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "estabilidad": {
+            "pares": 10,
+            "spearman_media": 0.8539,
+            "spearman_rango": [
+              0.8218,
+              0.9178
+            ],
+            "top10_solape_media": 0.72,
+            "top10_solape_rango": [
+              0.5,
+              0.8
+            ]
+          }
+        },
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "explicador": null,
+          "motivo": "explicador de permutación con muestra de fondo (D33): Entrega 3, según la planificación de evidencias de 2026-10-23 (en la Entrega 2, SHAP out-of-fold solo con TreeSHAP y para el modelo desplegado)"
+        }
+      ],
+      "tiempo_s": 23.4
+    },
+    {
+      "semana": 4,
+      "n": 18304,
+      "retiros": 3320,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "explicador": "lineal exacto (equivale a shap.LinearExplainer con fondo independiente = filas de ajuste)",
+          "salida": "log-odds sin calibrar (D32)",
+          "coste_s": 2.9,
+          "aditividad_error_max": 2.220446049250313e-15,
+          "concordancia_con_oof_principal_spearman_min": 1.0,
+          "importancia_global": [
+            {
+              "variable": "proporcion_entregadas",
+              "media_abs": 0.1563,
+              "rango_pliegues": [
+                0.0888,
+                0.2886
+              ]
+            },
+            {
+              "variable": "percentil_clics_ventana_1_cohorte",
+              "media_abs": 0.1374,
+              "rango_pliegues": [
+                0.1274,
+                0.1463
+              ]
+            },
+            {
+              "variable": "studied_credits",
+              "media_abs": 0.1304,
+              "rango_pliegues": [
+                0.1035,
+                0.156
+              ]
+            },
+            {
+              "variable": "highest_education",
+              "media_abs": 0.1123,
+              "rango_pliegues": [
+                0.097,
+                0.1215
+              ]
+            },
+            {
+              "variable": "n_entregas_tardias",
+              "media_abs": 0.0904,
+              "rango_pliegues": [
+                0.0473,
+                0.1277
+              ]
+            },
+            {
+              "variable": "nota_media_cma",
+              "media_abs": 0.0886,
+              "rango_pliegues": [
+                0.0026,
+                0.1724
+              ]
+            },
+            {
+              "variable": "code_module",
+              "media_abs": 0.0819,
+              "rango_pliegues": [
+                0.0265,
+                0.1198
+              ]
+            },
+            {
+              "variable": "percentil_dias_activos_cohorte",
+              "media_abs": 0.0816,
+              "rango_pliegues": [
+                0.0497,
+                0.0984
+              ]
+            },
+            {
+              "variable": "n_entregadas",
+              "media_abs": 0.0746,
+              "rango_pliegues": [
+                0.0526,
+                0.1372
+              ]
+            },
+            {
+              "variable": "antelacion_media",
+              "media_abs": 0.0656,
+              "rango_pliegues": [
+                0.0404,
+                0.0858
+              ]
+            },
+            {
+              "variable": "date_registration",
+              "media_abs": 0.0637,
+              "rango_pliegues": [
+                0.0493,
+                0.0747
+              ]
+            },
+            {
+              "variable": "clics_page",
+              "media_abs": 0.0633,
+              "rango_pliegues": [
+                0.0497,
+                0.0766
+              ]
+            },
+            {
+              "variable": "tipo_presentacion",
+              "media_abs": 0.0479,
+              "rango_pliegues": [
+                0.0174,
+                0.0736
+              ]
+            },
+            {
+              "variable": "n_evaluaciones_vencidas",
+              "media_abs": 0.045,
+              "rango_pliegues": [
+                0.0053,
+                0.1727
+              ]
+            },
+            {
+              "variable": "n_cma_calificadas",
+              "media_abs": 0.0422,
+              "rango_pliegues": [
+                0.0253,
+                0.0632
+              ]
+            },
+            {
+              "variable": "dias_activos",
+              "media_abs": 0.0381,
+              "rango_pliegues": [
+                0.0267,
+                0.0449
+              ]
+            },
+            {
+              "variable": "clics_ventana_2",
+              "media_abs": 0.034,
+              "rango_pliegues": [
+                0.0159,
+                0.049
+              ]
+            },
+            {
+              "variable": "clics_ouwiki",
+              "media_abs": 0.033,
+              "rango_pliegues": [
+                0.0218,
+                0.0576
+              ]
+            },
+            {
+              "variable": "clics_subpage",
+              "media_abs": 0.0328,
+              "rango_pliegues": [
+                0.0194,
+                0.0614
+              ]
+            },
+            {
+              "variable": "clics_quiz",
+              "media_abs": 0.0306,
+              "rango_pliegues": [
+                0.0212,
+                0.0543
+              ]
+            },
+            {
+              "variable": "clics_questionnaire",
+              "media_abs": 0.0304,
+              "rango_pliegues": [
+                0.0178,
+                0.0511
+              ]
+            },
+            {
+              "variable": "module_presentation_length",
+              "media_abs": 0.0299,
+              "rango_pliegues": [
+                0.0029,
+                0.0838
+              ]
+            },
+            {
+              "variable": "percentil_clics_total_cohorte",
+              "media_abs": 0.0298,
+              "rango_pliegues": [
+                0.0229,
+                0.0369
+              ]
+            },
+            {
+              "variable": "clics_dualpane",
+              "media_abs": 0.029,
+              "rango_pliegues": [
+                0.0135,
+                0.0897
+              ]
+            },
+            {
+              "variable": "region",
+              "media_abs": 0.0263,
+              "rango_pliegues": [
+                0.0224,
+                0.0309
+              ]
+            },
+            {
+              "variable": "clics_url",
+              "media_abs": 0.0248,
+              "rango_pliegues": [
+                0.0125,
+                0.0538
+              ]
+            },
+            {
+              "variable": "clics_oucontent",
+              "media_abs": 0.0242,
+              "rango_pliegues": [
+                0.0077,
+                0.0387
+              ]
+            },
+            {
+              "variable": "nota_media_convalidada",
+              "media_abs": 0.0222,
+              "rango_pliegues": [
+                0.016,
+                0.0332
+              ]
+            },
+            {
+              "variable": "clics_externalquiz",
+              "media_abs": 0.0219,
+              "rango_pliegues": [
+                0.0134,
+                0.0463
+              ]
+            },
+            {
+              "variable": "clics_oucollaborate",
+              "media_abs": 0.0206,
+              "rango_pliegues": [
+                0.0052,
+                0.0306
+              ]
+            },
+            {
+              "variable": "dias_desde_ultima_actividad",
+              "media_abs": 0.0194,
+              "rango_pliegues": [
+                0.0132,
+                0.0337
+              ]
+            },
+            {
+              "variable": "clics_ventana_1",
+              "media_abs": 0.0188,
+              "rango_pliegues": [
+                0.0053,
+                0.0252
+              ]
+            },
+            {
+              "variable": "proporcion_dias_activos_28d",
+              "media_abs": 0.0166,
+              "rango_pliegues": [
+                0.0049,
+                0.0298
+              ]
+            },
+            {
+              "variable": "num_of_prev_attempts",
+              "media_abs": 0.0164,
+              "rango_pliegues": [
+                0.0033,
+                0.0278
+              ]
+            },
+            {
+              "variable": "sin_actividad",
+              "media_abs": 0.0164,
+              "rango_pliegues": [
+                0.0112,
+                0.0216
+              ]
+            },
+            {
+              "variable": "clics_ventana_4",
+              "media_abs": 0.0161,
+              "rango_pliegues": [
+                0.008,
+                0.0243
+              ]
+            },
+            {
+              "variable": "cv_clics_4s",
+              "media_abs": 0.0125,
+              "rango_pliegues": [
+                0.0028,
+                0.0196
+              ]
+            },
+            {
+              "variable": "clics_ouelluminate",
+              "media_abs": 0.0104,
+              "rango_pliegues": [
+                0.001,
+                0.0443
+              ]
+            },
+            {
+              "variable": "tendencia_4s",
+              "media_abs": 0.0099,
+              "rango_pliegues": [
+                0.0082,
+                0.0116
+              ]
+            },
+            {
+              "variable": "n_convalidadas",
+              "media_abs": 0.0092,
+              "rango_pliegues": [
+                0.0074,
+                0.013
+              ]
+            },
+            {
+              "variable": "clics_forumng",
+              "media_abs": 0.0075,
+              "rango_pliegues": [
+                0.0034,
+                0.016
+              ]
+            },
+            {
+              "variable": "clics_resource",
+              "media_abs": 0.0066,
+              "rango_pliegues": [
+                0.0006,
+                0.0104
+              ]
+            },
+            {
+              "variable": "clics_homepage",
+              "media_abs": 0.0065,
+              "rango_pliegues": [
+                0.0023,
+                0.0134
+              ]
+            },
+            {
+              "variable": "clics_glossary",
+              "media_abs": 0.0064,
+              "rango_pliegues": [
+                0.002,
+                0.0257
+              ]
+            },
+            {
+              "variable": "clics_ventana_3",
+              "media_abs": 0.0062,
+              "rango_pliegues": [
+                0.0032,
+                0.0088
+              ]
+            },
+            {
+              "variable": "clics_sharedsubpage",
+              "media_abs": 0.0031,
+              "rango_pliegues": [
+                0.0015,
+                0.0054
+              ]
+            },
+            {
+              "variable": "clics_total",
+              "media_abs": 0.0018,
+              "rango_pliegues": [
+                0.0002,
+                0.004
+              ]
+            },
+            {
+              "variable": "falta_date_registration",
+              "media_abs": 0.0004,
+              "rango_pliegues": [
+                0.0,
+                0.0014
+              ]
+            },
+            {
+              "variable": "clics_dataplus",
+              "media_abs": 0.0003,
+              "rango_pliegues": [
+                0.0,
+                0.0004
+              ]
+            },
+            {
+              "variable": "clics_folder",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "clics_repeatactivity",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "estabilidad": {
+            "pares": 10,
+            "spearman_media": 0.776,
+            "spearman_rango": [
+              0.7195,
+              0.9324
+            ],
+            "top10_solape_media": 0.67,
+            "top10_solape_rango": [
+              0.6,
+              0.8
+            ]
+          }
+        },
+        {
+          "papel": "mejor_automl",
+          "modelo": "catboost",
+          "explicador": "TreeSHAP (shap.TreeExplainer, tree_path_dependent)",
+          "salida": "log-odds sin calibrar (D32)",
+          "coste_s": 37.0,
+          "aditividad_error_max": 6.661338147750939e-15,
+          "concordancia_con_oof_principal_spearman_min": 0.984,
+          "importancia_global": [
+            {
+              "variable": "antelacion_media",
+              "media_abs": 0.1523,
+              "rango_pliegues": [
+                0.1381,
+                0.1861
+              ]
+            },
+            {
+              "variable": "highest_education",
+              "media_abs": 0.1143,
+              "rango_pliegues": [
+                0.0995,
+                0.1234
+              ]
+            },
+            {
+              "variable": "studied_credits",
+              "media_abs": 0.1092,
+              "rango_pliegues": [
+                0.086,
+                0.1269
+              ]
+            },
+            {
+              "variable": "nota_media_cma",
+              "media_abs": 0.1036,
+              "rango_pliegues": [
+                0.0636,
+                0.1428
+              ]
+            },
+            {
+              "variable": "code_module",
+              "media_abs": 0.0947,
+              "rango_pliegues": [
+                0.028,
+                0.2165
+              ]
+            },
+            {
+              "variable": "percentil_clics_ventana_1_cohorte",
+              "media_abs": 0.0916,
+              "rango_pliegues": [
+                0.0745,
+                0.1194
+              ]
+            },
+            {
+              "variable": "n_evaluaciones_vencidas",
+              "media_abs": 0.0784,
+              "rango_pliegues": [
+                0.0563,
+                0.1498
+              ]
+            },
+            {
+              "variable": "proporcion_entregadas",
+              "media_abs": 0.0698,
+              "rango_pliegues": [
+                0.0456,
+                0.1213
+              ]
+            },
+            {
+              "variable": "n_entregas_tardias",
+              "media_abs": 0.055,
+              "rango_pliegues": [
+                0.0225,
+                0.0897
+              ]
+            },
+            {
+              "variable": "date_registration",
+              "media_abs": 0.0544,
+              "rango_pliegues": [
+                0.0428,
+                0.0821
+              ]
+            },
+            {
+              "variable": "dias_desde_ultima_actividad",
+              "media_abs": 0.0512,
+              "rango_pliegues": [
+                0.0387,
+                0.0588
+              ]
+            },
+            {
+              "variable": "percentil_dias_activos_cohorte",
+              "media_abs": 0.0389,
+              "rango_pliegues": [
+                0.0235,
+                0.0519
+              ]
+            },
+            {
+              "variable": "tipo_presentacion",
+              "media_abs": 0.0364,
+              "rango_pliegues": [
+                0.019,
+                0.0687
+              ]
+            },
+            {
+              "variable": "percentil_clics_total_cohorte",
+              "media_abs": 0.0354,
+              "rango_pliegues": [
+                0.0251,
+                0.0588
+              ]
+            },
+            {
+              "variable": "module_presentation_length",
+              "media_abs": 0.0318,
+              "rango_pliegues": [
+                0.0153,
+                0.0642
+              ]
+            },
+            {
+              "variable": "clics_page",
+              "media_abs": 0.0289,
+              "rango_pliegues": [
+                0.0127,
+                0.0508
+              ]
+            },
+            {
+              "variable": "clics_ventana_2",
+              "media_abs": 0.0237,
+              "rango_pliegues": [
+                0.0083,
+                0.0532
+              ]
+            },
+            {
+              "variable": "clics_externalquiz",
+              "media_abs": 0.0219,
+              "rango_pliegues": [
+                0.0152,
+                0.0429
+              ]
+            },
+            {
+              "variable": "clics_homepage",
+              "media_abs": 0.0155,
+              "rango_pliegues": [
+                0.0133,
+                0.0196
+              ]
+            },
+            {
+              "variable": "clics_subpage",
+              "media_abs": 0.0148,
+              "rango_pliegues": [
+                0.0092,
+                0.0198
+              ]
+            },
+            {
+              "variable": "cv_clics_4s",
+              "media_abs": 0.0144,
+              "rango_pliegues": [
+                0.0062,
+                0.021
+              ]
+            },
+            {
+              "variable": "clics_questionnaire",
+              "media_abs": 0.0136,
+              "rango_pliegues": [
+                0.007,
+                0.0294
+              ]
+            },
+            {
+              "variable": "n_cma_calificadas",
+              "media_abs": 0.0135,
+              "rango_pliegues": [
+                0.0021,
+                0.0268
+              ]
+            },
+            {
+              "variable": "clics_oucontent",
+              "media_abs": 0.0126,
+              "rango_pliegues": [
+                0.0045,
+                0.02
+              ]
+            },
+            {
+              "variable": "tendencia_4s",
+              "media_abs": 0.012,
+              "rango_pliegues": [
+                0.0068,
+                0.0273
+              ]
+            },
+            {
+              "variable": "n_entregadas",
+              "media_abs": 0.0119,
+              "rango_pliegues": [
+                0.0049,
+                0.0187
+              ]
+            },
+            {
+              "variable": "dias_activos",
+              "media_abs": 0.0116,
+              "rango_pliegues": [
+                0.0082,
+                0.0148
+              ]
+            },
+            {
+              "variable": "clics_ventana_4",
+              "media_abs": 0.0115,
+              "rango_pliegues": [
+                0.0074,
+                0.0164
+              ]
+            },
+            {
+              "variable": "clics_ouwiki",
+              "media_abs": 0.0115,
+              "rango_pliegues": [
+                0.0041,
+                0.0208
+              ]
+            },
+            {
+              "variable": "clics_dualpane",
+              "media_abs": 0.0115,
+              "rango_pliegues": [
+                0.0059,
+                0.0213
+              ]
+            },
+            {
+              "variable": "clics_quiz",
+              "media_abs": 0.0096,
+              "rango_pliegues": [
+                0.0046,
+                0.0201
+              ]
+            },
+            {
+              "variable": "proporcion_dias_activos_28d",
+              "media_abs": 0.0094,
+              "rango_pliegues": [
+                0.0045,
+                0.0145
+              ]
+            },
+            {
+              "variable": "region",
+              "media_abs": 0.0093,
+              "rango_pliegues": [
+                0.0054,
+                0.0124
+              ]
+            },
+            {
+              "variable": "clics_total",
+              "media_abs": 0.009,
+              "rango_pliegues": [
+                0.0057,
+                0.0102
+              ]
+            },
+            {
+              "variable": "clics_oucollaborate",
+              "media_abs": 0.0089,
+              "rango_pliegues": [
+                0.002,
+                0.0182
+              ]
+            },
+            {
+              "variable": "clics_ventana_3",
+              "media_abs": 0.0086,
+              "rango_pliegues": [
+                0.0035,
+                0.0128
+              ]
+            },
+            {
+              "variable": "clics_forumng",
+              "media_abs": 0.0085,
+              "rango_pliegues": [
+                0.0046,
+                0.013
+              ]
+            },
+            {
+              "variable": "clics_ventana_1",
+              "media_abs": 0.0072,
+              "rango_pliegues": [
+                0.0035,
+                0.0094
+              ]
+            },
+            {
+              "variable": "clics_resource",
+              "media_abs": 0.0065,
+              "rango_pliegues": [
+                0.0033,
+                0.0119
+              ]
+            },
+            {
+              "variable": "clics_url",
+              "media_abs": 0.0061,
+              "rango_pliegues": [
+                0.0025,
+                0.0103
+              ]
+            },
+            {
+              "variable": "num_of_prev_attempts",
+              "media_abs": 0.0039,
+              "rango_pliegues": [
+                0.0034,
+                0.0051
+              ]
+            },
+            {
+              "variable": "clics_ouelluminate",
+              "media_abs": 0.0021,
+              "rango_pliegues": [
+                0.0001,
+                0.0088
+              ]
+            },
+            {
+              "variable": "nota_media_convalidada",
+              "media_abs": 0.001,
+              "rango_pliegues": [
+                0.0001,
+                0.002
+              ]
+            },
+            {
+              "variable": "n_convalidadas",
+              "media_abs": 0.0007,
+              "rango_pliegues": [
+                0.0003,
+                0.002
+              ]
+            },
+            {
+              "variable": "clics_glossary",
+              "media_abs": 0.0005,
+              "rango_pliegues": [
+                0.0002,
+                0.001
+              ]
+            },
+            {
+              "variable": "clics_sharedsubpage",
+              "media_abs": 0.0002,
+              "rango_pliegues": [
+                0.0,
+                0.0006
+              ]
+            },
+            {
+              "variable": "sin_actividad",
+              "media_abs": 0.0001,
+              "rango_pliegues": [
+                0.0,
+                0.0008
+              ]
+            },
+            {
+              "variable": "clics_dataplus",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0001
+              ]
+            },
+            {
+              "variable": "falta_date_registration",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0001
+              ]
+            },
+            {
+              "variable": "clics_folder",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "variable": "clics_repeatactivity",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "estabilidad": {
+            "pares": 10,
+            "spearman_media": 0.8797,
+            "spearman_rango": [
+              0.8139,
+              0.9177
+            ],
+            "top10_solape_media": 0.75,
+            "top10_solape_rango": [
+              0.7,
+              0.9
+            ]
+          }
+        }
+      ],
+      "tiempo_s": 40.1
+    },
+    {
+      "semana": 8,
+      "n": 17629,
+      "retiros": 2641,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "explicador": "lineal exacto (equivale a shap.LinearExplainer con fondo independiente = filas de ajuste)",
+          "salida": "log-odds sin calibrar (D32)",
+          "coste_s": 2.5,
+          "aditividad_error_max": 5.329070518200751e-15,
+          "concordancia_con_oof_principal_spearman_min": 1.0,
+          "importancia_global": [
+            {
+              "variable": "proporcion_entregadas",
+              "media_abs": 0.2091,
+              "rango_pliegues": [
+                0.1276,
+                0.2974
+              ]
+            },
+            {
+              "variable": "n_entregas_tardias",
+              "media_abs": 0.167,
+              "rango_pliegues": [
+                0.1137,
+                0.2247
+              ]
+            },
+            {
+              "variable": "nota_media_cma",
+              "media_abs": 0.1381,
+              "rango_pliegues": [
+                0.0354,
+                0.2568
+              ]
+            },
+            {
+              "variable": "percentil_clics_ventana_1_cohorte",
+              "media_abs": 0.1238,
+              "rango_pliegues": [
+                0.1066,
+                0.1362
+              ]
+            },
+            {
+              "variable": "antelacion_media",
+              "media_abs": 0.1095,
+              "rango_pliegues": [
+                0.0815,
+                0.1427
+              ]
+            },
+            {
+              "variable": "n_entregadas",
+              "media_abs": 0.1068,
+              "rango_pliegues": [
+                0.0585,
+                0.1659
+              ]
+            },
+            {
+              "variable": "studied_credits",
+              "media_abs": 0.1024,
+              "rango_pliegues": [
+                0.0744,
+                0.1283
+              ]
+            },
+            {
+              "variable": "n_cma_calificadas",
+              "media_abs": 0.0993,
+              "rango_pliegues": [
+                0.0809,
+                0.1562
+              ]
+            },
+            {
+              "variable": "highest_education",
+              "media_abs": 0.0925,
+              "rango_pliegues": [
+                0.0825,
+                0.099
+              ]
+            },
+            {
+              "variable": "code_module",
+              "media_abs": 0.0908,
+              "rango_pliegues": [
+                0.0404,
+                0.141
+              ]
+            },
+            {
+              "variable": "proporcion_dias_activos_28d",
+              "media_abs": 0.0883,
+              "rango_pliegues": [
+                0.0685,
+                0.1148
+              ]
+            },
+            {
+              "variable": "clics_page",
+              "media_abs": 0.0795,
+              "rango_pliegues": [
+                0.06,
+                0.096
+              ]
+            },
+            {
+              "variable": "percentil_dias_activos_cohorte",
+              "media_abs": 0.0697,
+              "rango_pliegues": [
+                0.0401,
+                0.0852
+              ]
+            },
+            {
+              "variable": "date_registration",
+              "media_abs": 0.0542,
+              "rango_pliegues": [
+                0.0309,
+                0.0742
+              ]
+            },
+            {
+              "variable": "clics_dualpane",
+              "media_abs": 0.0532,
+              "rango_pliegues": [
+                0.0329,
+                0.099
+              ]
+            },
+            {
+              "variable": "cv_clics_4s",
+              "media_abs": 0.052,
+              "rango_pliegues": [
+                0.0384,
+                0.0662
+              ]
+            },
+            {
+              "variable": "dias_activos",
+              "media_abs": 0.0506,
+              "rango_pliegues": [
+                0.0393,
+                0.0621
+              ]
+            },
+            {
+              "variable": "clics_ouwiki",
+              "media_abs": 0.0428,
+              "rango_pliegues": [
+                0.0339,
+                0.0592
+              ]
+            },
+            {
+              "variable": "clics_url",
+              "media_abs": 0.0383,
+              "rango_pliegues": [
+                0.0215,
+                0.0906
+              ]
+            },
+            {
+              "variable": "clics_questionnaire",
+              "media_abs": 0.0323,
+              "rango_pliegues": [
+                0.0182,
+                0.0451
+              ]
+            },
+            {
+              "variable": "region",
+              "media_abs": 0.0298,
+              "rango_pliegues": [
+                0.024,
+                0.0335
+              ]
+            },
+            {
+              "variable": "clics_subpage",
+              "media_abs": 0.0258,
+              "rango_pliegues": [
+                0.012,
+                0.0651
+              ]
+            },
+            {
+              "variable": "tipo_presentacion",
+              "media_abs": 0.0241,
+              "rango_pliegues": [
+                0.0032,
+                0.0428
+              ]
+            },
+            {
+              "variable": "nota_media_convalidada",
+              "media_abs": 0.0231,
+              "rango_pliegues": [
+                0.0154,
+                0.031
+              ]
+            },
+            {
+              "variable": "clics_ventana_2",
+              "media_abs": 0.0229,
+              "rango_pliegues": [
+                0.0166,
+                0.0268
+              ]
+            },
+            {
+              "variable": "clics_forumng",
+              "media_abs": 0.0225,
+              "rango_pliegues": [
+                0.0134,
+                0.0316
+              ]
+            },
+            {
+              "variable": "clics_quiz",
+              "media_abs": 0.0221,
+              "rango_pliegues": [
+                0.0117,
+                0.035
+              ]
+            },
+            {
+              "variable": "clics_oucollaborate",
+              "media_abs": 0.0178,
+              "rango_pliegues": [
+                0.0109,
+                0.0252
+              ]
+            },
+            {
+              "variable": "percentil_clics_total_cohorte",
+              "media_abs": 0.0173,
+              "rango_pliegues": [
+                0.0065,
+                0.0339
+              ]
+            },
+            {
+              "variable": "clics_oucontent",
+              "media_abs": 0.0172,
+              "rango_pliegues": [
+                0.0019,
+                0.0274
+              ]
+            },
+            {
+              "variable": "clics_ventana_3",
+              "media_abs": 0.0169,
+              "rango_pliegues": [
+                0.0053,
+                0.0357
+              ]
+            },
+            {
+              "variable": "clics_ouelluminate",
+              "media_abs": 0.0168,
+              "rango_pliegues": [
+                0.0002,
+                0.0845
+              ]
+            },
+            {
+              "variable": "num_of_prev_attempts",
+              "media_abs": 0.0165,
+              "rango_pliegues": [
+                0.0088,
+                0.0282
+              ]
+            },
+            {
+              "variable": "clics_total",
+              "media_abs": 0.0152,
+              "rango_pliegues": [
+                0.0089,
+                0.026
+              ]
+            },
+            {
+              "variable": "n_evaluaciones_vencidas",
+              "media_abs": 0.0132,
+              "rango_pliegues": [
+                0.0012,
+                0.0298
+              ]
+            },
+            {
+              "variable": "module_presentation_length",
+              "media_abs": 0.0121,
+              "rango_pliegues": [
+                0.0029,
+                0.0203
+              ]
+            },
+            {
+              "variable": "clics_glossary",
+              "media_abs": 0.0105,
+              "rango_pliegues": [
+                0.0029,
+                0.0448
+              ]
+            },
+            {
+              "variable": "clics_ventana_1",
+              "media_abs": 0.0103,
+              "rango_pliegues": [
+                0.0064,
+                0.0175
+              ]
+            },
+            {
+              "variable": "dias_desde_ultima_actividad",
+              "media_abs": 0.0093,
+              "rango_pliegues": [
+                0.0054,
+                0.0157
+              ]
+            },
+            {
+              "variable": "clics_externalquiz",
+              "media_abs": 0.0076,
+              "rango_pliegues": [
+                0.0013,
+                0.0266
+              ]
+            },
+            {
+              "variable": "sin_actividad",
+              "media_abs": 0.0073,
+              "rango_pliegues": [
+                0.0037,
+                0.0126
+              ]
+            },
+            {
+              "variable": "clics_homepage",
+              "media_abs": 0.0065,
+              "rango_pliegues": [
+                0.0009,
+                0.0088
+              ]
+            },
+            {
+              "variable": "clics_sharedsubpage",
+              "media_abs": 0.0052,
+              "rango_pliegues": [
+                0.0032,
+                0.0093
+              ]
+            },
+            {
+              "variable": "clics_resource",
+              "media_abs": 0.0033,
+              "rango_pliegues": [
+                0.0003,
+                0.0103
+              ]
+            },
+            {
+              "variable": "clics_ventana_4",
+              "media_abs": 0.0032,
+              "rango_pliegues": [
+                0.0005,
+                0.0078
+              ]
+            },
+            {
+              "variable": "tendencia_4s",
+              "media_abs": 0.0031,
+              "rango_pliegues": [
+                0.0012,
+                0.0054
+              ]
+            },
+            {
+              "variable": "n_convalidadas",
+              "media_abs": 0.0031,
+              "rango_pliegues": [
+                0.0,
+                0.0062
+              ]
+            },
+            {
+              "variable": "clics_dataplus",
+              "media_abs": 0.0013,
+              "rango_pliegues": [
+                0.0,
+                0.0018
+              ]
+            },
+            {
+              "variable": "falta_date_registration",
+              "media_abs": 0.0004,
+              "rango_pliegues": [
+                0.0,
+                0.0014
+              ]
+            },
+            {
+              "variable": "clics_repeatactivity",
+              "media_abs": 0.0003,
+              "rango_pliegues": [
+                0.0,
+                0.0004
+              ]
+            },
+            {
+              "variable": "clics_folder",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "estabilidad": {
+            "pares": 10,
+            "spearman_media": 0.8594,
+            "spearman_rango": [
+              0.7951,
+              0.9383
+            ],
+            "top10_solape_media": 0.71,
+            "top10_solape_rango": [
+              0.6,
+              0.8
+            ]
+          }
+        },
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "explicador": null,
+          "motivo": "explicador de permutación con muestra de fondo (D33): Entrega 3, según la planificación de evidencias de 2026-10-23 (en la Entrega 2, SHAP out-of-fold solo con TreeSHAP y para el modelo desplegado)"
+        }
+      ],
+      "tiempo_s": 2.6
+    },
+    {
+      "semana": 12,
+      "n": 17146,
+      "retiros": 2154,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "explicador": "lineal exacto (equivale a shap.LinearExplainer con fondo independiente = filas de ajuste)",
+          "salida": "log-odds sin calibrar (D32)",
+          "coste_s": 3.6,
+          "aditividad_error_max": 7.105427357601002e-15,
+          "concordancia_con_oof_principal_spearman_min": 0.9864,
+          "importancia_global": [
+            {
+              "variable": "tipo_presentacion",
+              "media_abs": 0.4628,
+              "rango_pliegues": [
+                0.3129,
+                0.5708
+              ]
+            },
+            {
+              "variable": "n_entregas_tardias",
+              "media_abs": 0.4432,
+              "rango_pliegues": [
+                0.312,
+                0.5825
+              ]
+            },
+            {
+              "variable": "module_presentation_length",
+              "media_abs": 0.3887,
+              "rango_pliegues": [
+                0.2584,
+                0.5194
+              ]
+            },
+            {
+              "variable": "proporcion_dias_activos_28d",
+              "media_abs": 0.2977,
+              "rango_pliegues": [
+                0.1911,
+                0.4421
+              ]
+            },
+            {
+              "variable": "dias_activos",
+              "media_abs": 0.2925,
+              "rango_pliegues": [
+                0.2421,
+                0.3348
+              ]
+            },
+            {
+              "variable": "proporcion_entregadas",
+              "media_abs": 0.2368,
+              "rango_pliegues": [
+                0.1744,
+                0.2925
+              ]
+            },
+            {
+              "variable": "n_cma_calificadas",
+              "media_abs": 0.2351,
+              "rango_pliegues": [
+                0.1384,
+                0.3031
+              ]
+            },
+            {
+              "variable": "code_module",
+              "media_abs": 0.2156,
+              "rango_pliegues": [
+                0.0134,
+                0.494
+              ]
+            },
+            {
+              "variable": "n_entregadas",
+              "media_abs": 0.2153,
+              "rango_pliegues": [
+                0.1135,
+                0.4191
+              ]
+            },
+            {
+              "variable": "nota_media_cma",
+              "media_abs": 0.1661,
+              "rango_pliegues": [
+                0.0618,
+                0.2269
+              ]
+            },
+            {
+              "variable": "percentil_dias_activos_cohorte",
+              "media_abs": 0.1592,
+              "rango_pliegues": [
+                0.0742,
+                0.2115
+              ]
+            },
+            {
+              "variable": "dias_desde_ultima_actividad",
+              "media_abs": 0.1322,
+              "rango_pliegues": [
+                0.1157,
+                0.154
+              ]
+            },
+            {
+              "variable": "highest_education",
+              "media_abs": 0.1249,
+              "rango_pliegues": [
+                0.1066,
+                0.1379
+              ]
+            },
+            {
+              "variable": "clics_dualpane",
+              "media_abs": 0.1033,
+              "rango_pliegues": [
+                0.0649,
+                0.1576
+              ]
+            },
+            {
+              "variable": "antelacion_media",
+              "media_abs": 0.0876,
+              "rango_pliegues": [
+                0.0498,
+                0.1249
+              ]
+            },
+            {
+              "variable": "n_evaluaciones_vencidas",
+              "media_abs": 0.0873,
+              "rango_pliegues": [
+                0.0168,
+                0.1894
+              ]
+            },
+            {
+              "variable": "studied_credits",
+              "media_abs": 0.0872,
+              "rango_pliegues": [
+                0.0587,
+                0.114
+              ]
+            },
+            {
+              "variable": "cv_clics_4s",
+              "media_abs": 0.0821,
+              "rango_pliegues": [
+                0.0569,
+                0.1081
+              ]
+            },
+            {
+              "variable": "region",
+              "media_abs": 0.0773,
+              "rango_pliegues": [
+                0.0708,
+                0.0903
+              ]
+            },
+            {
+              "variable": "percentil_clics_ventana_1_cohorte",
+              "media_abs": 0.0771,
+              "rango_pliegues": [
+                0.0492,
+                0.1166
+              ]
+            },
+            {
+              "variable": "percentil_clics_total_cohorte",
+              "media_abs": 0.0682,
+              "rango_pliegues": [
+                0.004,
+                0.1222
+              ]
+            },
+            {
+              "variable": "clics_url",
+              "media_abs": 0.0589,
+              "rango_pliegues": [
+                0.0364,
+                0.1156
+              ]
+            },
+            {
+              "variable": "clics_page",
+              "media_abs": 0.0526,
+              "rango_pliegues": [
+                0.0278,
+                0.0744
+              ]
+            },
+            {
+              "variable": "clics_forumng",
+              "media_abs": 0.0495,
+              "rango_pliegues": [
+                0.0322,
+                0.0644
+              ]
+            },
+            {
+              "variable": "clics_ventana_1",
+              "media_abs": 0.0488,
+              "rango_pliegues": [
+                0.027,
+                0.0635
+              ]
+            },
+            {
+              "variable": "date_registration",
+              "media_abs": 0.0426,
+              "rango_pliegues": [
+                0.0151,
+                0.0648
+              ]
+            },
+            {
+              "variable": "clics_ouwiki",
+              "media_abs": 0.0421,
+              "rango_pliegues": [
+                0.0191,
+                0.064
+              ]
+            },
+            {
+              "variable": "clics_quiz",
+              "media_abs": 0.0414,
+              "rango_pliegues": [
+                0.0125,
+                0.0943
+              ]
+            },
+            {
+              "variable": "clics_ouelluminate",
+              "media_abs": 0.0396,
+              "rango_pliegues": [
+                0.0025,
+                0.1844
+              ]
+            },
+            {
+              "variable": "clics_total",
+              "media_abs": 0.0309,
+              "rango_pliegues": [
+                0.0191,
+                0.0458
+              ]
+            },
+            {
+              "variable": "num_of_prev_attempts",
+              "media_abs": 0.0285,
+              "rango_pliegues": [
+                0.0187,
+                0.0432
+              ]
+            },
+            {
+              "variable": "clics_ventana_4",
+              "media_abs": 0.0278,
+              "rango_pliegues": [
+                0.0054,
+                0.0579
+              ]
+            },
+            {
+              "variable": "clics_glossary",
+              "media_abs": 0.0263,
+              "rango_pliegues": [
+                0.0071,
+                0.1148
+              ]
+            },
+            {
+              "variable": "clics_questionnaire",
+              "media_abs": 0.026,
+              "rango_pliegues": [
+                0.0026,
+                0.0793
+              ]
+            },
+            {
+              "variable": "clics_ventana_2",
+              "media_abs": 0.0237,
+              "rango_pliegues": [
+                0.0084,
+                0.066
+              ]
+            },
+            {
+              "variable": "clics_subpage",
+              "media_abs": 0.0237,
+              "rango_pliegues": [
+                0.0063,
+                0.0593
+              ]
+            },
+            {
+              "variable": "sin_actividad",
+              "media_abs": 0.0231,
+              "rango_pliegues": [
+                0.0174,
+                0.0273
+              ]
+            },
+            {
+              "variable": "n_convalidadas",
+              "media_abs": 0.0211,
+              "rango_pliegues": [
+                0.0132,
+                0.0478
+              ]
+            },
+            {
+              "variable": "tendencia_4s",
+              "media_abs": 0.0199,
+              "rango_pliegues": [
+                0.0091,
+                0.0357
+              ]
+            },
+            {
+              "variable": "clics_oucontent",
+              "media_abs": 0.016,
+              "rango_pliegues": [
+                0.0027,
+                0.035
+              ]
+            },
+            {
+              "variable": "clics_externalquiz",
+              "media_abs": 0.0158,
+              "rango_pliegues": [
+                0.005,
+                0.0425
+              ]
+            },
+            {
+              "variable": "clics_ventana_3",
+              "media_abs": 0.0157,
+              "rango_pliegues": [
+                0.005,
+                0.0273
+              ]
+            },
+            {
+              "variable": "nota_media_convalidada",
+              "media_abs": 0.009,
+              "rango_pliegues": [
+                0.0023,
+                0.0163
+              ]
+            },
+            {
+              "variable": "clics_homepage",
+              "media_abs": 0.0083,
+              "rango_pliegues": [
+                0.0003,
+                0.0172
+              ]
+            },
+            {
+              "variable": "clics_oucollaborate",
+              "media_abs": 0.0082,
+              "rango_pliegues": [
+                0.0031,
+                0.0147
+              ]
+            },
+            {
+              "variable": "clics_sharedsubpage",
+              "media_abs": 0.0056,
+              "rango_pliegues": [
+                0.001,
+                0.0108
+              ]
+            },
+            {
+              "variable": "clics_resource",
+              "media_abs": 0.0043,
+              "rango_pliegues": [
+                0.0006,
+                0.0101
+              ]
+            },
+            {
+              "variable": "clics_dataplus",
+              "media_abs": 0.0011,
+              "rango_pliegues": [
+                0.0,
+                0.0015
+              ]
+            },
+            {
+              "variable": "falta_date_registration",
+              "media_abs": 0.0007,
+              "rango_pliegues": [
+                0.0001,
+                0.0024
+              ]
+            },
+            {
+              "variable": "clics_repeatactivity",
+              "media_abs": 0.0005,
+              "rango_pliegues": [
+                0.0,
+                0.0006
+              ]
+            },
+            {
+              "variable": "clics_folder",
+              "media_abs": 0.0,
+              "rango_pliegues": [
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "estabilidad": {
+            "pares": 10,
+            "spearman_media": 0.8362,
+            "spearman_rango": [
+              0.7481,
+              0.8884
+            ],
+            "top10_solape_media": 0.81,
+            "top10_solape_rango": [
+              0.7,
+              0.9
+            ]
+          }
+        },
+        {
+          "papel": "mejor_automl",
+          "modelo": "apilamiento",
+          "explicador": null,
+          "motivo": "explicador de permutación con muestra de fondo (D33): Entrega 3, según la planificación de evidencias de 2026-10-23 (en la Entrega 2, SHAP out-of-fold solo con TreeSHAP y para el modelo desplegado)"
+        }
+      ],
+      "tiempo_s": 3.7
+    }
+  ],
+  "metricas_test": null,
+  "motivos_null": {
+    "metricas_test": "Entrega 2: solo validación cruzada; 2014J se evalúa una vez en la Entrega 3",
+    "momentos.modelos.explicador": "explicador de permutación con muestra de fondo (D33): Entrega 3, según la planificación de evidencias de 2026-10-23 (en la Entrega 2, SHAP out-of-fold solo con TreeSHAP y para el modelo desplegado)"
+  },
+  "predicciones_oof_sha256": {
+    "carpeta": "data/procesado/oof",
+    "exp-2026-10-29-02_shap_semana_0.parquet": "d6f52d4fc27fa4b2b9049e72cf5222fb45c5806c183ca2d55e09b7ffcf545a22",
+    "exp-2026-10-29-02_shap_semana_4.parquet": "3ad8adb21ad84d5f80a8bc183a30b238c80feef20bad090c248b74df49aad23e",
+    "exp-2026-10-29-02_shap_semana_8.parquet": "36682cf654c601ecba010e3696c85c987f33f9744b90dfb6fa748735173d58eb",
+    "exp-2026-10-29-02_shap_semana_12.parquet": "022fb5d3562d014d1c13423b422e49e7d91d9705ccd2006153e4a8a1aa9ca411"
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10",
+    "shap": "0.54.1",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
+    "pytest": "9.1.1"
+  },
+  "hardware": {
+    "procesador": "AMD Ryzen 7 4800H with Radeon Graphics",
+    "nucleos_fisicos": 8,
+    "nucleos_logicos": 16,
+    "memoria_gb": 15.4,
+    "sistema": "Windows 11"
+  },
+  "n_jobs": {
+    "valor": 8,
+    "nivel": "n_jobs actúa dentro de cada modelo: hilos de rf, xgb, lgbm y catboost. Los ensayos de Optuna, los pliegues, la calibración y el apilamiento se ejecutan en serie. rl (liblinear) usa un hilo; gb (OpenMP) y mlp (BLAS de numpy) usan el paralelismo interno de su biblioteca, que n_jobs no controla"
+  },
+  "pruebas": {
+    "informe": "pruebas/exp-2026-10-29-02_pruebas.xml",
+    "superadas": 133,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "tiempo_ejecucion_s": 726.4,
+  "figuras": [
+    "figuras/exp-2026-10-29-02_shap_rl_desplegada.png",
+    "figuras/exp-2026-10-29-02_shap_mejor_automl.png"
+  ]
+}
