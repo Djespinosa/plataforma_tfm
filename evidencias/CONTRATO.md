@@ -108,7 +108,8 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 }
 ```
 
-- `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20) o `ablacion` (D46).
+- `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20), `ablacion` (D46) o `shap`
+  (D9, D32).
   Las variantes que reutilizan hiperparámetros indican `hiperparametros_de: "<id del experimento principal>"`.
 - `con_sensibles` (D8, `ml/variante.py`): sin búsqueda; `reentrenamiento` y `comparacion` (texto); por momento
   `{semana, n, retiros, mejor_automl_principal, desplegado_principal, por_modelo, mejores, tiempo_s}`. Cada fila de
@@ -133,8 +134,17 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   Cada elemento de `modelos` es `{papel, modelo, calibracion, roc_auc_fuga_su_poblacion, roc_auc_fuga_comunes,
   roc_auc_principal, inflacion, efecto_evaluar, efecto_entrenar, suma_comprobada, tiempo_s}`; cada componente es
   `{valor, ic95_bootstrap}` (`efecto_entrenar` añade `delong_p`). `inflacion` = con fuga en su población − principal
-  (lectura primaria, cota inferior por D38) = `efecto_evaluar` + `efecto_entrenar`. Los IC salen de un mismo bootstrap
+  (lectura primaria; estimación previsiblemente sesgada a la baja por D38, no una cota garantizada) = `efecto_evaluar` +
+  `efecto_entrenar`. `efecto_entrenar` incluye el recálculo de los percentiles de cohorte sobre la población con fuga
+  (efecto aislado en la RL ≤ 0,001; auditoría de exp-2026-10-29-01, m2). Los IC salen de un mismo bootstrap
   por estudiante sobre la población con fuga.
+- `shap` (D9, D32, D33, `ml/shap_estabilidad.py`): sin búsqueda; `reentrenamiento`, `metodo` y `explicadores` (texto).
+  Por momento `{semana, n, retiros, modelos, tiempo_s}`; cada elemento de `modelos` es `{papel, modelo, explicador,
+  salida, coste_s, aditividad_error_max, concordancia_con_oof_principal_spearman_min, importancia_global, estabilidad}`,
+  con `importancia_global` = lista ordenada de `{variable, media_abs, rango_pliegues}` (media de |SHAP| en log-odds sin
+  calibrar, por variable original) y `estabilidad` = `{pares, spearman_media, spearman_rango, top10_solape_media,
+  top10_solape_rango}`. Un modelo sin explicador en esta entrega lleva `explicador: null` y `motivo`. Los valores SHAP
+  *out-of-fold* por fila van en `data/procesado/oof/<id>_shap_semana_<k>.parquet` (SHA-256 en el JSON).
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
   candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
   `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.
