@@ -187,7 +187,7 @@ def figura_importancia(momentos: list[dict], papel: str, ruta: Path, n_variables
     """Un panel por momento con el modelo de ese papel: top de variables por media de |SHAP| y su rango entre pliegues."""
     filas = [(m["semana"], next(r for r in m["modelos"] if r["papel"] == papel)) for m in momentos]
     filas = [(s, r) for s, r in filas if r["explicador"]]
-    fig, ejes = plt.subplots(1, len(filas), figsize=(max(3.4 * len(filas) + 1.4, 5.5), 5.2), squeeze=False)
+    fig, ejes = plt.subplots(1, len(filas), figsize=(max(3.4 * len(filas) + 1.4, 7.5), 5.4), squeeze=False)
     maximo = max(v["rango_pliegues"][1] for _, r in filas for v in r["importancia_global"][:n_variables])
     for ax, (semana, r) in zip(ejes[0], filas):
         top = r["importancia_global"][:n_variables]
@@ -206,7 +206,8 @@ def figura_importancia(momentos: list[dict], papel: str, ruta: Path, n_variables
         ax.set_xlabel("media de |SHAP| (log-odds)", fontsize=8)
         _estilo(ax)
     fig.suptitle("Importancia SHAP global out-of-fold con el rango entre pliegues\n"
-                 "contribución a la predicción del modelo, no causa; estabilidad = media entre los 10 pares de pliegues",
+                 "contribución a la predicción del modelo, no causa\n"
+                 "estabilidad = media entre los 10 pares de pliegues",
                  color=TINTA, fontsize=9)
     fig.tight_layout()
     fig.savefig(ruta, dpi=DPI)
