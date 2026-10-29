@@ -108,8 +108,8 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
 }
 ```
 
-- `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20), `ablacion` (D46) o `shap`
-  (D9, D32).
+- `variante`: `principal`, `sin_sensibles`, `con_sensibles`, `sin_exclusion_retirados` (D20), `ablacion` (D46), `shap`
+  (D9, D32) o `modelo_final` (D41).
   Las variantes que reutilizan hiperparámetros indican `hiperparametros_de: "<id del experimento principal>"`.
 - `con_sensibles` (D8, `ml/variante.py`): sin búsqueda; `reentrenamiento` y `comparacion` (texto); por momento
   `{semana, n, retiros, mejor_automl_principal, desplegado_principal, por_modelo, mejores, tiempo_s}`. Cada fila de
@@ -145,6 +145,12 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   calibrar, por variable original) y `estabilidad` = `{pares, spearman_media, spearman_rango, top10_solape_media,
   top10_solape_rango}`. Un modelo sin explicador en esta entrega lleva `explicador: null` y `motivo`. Los valores SHAP
   *out-of-fold* por fila van en `data/procesado/oof/<id>_shap_semana_<k>.parquet` (SHA-256 en el JSON).
+- `modelo_final` (D41, D31-rev, `ml/modelo_final.py`): sin búsqueda ni evaluación en prueba (`metricas_test: null`);
+  `reentrenamiento` y `umbral_transferido` (texto). Por momento `{semana, n, retiros, presentaciones, modelo,
+  hiperparametros, calibracion: {metodo, cv, ensemble}, umbral: {valor, origen, punto_operacion_oof}, explicador,
+  coeficientes_no_nulos, columnas_transformadas, aditividad_error_max, tiempo_s}`. Los paquetes del modelo (modelo
+  calibrado, umbral, columnas y fondo del explicador) van en `data/procesado/modelos/<id>_semana_<k>.joblib`, no
+  versionados, con su SHA-256 en `modelos_sha256`.
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
   candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
   `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.
