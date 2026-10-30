@@ -35,6 +35,8 @@ import shap  # noqa: E402
 from scipy.stats import spearmanr  # noqa: E402
 
 from automl import busqueda  # noqa: E402
+# Movidas a automl.explicacion (docs/diseno-api.md §6.3); se reimportan con el mismo nombre (se.agregar…).
+from automl.explicacion import agregar, variable_original  # noqa: E402, F401
 from cortes_oulad import ejecutar_pruebas  # noqa: E402
 from evidencias import (  # noqa: E402
     EVIDENCIAS,
@@ -65,26 +67,6 @@ PERMUTACION = {"apilamiento", "mlp"}
 TOP = 10
 PENDIENTE = ("explicador de permutación con muestra de fondo (D33): Entrega 3, según la planificación de evidencias de "
              "2026-10-23 (en la Entrega 2, SHAP out-of-fold solo con TreeSHAP y para el modelo desplegado)")
-
-
-def variable_original(columna: str, columnas: dict) -> str:
-    """Variable de la que procede una columna transformada (numérica, indicador de faltante o one-hot)."""
-    if columna in columnas["numericas"]:
-        return columna
-    if columna.startswith("missingindicator_"):
-        return columna.removeprefix("missingindicator_")
-    candidatas = [c for c in columnas["categoricas"] if columna.startswith(f"{c}_")]
-    if not candidatas:
-        raise ValueError(f"No se reconoce la variable de la columna {columna}")
-    return max(candidatas, key=len)
-
-
-def agregar(phi: pd.DataFrame, columnas: dict) -> pd.DataFrame:
-    """Suma los SHAP de las columnas transformadas por variable original; las variables que el pliegue descartó (sin
-    valores) reciben 0."""
-    variables = columnas["numericas"] + columnas["categoricas"]
-    return phi.T.groupby([variable_original(c, columnas) for c in phi.columns]).sum().T.reindex(columns=variables,
-                                                                                                 fill_value=0.0)
 
 
 def explicar(modelo, X_ajuste: pd.DataFrame, X_validacion: pd.DataFrame) -> tuple[pd.DataFrame, np.ndarray, str]:

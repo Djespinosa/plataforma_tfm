@@ -35,8 +35,9 @@ import pandas as pd
 from sklearn.calibration import CalibratedClassifierCV
 
 from automl import busqueda
-from automl.calibracion import METODOS, umbral
-from automl.particion import divisiones
+from automl.calibracion import umbral
+# Movida a automl.motor (docs/diseno-api.md §6.2); se reimporta con el mismo nombre (mf.entrenar_final).
+from automl.motor import entrenar_final
 from cortes_oulad import ejecutar_pruebas
 from evidencias import (
     EVIDENCIAS,
@@ -54,14 +55,6 @@ from shap_estabilidad import agregar
 from variante import predicciones_principal
 
 MODELOS = OOF.parent / "modelos"  # data/procesado/modelos, no versionada
-
-
-def entrenar_final(familia: str, hiperparametros: dict, metodo: str, X: pd.DataFrame, y: pd.Series,
-                   pliegue: pd.Series, columnas: dict, semilla: int, n_jobs: int) -> CalibratedClassifierCV:
-    """Modelo base con todo el entrenamiento y calibrador con las predicciones out-of-fold de los 5 pliegues agrupados
-    (ensemble=False). `divisiones` falla si hay filas sin pliegue (las de 2014J)."""
-    base = busqueda.construir(familia, hiperparametros, **columnas, semilla=semilla, n_jobs=n_jobs)
-    return CalibratedClassifierCV(base, method=METODOS[metodo], cv=divisiones(pliegue), ensemble=False).fit(X, y)
 
 
 def paquete(calibrado: CalibratedClassifierCV, corte: float, columnas: dict, X: pd.DataFrame, semana: int,

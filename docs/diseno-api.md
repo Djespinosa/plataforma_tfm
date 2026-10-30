@@ -538,7 +538,8 @@ Condición de la extracción (requisito del estudiante): (a) las pruebas de `ml/
 **prueba de no regresión manual antes del commit:** ejecutar
 `python ml/experimento.py ml/configs/principal.json --ensayo --n-trials 2 --semanas 0 --n-bootstrap 50 --salida <tmp>`
 en 82a6f9e y tras el cambio, y comparar `momentos` del JSON (sin las claves `tiempo*`) y el parquet OOF (`assert_frame_equal`):
-deben ser idénticos. Los experimentos exportados siguen siendo reproducibles desde su propio commit, y desde el nuevo con
+deben ser idénticos (las predicciones, dentro de atol=1e-9: RandomForest con `n_jobs` > 1 no es reproducible bit a bit
+entre ejecuciones del mismo código; véase el esquema `no_regresion` de CONTRATO.md). Los experimentos exportados siguen siendo reproducibles desde su propio commit, y desde el nuevo con
 los mismos números.
 
 Pruebas (`ml/tests/test_motor.py`): `test_modelar_despliega_un_candidato_y_fija_el_umbral_sobre_sus_oof` (umbral ==
@@ -547,6 +548,21 @@ Pruebas (`ml/tests/test_motor.py`): `test_modelar_despliega_un_candidato_y_fija_
 (monkeypatch de `buscar` tras `modelar`) · `test_entrenar_desplegado_apilamiento_sin_calibracion` ·
 `test_entrenar_desplegado_familia_calibrada_con_5_pliegues_ensemble_false` · `test_curva_calibracion_10_intervalos` ·
 `test_auditar_equidad_con_recuentos_de_referencia`.
+
+Al implementar (incremento 2):
+- `modelar` sin `rl` → `ValueError`. Etapas de `progreso`: el nombre de cada familia, `"referencias"`, `"apilamiento"`
+  (si se pide) y `"comparacion"`; `experimento.py` las imprime (dos líneas más en consola que antes, sin efecto numérico).
+  `momento` toma el corte de `punto_operacion_oof["umbral_exacto"]` (el mismo `float`).
+- `auditar_equidad` lleva un argumento nombrado obligatorio, `recuentos_de` (`"cohorte de prueba"` o
+  `"entrenamiento"`): la función no puede saber de dónde vienen las filas de referencia. Devuelve
+  `{"recuentos_de": …, <atributo>: …}`. Un subgrupo con predicciones que no aparece en la referencia cuenta 0 positivos
+  (es un recuento de esas filas, no un dato que falte).
+- `curva_calibracion` redondea a 4 decimales.
+- `test_motor.py` reduce los predeterminados de rf, gb, xgb, lgbm, catboost y mlp con `monkeypatch` (solo el primer
+  ensayo encolado) para que las 7 familias y el apilamiento tarden unos 35 s.
+- La no regresión es el script `ml/no_regresion.py` (matiz (a)): comando, comparación y exportación en el esquema
+  `analisis: "no_regresion"` de `evidencias/CONTRATO.md`, con su prueba `test_no_regresion.py`. Base: 3395ab4 (desde
+  82a6f9e solo cambiaron `api/` y `validacion.py`). Las pruebas de `ml/tests` eran 169 antes del incremento (201 después).
 
 ### 6.3 `ml/automl/explicacion.py`
 
@@ -594,6 +610,27 @@ Pruebas (`ml/tests/test_explicacion.py`): `test_lineal_reproduce_predecir_y_expl
 catboost, rf, mlp, apilamiento: |Σφ + base − log_odds| < 1e-4) · `test_variables_sin_valores_son_las_descartadas`
 (columna toda vacía → listada y φ = 0) · `test_limite_extremo_igual_que_shap_analisis` · `test_permutacion_reproducible_con_semilla`
 · `test_categorias_nuevas_no_rompen_la_explicacion` · `test_preparar_paquete_exige_desplegado_true`.
+
+Al implementar (incremento 2):
+- **`variables_sin_valores`:** el criterio «sin ninguna columna transformada» no sirve para la RL ni la MLP: en ellas el
+  indicador de faltante sobrevive aunque la variable esté vacía (en el paquete de la semana 0 de exp-2026-10-29-03 queda
+  `missingindicator_antelacion_media`, con coeficiente 0). Criterio implementado: sin ningún valor observado al ajustar
+  el preprocesado (mediana NaN en el `SimpleImputer`, descartada por `DescartarVacias` o, en una categórica, solo la
+  categoría de relleno «faltante»); en el apilamiento, las que no tienen valores para ninguno de sus modelos base. En la
+  semana 0 de 29-03 da `proporcion_entregadas` y `antelacion_media`, ambas con φ = 0 en todas las filas.
+- **TreeSHAP en XGBoost:** con shap 0.54.1, `TreeExplainer(...).expected_value` es una aproximación hasta que se calcula
+  algún SHAP (error de aditividad 0,099 en el sondeo); el valor base se toma después de explicar una fila y el error
+  queda en ~5e-7. `log_odds` de los árboles es la salida bruta nativa (`decision_function`, `output_margin`, `raw_score`,
+  `RawFormulaVal`), que coincide con el logit de la probabilidad sin calibrar (< 1e-5).
+- `preparar_paquete`: sin la clave `semana` (es de OULAD) y con `semilla` (la de la muestra de fondo y la del
+  explicador de permutación). `tipo_explicador` acepta los paquetes de `modelo_final` (sin `familia` ni `explicador`):
+  lineal si el estimador tiene `coef_`. Función auxiliar `explicador_de_familia`.
+- `explicacion_global` no redondea (identidad exacta del matiz D-3) y `sin_contribucion` es una lista de nombres (el
+  motivo es texto de `api/textos.py`).
+- Prueba añadida `test_oulad_paquetes_de_29_03_siguen_funcionando`: los paquetes reales se cargan sin regenerarse y
+  `predecir`/`explicar` dan lo mismo que `modelo_final.predecir_y_explicar` (`assert_frame_equal`).
+- `shap_estabilidad.explicar` (SHAP *out-of-fold* con fondo = filas de ajuste del pliegue) se queda en su script: no es
+  el explicador del modelo desplegado.
 
 ### 6.4 Configuración efectiva guardada (RF-02 f, RNF-06)
 
@@ -745,7 +782,20 @@ Los incrementos 0-6 cubren todos los Must de la plataforma; 7-9 son S/C.
 | D-7 | **Pliegues agrupados genéricos** con `StratifiedGroupKFold` (equilibra la prevalencia entre pliegues), distinto del reparto de D29-rev (3 presentaciones por pliegue, permutación con semilla), que sigue siendo el de OULAD | Aceptar y declararlo en 5.6 de la memoria |
 | D-8 | **Extraer** `motor.py` y `explicacion.py` de `experimento.py`, `modelo_final.py` y `shap_estabilidad.py` (movimientos con reexportación) en vez de duplicar | Extraer, con la no regresión del §6.2 antes del commit |
 
-## 13. Pendientes menores (para después de la congelación del 06/11)
+## 13. Pendientes
+
+**Obligatorios antes de la congelación del 06/11** (no son menores; el estudiante pidió vigilar que no se aplacen):
+
+- **Incremento 6:** `clave_cohorte` normaliza los valores con `automl.validacion.normalizar_valor` (la misma que usa
+  `reservar_prueba`) antes de que se guarde la primera evaluación (incremento 9). Si no, "2014" y 2014.0 reservarían las
+  mismas filas con claves distintas y se reabriría el hueco I-4. Con su prueba.
+- **Incremento 6:** prueba de API `cohorte_prueba_clave == clave_cohorte(configuracion["cohorte_prueba"])` al crear el
+  experimento.
+
+Las cifras que den las revisiones de código (p. ej. la prevalencia por pliegue de la revisión del incremento 1) son
+comprobaciones internas, no citables: si la memoria las quiere, deben llegar como evidencia exportada con su commit.
+
+### Menores (para después de la congelación del 06/11)
 
 Hallazgos menores de las revisiones de código, anotados por decisión del estudiante (solo se corrigen bloqueantes e
 importantes antes de la congelación).
@@ -757,8 +807,6 @@ importantes antes de la congelación).
 | Revisión 2 del incremento 0 | Instalar `ruff` en el entorno para pasar el linter |
 | Revisión 3 del incremento 0 | El hook que oculta la contraseña solo actúa en informes fallidos (`-rA` mostraría la salida de pruebas superadas) |
 | Revisión 3 del incremento 0 | `modelo_evaluado_congelado` lee `experimento` sin `FOR SHARE`: un INSERT concurrente con la evaluación podría colarse (no ocurre con un solo trabajador) |
-| Revisión 3 del incremento 0 | `clave_cohorte`: `1` y `1.0` dan claves distintas; en el incremento 6, normalizar con `automl.validacion.normalizar_valor` (la misma que usa `reservar_prueba`) |
-| Revisión 3 del incremento 0 | **Incremento 6 (no menor, recordatorio):** prueba de API `cohorte_prueba_clave == clave_cohorte(configuracion["cohorte_prueba"])` al crear el experimento; mientras tanto, el desajuste se declara como limitación |
 | Incremento 8 | Exportar el JUnit de `-m postgres` con `--tb=short` |
 | Revisión del incremento 1 | `reservar_prueba` no comprueba que `grupos` tenga el índice de `datos` (si no, la salvaguarda de grupos compartidos se desactiva en silencio) |
 | Revisión del incremento 1 | En modo `aleatoria`, una clase con 1 fila da un `ValueError` de sklearn en inglés; la API no debe devolverlo tal cual |
@@ -766,3 +814,9 @@ importantes antes de la congelación).
 | Revisión del incremento 1 | Pliegue vacío: el mensaje dice «sin filas de una de las clases» aunque no tenga filas |
 | Revisión del incremento 1 | `cohorte` sin la clave `modo` da `KeyError` (lo valida la API) |
 | Revisión del incremento 1 | Pruebas que faltan: prevalencia por pliegue con grupos (distingue `StratifiedGroupKFold` de `GroupKFold`, D-7), índice de grupos distinto, modo desconocido, `y` de una clase |
+| Revisión del incremento 2 | `variables_sin_valores`: en una fila nueva con valor, φ puede no ser 0 (MLP, categórica toda «faltante»); el texto de la API dirá «sin valores en el entrenamiento», no «no contribuye» |
+| Revisión del incremento 2 | Permutación con `max_evals = 2p+1`: una sola permutación antitética, aditiva pero aproximada y dependiente de la semilla; declararlo en la memoria (D33) |
+| Revisión del incremento 2 | Para `decisiones.md` (lo registra el estudiante): RF con permutación (D33 dice «TreeSHAP para árboles») y `auditar_equidad` cuenta 0 en un subgrupo ausente (D50 dice «falla») |
+| Revisión del incremento 2 | `no_regresion.py`: si la copia de `data/` falla, el worktree se elimina igualmente en el `finally`; `--salida evidencias/sub` pasa el filtro de `--arbol-de-trabajo` (usar `is_relative_to`); JUnit huérfano si un ensayo falla |
+| Revisión del incremento 2 | Pruebas que faltan: salvaguardas de base = HEAD y comparación vacía, `proporcion_entregadas` en `variables_sin_valores` de la semana 0 |
+| Revisión del incremento 2 | `explicacion.py`: `calibrated_classifiers_[0]` sin comprobar que haya uno; muestra de `explicacion_global` con `semilla=42` y no `paquete["semilla"]`; guarda `if len(X)` inútil |

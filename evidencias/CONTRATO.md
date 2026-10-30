@@ -204,6 +204,22 @@ sensibilidad_en_entrenamiento, tasa_alerta_en_entrenamiento, lectura, sensibilid
 aplicado a sus propias filas de entrenamiento frente al punto de operación *out-of-fold* del que salió el umbral. Es un
 diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento.
 
+Con `analisis: "no_regresion"` (`ml/no_regresion.py`, docs/diseno-api.md §6.2), sin `contrastes` ni métricas nuevas:
+el mismo ensayo de `experimento.py` en un commit base (git worktree temporal con una copia de `data/`) y en el commit nuevo.
+`commit_base`, `commit_nuevo`, `arbol_de_trabajo` (`true` solo en ensayos con cambios sin confirmar; nunca en una
+exportación), `comando` (el del ensayo) y `metodo` (texto); `ensayos` = `{base, nuevo}`, cada uno `{id, commit,
+configuracion, pruebas}` (ids de la carpeta temporal, no de `evidencias/`); `comparaciones` = `{momentos: {claves_comparadas,
+claves_excluidas, valores_comparados, igual, diferencias}, predicciones_oof: [{semana, filas, columnas, igual, diferencia,
+tolerancia, diferencia_maxima, sha256_base, sha256_nuevo, sha256_igual}]}`, con `momentos` comparado sin las claves
+`tiempo*` (igualdad exacta, NaN igual a NaN, también el orden de las claves) y las predicciones con
+`pandas.testing.assert_frame_equal(check_exact=False, rtol=0, atol=tolerancia)` (columnas no numéricas exactas;
+`tolerancia` = 1e-9 porque RandomForest con `n_jobs` > 1 suma los árboles en el orden en que acaban los hilos, con
+diferencias de redondeo de ~1e-16 que la isotónica y el apilamiento propagan a ~1e-13); `diferencia_maxima` =
+`{columna: máx |base − nuevo|}` de las columnas decimales con diferencia distinta de 0; `diferencias` = lista de
+`{ruta, base, nuevo}` y `diferencia` = mensaje de `assert_frame_equal` o `null`; `identico` (ambas comparaciones iguales,
+las predicciones dentro de la tolerancia); `oof_sha256` = `{base, nuevo}` por semana; `dataset` (el del ensayo nuevo), `hardware` y
+`pruebas` (JUnit del commit nuevo).
+
 ## `manifest.json`
 
 ```json
