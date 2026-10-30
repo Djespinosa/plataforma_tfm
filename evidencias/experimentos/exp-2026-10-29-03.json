@@ -1,0 +1,595 @@
+{
+  "id": "exp-2026-10-29-03",
+  "tipo": "modelado",
+  "fecha": "2026-10-29T16:40:42",
+  "commit": "4e1511e",
+  "descripcion": "Modelo final por momento (D41, D31-rev), sin nueva búsqueda (D38): la RL optimizada desplegada (D49-rev) con sus hiperparámetros y método de calibración del principal, reentrenada con las 15 presentaciones de entrenamiento y calibrada sobre los 5 pliegues agrupados (ensemble=False, D54), con el umbral out-of-fold anidado del principal transferido (D41); preparado sin evaluar en 2014J. Incluye, sin desplegar, el modelo final de la variante con sensibles (P-13) y los parámetros efectivos de Optuna (P-4). Configuración: ml/configs/modelo_final.json.",
+  "variante": "modelo_final",
+  "hiperparametros_de": "exp-2026-10-27-01",
+  "configuracion": {
+    "nombre": "modelo_final",
+    "variante": "modelo_final",
+    "descripcion": "Modelo final por momento (D41, D31-rev), sin nueva búsqueda (D38): la RL optimizada desplegada (D49-rev) con sus hiperparámetros y método de calibración del principal, reentrenada con las 15 presentaciones de entrenamiento y calibrada sobre los 5 pliegues agrupados (ensemble=False, D54), con el umbral out-of-fold anidado del principal transferido (D41); preparado sin evaluar en 2014J. Incluye, sin desplegar, el modelo final de la variante con sensibles (P-13) y los parámetros efectivos de Optuna (P-4).",
+    "hiperparametros_de": "exp-2026-10-27-01",
+    "n_jobs": 8,
+    "con_sensibles_de": "exp-2026-10-28-01",
+    "umbral_con_sensibles_de": "exp-2026-10-28-02"
+  },
+  "experimento_cortes": "exp-2026-10-23-02",
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    },
+    "cortes_sha256": {
+      "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c",
+      "semana_4.parquet": "1678b4c811fc1e676d757cae2eb782c38214c8b1aca27ae5912e0744217ee1ee",
+      "semana_8.parquet": "1fba8c215aa58b96b49096c36c69c52fce38ca755995cceccdc287c545e4f76e",
+      "semana_12.parquet": "aea7eba703e29f0412746b681fa91226e88942059e0d75e890028640029ad8cf"
+    }
+  },
+  "variables": {
+    "numericas": [
+      "module_presentation_length",
+      "num_of_prev_attempts",
+      "studied_credits",
+      "date_registration",
+      "falta_date_registration",
+      "clics_total",
+      "dias_activos",
+      "clics_dataplus",
+      "clics_dualpane",
+      "clics_externalquiz",
+      "clics_folder",
+      "clics_forumng",
+      "clics_glossary",
+      "clics_homepage",
+      "clics_oucollaborate",
+      "clics_oucontent",
+      "clics_ouelluminate",
+      "clics_ouwiki",
+      "clics_page",
+      "clics_questionnaire",
+      "clics_quiz",
+      "clics_repeatactivity",
+      "clics_resource",
+      "clics_sharedsubpage",
+      "clics_subpage",
+      "clics_url",
+      "clics_ventana_1",
+      "clics_ventana_2",
+      "clics_ventana_3",
+      "clics_ventana_4",
+      "proporcion_dias_activos_28d",
+      "sin_actividad",
+      "dias_desde_ultima_actividad",
+      "tendencia_4s",
+      "cv_clics_4s",
+      "percentil_clics_total_cohorte",
+      "percentil_dias_activos_cohorte",
+      "percentil_clics_ventana_1_cohorte",
+      "n_evaluaciones_vencidas",
+      "n_entregadas",
+      "proporcion_entregadas",
+      "antelacion_media",
+      "n_entregas_tardias",
+      "n_cma_calificadas",
+      "nota_media_cma",
+      "n_convalidadas",
+      "nota_media_convalidada"
+    ],
+    "categoricas": [
+      "code_module",
+      "tipo_presentacion",
+      "region",
+      "highest_education"
+    ],
+    "imputar_mediana": [
+      "date_registration"
+    ]
+  },
+  "variables_con_sensibles": {
+    "numericas": [
+      "module_presentation_length",
+      "num_of_prev_attempts",
+      "studied_credits",
+      "date_registration",
+      "falta_date_registration",
+      "clics_total",
+      "dias_activos",
+      "clics_dataplus",
+      "clics_dualpane",
+      "clics_externalquiz",
+      "clics_folder",
+      "clics_forumng",
+      "clics_glossary",
+      "clics_homepage",
+      "clics_oucollaborate",
+      "clics_oucontent",
+      "clics_ouelluminate",
+      "clics_ouwiki",
+      "clics_page",
+      "clics_questionnaire",
+      "clics_quiz",
+      "clics_repeatactivity",
+      "clics_resource",
+      "clics_sharedsubpage",
+      "clics_subpage",
+      "clics_url",
+      "clics_ventana_1",
+      "clics_ventana_2",
+      "clics_ventana_3",
+      "clics_ventana_4",
+      "proporcion_dias_activos_28d",
+      "sin_actividad",
+      "dias_desde_ultima_actividad",
+      "tendencia_4s",
+      "cv_clics_4s",
+      "percentil_clics_total_cohorte",
+      "percentil_dias_activos_cohorte",
+      "percentil_clics_ventana_1_cohorte",
+      "n_evaluaciones_vencidas",
+      "n_entregadas",
+      "proporcion_entregadas",
+      "antelacion_media",
+      "n_entregas_tardias",
+      "n_cma_calificadas",
+      "nota_media_cma",
+      "n_convalidadas",
+      "nota_media_convalidada"
+    ],
+    "categoricas": [
+      "code_module",
+      "tipo_presentacion",
+      "gender",
+      "region",
+      "highest_education",
+      "imd_band",
+      "age_band",
+      "disability"
+    ],
+    "imputar_mediana": [
+      "date_registration"
+    ]
+  },
+  "con_sensibles": "P-13 (D8-concreción-rev): modelo final de la variante con sensibles de exp-2026-10-28-01, con los mismos hiperparámetros (D38), su propio método de calibración y su umbral out-of-fold; no se despliega y solo se prepara para informar ambas variantes en prueba (Entrega 3)",
+  "optuna": {
+    "optimizador": "Optuna",
+    "version": "5.0.0",
+    "muestreador": "TPESampler (semilla de la configuración, parámetros por defecto); primer ensayo encolado con la configuración por defecto de la familia",
+    "parametros_muestreador": {
+      "n_startup_trials": 10,
+      "n_ei_candidates": 24,
+      "multivariate": true,
+      "group": false,
+      "constant_liar": true,
+      "prior_weight": 1.0,
+      "consider_magic_clip": true,
+      "consider_endpoints": false,
+      "gamma": "default_gamma: min(ceil(0,1·n), 25)",
+      "weights": "default_weights: 1 para los 25 ensayos más recientes y rampa lineal para los anteriores"
+    },
+    "podador": "MedianPruner(n_startup_trials=5, n_warmup_steps=1); valor intermedio = media acumulada de ROC-AUC tras cada pliegue",
+    "parametros_podador": {
+      "percentil": 50.0,
+      "n_startup_trials": 5,
+      "n_warmup_steps": 1,
+      "interval_steps": 1,
+      "n_min_trials": 1
+    },
+    "tiempo_maximo_por_busqueda": "ninguno: cada búsqueda termina al completar n_trials (timeout=None)",
+    "metrica_objetivo": "roc_auc (media de los 5 pliegues agrupados por presentación)",
+    "vale_para": "exp-2026-10-27-01: la construcción de TPESampler(seed) y MedianPruner es idéntica desde e49f339 (código de ese experimento) y la versión de Optuna es la misma (P-4)"
+  },
+  "particion": {
+    "estrategia": "temporal",
+    "entrenamiento": "presentaciones anteriores a 2014J (15)",
+    "prueba": "2014J (7)",
+    "validacion": "5 pliegues agrupados por presentación (D29-rev)",
+    "semillas": {
+      "optuna": 42,
+      "modelos": 42,
+      "bootstrap": 42
+    }
+  },
+  "reentrenamiento": "D41/D31-rev: modelo desplegado del principal (RL optimizada, D49-rev) con sus hiperparámetros y método de calibración de exp-2026-10-27-01, sin nueva búsqueda (D38), reentrenado con las 15 presentaciones de entrenamiento; CalibratedClassifierCV sobre los 5 pliegues agrupados con ensemble=False (D54): calibrador ajustado con sus predicciones out-of-fold y modelo base reentrenado con todo el entrenamiento",
+  "umbral_transferido": "D41: el umbral se fija sobre las predicciones out-of-fold calibradas de forma anidada del principal (sensibilidad mínima 0.7, sin margen, D45) y se aplica al modelo final. Es una aproximación: el calibrador final se ajusta de forma distinta a los anidados, así que la sensibilidad en prueba puede no ser la out-of-fold",
+  "calibracion_definicion": "D37/D54: para cada pliegue externo, CalibratedClassifierCV (sigmoid = Platt, isotonic) con los otros 4 pliegues como divisiones internas y ensemble=False: el calibrador se ajusta con las predicciones out-of-fold de esas divisiones y el modelo base se reentrena con los 4 pliegues; método por Brier out-of-fold; métricas por pliegue y out-of-fold sobre las probabilidades calibradas",
+  "evaluado_en_prueba": false,
+  "momentos": [
+    {
+      "semana": 0,
+      "n": 19023,
+      "retiros": 4111,
+      "presentaciones": 15,
+      "modelo": "rl",
+      "hiperparametros": {
+        "C": 52.400505743603105,
+        "l1_ratio": 1.0,
+        "class_weight": null
+      },
+      "calibracion": {
+        "metodo": "isotonica",
+        "cv": "5 pliegues agrupados por presentación (D29-rev)",
+        "ensemble": false
+      },
+      "umbral": {
+        "valor": 0.213612,
+        "origen": "punto_operacion_oof de exp-2026-10-27-01 (D41), recalculado desde sus predicciones out-of-fold calibradas de forma anidada",
+        "punto_operacion_oof": {
+          "umbral": 0.213612,
+          "sensibilidad": 0.7025,
+          "precision": 0.2838,
+          "tasa_alerta": 0.5349,
+          "tasa_falsos_positivos": 0.4887,
+          "matriz_confusion": [
+            [
+              7624,
+              7288
+            ],
+            [
+              1223,
+              2888
+            ]
+          ]
+        }
+      },
+      "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+      "coeficientes_no_nulos": 72,
+      "columnas_transformadas": 79,
+      "aditividad_error_max": 3.552713678800501e-15,
+      "tiempo_s": 21.8,
+      "con_sensibles": {
+        "desplegado": false,
+        "modelo": "rl",
+        "hiperparametros": {
+          "C": 52.400505743603105,
+          "l1_ratio": 1.0,
+          "class_weight": null
+        },
+        "calibracion": {
+          "metodo": "isotonica",
+          "cv": "5 pliegues agrupados por presentación (D29-rev)",
+          "ensemble": false
+        },
+        "umbral": {
+          "valor": 0.206093,
+          "origen": "umbral out-of-fold propio de la variante (D45), recalculado desde las predicciones de exp-2026-10-28-01 y registrado en exp-2026-10-28-02 (exp-2026-10-28-01 no lo registra)",
+          "punto_operacion_oof": {
+            "umbral": 0.206093,
+            "sensibilidad": 0.7105,
+            "precision": 0.2853,
+            "tasa_alerta": 0.5382,
+            "tasa_falsos_positivos": 0.4907,
+            "matriz_confusion": [
+              [
+                7595,
+                7317
+              ],
+              [
+                1190,
+                2921
+              ]
+            ]
+          }
+        },
+        "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+        "coeficientes_no_nulos": 87,
+        "columnas_transformadas": 97,
+        "aditividad_error_max": 3.552713678800501e-15,
+        "tiempo_s": 24.3
+      }
+    },
+    {
+      "semana": 4,
+      "n": 18304,
+      "retiros": 3320,
+      "presentaciones": 15,
+      "modelo": "rl",
+      "hiperparametros": {
+        "C": 0.0024898812812146156,
+        "l1_ratio": 0.0,
+        "class_weight": "balanced"
+      },
+      "calibracion": {
+        "metodo": "platt",
+        "cv": "5 pliegues agrupados por presentación (D29-rev)",
+        "ensemble": false
+      },
+      "umbral": {
+        "valor": 0.150952,
+        "origen": "punto_operacion_oof de exp-2026-10-27-01 (D41), recalculado desde sus predicciones out-of-fold calibradas de forma anidada",
+        "punto_operacion_oof": {
+          "umbral": 0.150952,
+          "sensibilidad": 0.7,
+          "precision": 0.2573,
+          "tasa_alerta": 0.4936,
+          "tasa_falsos_positivos": 0.4478,
+          "matriz_confusion": [
+            [
+              8274,
+              6710
+            ],
+            [
+              996,
+              2324
+            ]
+          ]
+        }
+      },
+      "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+      "coeficientes_no_nulos": 79,
+      "columnas_transformadas": 81,
+      "aditividad_error_max": 1.3322676295501878e-15,
+      "tiempo_s": 2.4,
+      "con_sensibles": {
+        "desplegado": false,
+        "modelo": "rl",
+        "hiperparametros": {
+          "C": 0.0024898812812146156,
+          "l1_ratio": 0.0,
+          "class_weight": "balanced"
+        },
+        "calibracion": {
+          "metodo": "platt",
+          "cv": "5 pliegues agrupados por presentación (D29-rev)",
+          "ensemble": false
+        },
+        "umbral": {
+          "valor": 0.150952,
+          "origen": "umbral out-of-fold propio de la variante (D45), recalculado desde las predicciones de exp-2026-10-28-01 y registrado en exp-2026-10-28-02 (exp-2026-10-28-01 no lo registra)",
+          "punto_operacion_oof": {
+            "umbral": 0.150952,
+            "sensibilidad": 0.7,
+            "precision": 0.2583,
+            "tasa_alerta": 0.4916,
+            "tasa_falsos_positivos": 0.4455,
+            "matriz_confusion": [
+              [
+                8309,
+                6675
+              ],
+              [
+                996,
+                2324
+              ]
+            ]
+          }
+        },
+        "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+        "coeficientes_no_nulos": 97,
+        "columnas_transformadas": 99,
+        "aditividad_error_max": 1.5543122344752192e-15,
+        "tiempo_s": 2.9
+      }
+    },
+    {
+      "semana": 8,
+      "n": 17629,
+      "retiros": 2641,
+      "presentaciones": 15,
+      "modelo": "rl",
+      "hiperparametros": {
+        "C": 0.0028100559580436705,
+        "l1_ratio": 0.0,
+        "class_weight": "balanced"
+      },
+      "calibracion": {
+        "metodo": "platt",
+        "cv": "5 pliegues agrupados por presentación (D29-rev)",
+        "ensemble": false
+      },
+      "umbral": {
+        "valor": 0.132519,
+        "origen": "punto_operacion_oof de exp-2026-10-27-01 (D41), recalculado desde sus predicciones out-of-fold calibradas de forma anidada",
+        "punto_operacion_oof": {
+          "umbral": 0.132519,
+          "sensibilidad": 0.7001,
+          "precision": 0.2318,
+          "tasa_alerta": 0.4524,
+          "tasa_falsos_positivos": 0.4087,
+          "matriz_confusion": [
+            [
+              8862,
+              6126
+            ],
+            [
+              792,
+              1849
+            ]
+          ]
+        }
+      },
+      "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+      "coeficientes_no_nulos": 80,
+      "columnas_transformadas": 81,
+      "aditividad_error_max": 2.6645352591003757e-15,
+      "tiempo_s": 2.3,
+      "con_sensibles": {
+        "desplegado": false,
+        "modelo": "rl",
+        "hiperparametros": {
+          "C": 0.0028100559580436705,
+          "l1_ratio": 0.0,
+          "class_weight": "balanced"
+        },
+        "calibracion": {
+          "metodo": "isotonica",
+          "cv": "5 pliegues agrupados por presentación (D29-rev)",
+          "ensemble": false
+        },
+        "umbral": {
+          "valor": 0.142088,
+          "origen": "umbral out-of-fold propio de la variante (D45), recalculado desde las predicciones de exp-2026-10-28-01 y registrado en exp-2026-10-28-02 (exp-2026-10-28-01 no lo registra)",
+          "punto_operacion_oof": {
+            "umbral": 0.142088,
+            "sensibilidad": 0.7043,
+            "precision": 0.2293,
+            "tasa_alerta": 0.4602,
+            "tasa_falsos_positivos": 0.4172,
+            "matriz_confusion": [
+              [
+                8735,
+                6253
+              ],
+              [
+                781,
+                1860
+              ]
+            ]
+          }
+        },
+        "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+        "coeficientes_no_nulos": 98,
+        "columnas_transformadas": 99,
+        "aditividad_error_max": 2.6645352591003757e-15,
+        "tiempo_s": 2.7
+      }
+    },
+    {
+      "semana": 12,
+      "n": 17146,
+      "retiros": 2154,
+      "presentaciones": 15,
+      "modelo": "rl",
+      "hiperparametros": {
+        "C": 0.06969807555546856,
+        "l1_ratio": 0.0,
+        "class_weight": "balanced"
+      },
+      "calibracion": {
+        "metodo": "isotonica",
+        "cv": "5 pliegues agrupados por presentación (D29-rev)",
+        "ensemble": false
+      },
+      "umbral": {
+        "valor": 0.117117,
+        "origen": "punto_operacion_oof de exp-2026-10-27-01 (D41), recalculado desde sus predicciones out-of-fold calibradas de forma anidada",
+        "punto_operacion_oof": {
+          "umbral": 0.117117,
+          "sensibilidad": 0.7117,
+          "precision": 0.1992,
+          "tasa_alerta": 0.4489,
+          "tasa_falsos_positivos": 0.4111,
+          "matriz_confusion": [
+            [
+              8829,
+              6163
+            ],
+            [
+              621,
+              1533
+            ]
+          ]
+        }
+      },
+      "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+      "coeficientes_no_nulos": 80,
+      "columnas_transformadas": 81,
+      "aditividad_error_max": 2.220446049250313e-15,
+      "tiempo_s": 3.3,
+      "con_sensibles": {
+        "desplegado": false,
+        "modelo": "rl",
+        "hiperparametros": {
+          "C": 0.06969807555546856,
+          "l1_ratio": 0.0,
+          "class_weight": "balanced"
+        },
+        "calibracion": {
+          "metodo": "platt",
+          "cv": "5 pliegues agrupados por presentación (D29-rev)",
+          "ensemble": false
+        },
+        "umbral": {
+          "valor": 0.118287,
+          "origen": "umbral out-of-fold propio de la variante (D45), recalculado desde las predicciones de exp-2026-10-28-01 y registrado en exp-2026-10-28-02 (exp-2026-10-28-01 no lo registra)",
+          "punto_operacion_oof": {
+            "umbral": 0.118287,
+            "sensibilidad": 0.7006,
+            "precision": 0.2046,
+            "tasa_alerta": 0.4301,
+            "tasa_falsos_positivos": 0.3913,
+            "matriz_confusion": [
+              [
+                9126,
+                5866
+              ],
+              [
+                645,
+                1509
+              ]
+            ]
+          }
+        },
+        "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento transformadas",
+        "coeficientes_no_nulos": 98,
+        "columnas_transformadas": 99,
+        "aditividad_error_max": 3.552713678800501e-15,
+        "tiempo_s": 3.7
+      }
+    }
+  ],
+  "metricas_test": null,
+  "motivos_null": {
+    "metricas_test": "D31-rev: la evaluación única en 2014J es de la Entrega 3; este experimento no lee filas de prueba"
+  },
+  "modelos_sha256": {
+    "carpeta": "data/procesado/modelos",
+    "exp-2026-10-29-03_semana_0.joblib": "abd5bf8d892cf8f921ce8ff1821055e4a00e179364cfd7395cdf5e3818769a80",
+    "exp-2026-10-29-03_con_sensibles_semana_0.joblib": "33f6ac5da135ee4fe9ca75df09f49a8594223407da9717a617a1d863a6dde516",
+    "exp-2026-10-29-03_semana_4.joblib": "c0fd920e9c6f333daf29eac156bc443c89851c7dadbe6392bf0a8d997375c388",
+    "exp-2026-10-29-03_con_sensibles_semana_4.joblib": "41b426d121b8cdc24b468612a5c77f9a1715f85245266056e56dbeb1de8d5b11",
+    "exp-2026-10-29-03_semana_8.joblib": "78655fd4ec4829d47fce120fe6172b26503ba69e25366fa447301cb8d244a3f6",
+    "exp-2026-10-29-03_con_sensibles_semana_8.joblib": "dc6e5cea184998da5bb82b909b17cc9a849e176821fe7593c5484910ee718187",
+    "exp-2026-10-29-03_semana_12.joblib": "ee5b8d00509ec2028be94779494f80999726793aa6542cb6dd6c3abfef1bd367",
+    "exp-2026-10-29-03_con_sensibles_semana_12.joblib": "226e3d1dbbe6db42c5185e5fe5cd59b805ee1b34415cbcffa5ae5fa47aabf11a"
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "optuna": "5.0.0",
+    "joblib": "1.6.0",
+    "scipy": "1.18.1",
+    "pytest": "9.1.1"
+  },
+  "hardware": {
+    "procesador": "AMD Ryzen 7 4800H with Radeon Graphics",
+    "nucleos_fisicos": 8,
+    "nucleos_logicos": 16,
+    "memoria_gb": 15.4,
+    "sistema": "Windows 11"
+  },
+  "n_jobs": {
+    "valor": 8,
+    "nivel": "n_jobs actúa dentro de cada modelo: hilos de rf, xgb, lgbm y catboost. Los ensayos de Optuna, los pliegues, la calibración y el apilamiento se ejecutan en serie. rl (liblinear) usa un hilo; gb (OpenMP) y mlp (BLAS de numpy) usan el paralelismo interno de su biblioteca, que n_jobs no controla"
+  },
+  "pruebas": {
+    "informe": "pruebas/exp-2026-10-29-03_pruebas.xml",
+    "superadas": 146,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "tiempo_ejecucion_s": 581.1,
+  "figuras": []
+}
