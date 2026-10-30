@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T21:15:58",
-  "commit": "9d90aed",
+  "generado": "2026-10-29T21:24:11",
+  "commit": "6f3f60d",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -133,6 +133,11 @@
       "archivo": "figuras/exp-2026-10-29-02_shap_mejor_automl.png",
       "descripcion": "Importancia SHAP global out-of-fold (media de |SHAP| en log-odds sin calibrar) de el mejor AutoML de árboles por momento, con el rango entre pliegues y la estabilidad entre pliegues (D9, D32)",
       "experimento": "exp-2026-10-29-02"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-28-03_ablacion_v2.png",
+      "descripcion": "Pérdida de ROC-AUC out-of-fold al quitar cada grupo de variables (completo − sin el grupo), mejor AutoML y RL desplegada por momento (D46) (redibujada con el commit 6f3f60d desde el JSON del experimento, sin reentrenar)",
+      "experimento": "exp-2026-10-28-03"
     }
   ],
   "capturas": [],
