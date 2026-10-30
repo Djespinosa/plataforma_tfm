@@ -53,10 +53,12 @@ Detalle de capas, convenciones, API y modelo de datos: skill `arquitectura`.
 | Agente | `ingeniero-datos` | Cortes de OULAD, población, variables (OE2) |
 | Agente | `ingeniero-ml` | AutoML, referencias, calibración, umbral, comparación, SHAP, equidad (OE3, OE4) |
 | Agente | `revisor-fuga` | Auditoría independiente de fugas y del uso de la prueba (solo lectura) |
+| Agente | `arquitecto` | Diseño de `api/` y `web/` antes de implementar: módulos, contrato de la API, modelo de datos, decisiones técnicas |
+| Agente | `revisor-codigo` | Revisión independiente de calidad antes de cada commit: corrección, capas, simplicidad, seguridad, pruebas (solo lectura) |
 | Agente | `backend` / `frontend` | API Flask + PostgreSQL / interfaz Angular (OE5) |
 | Agente | `tester` | Pruebas del núcleo, de la API y del flujo; Lighthouse y axe (OE5, OE6) |
 | Comando | `/cortes`, `/experimento`, `/comparar` | Construir cortes, ejecutar un experimento, comparar modelos |
-| Comando | `/auditar-fuga`, `/exportar-evidencias`, `/test`, `/estado` | Auditar, validar evidencias, probar, ver el avance |
+| Comando | `/auditar-fuga`, `/revisar-codigo`, `/exportar-evidencias`, `/test`, `/estado` | Auditar fugas, revisar código, validar evidencias, probar, ver el avance |
 
 ## Estado actual (2026-10-27)
 
