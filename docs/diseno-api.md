@@ -252,7 +252,7 @@ pliegues necesita al menos 5 por clase.» · †«La columna de grupo «x» tien
 necesita al menos 5. Indique otra columna de grupo o ninguna.» · †«La columna de grupo «x» tiene valores vacíos en N
 filas.» · †«Con esta columna de grupo, el pliegue N queda sin filas de una de las clases; indique otra columna.» ·
 †«Con columna de grupo, la cohorte de prueba se elige por valores (cohortes completas), no al azar, para que filas
-relacionadas no queden a ambos lados.» · †«Ningún valor de la cohorte de prueba aparece en «x».» · †«La cohorte de prueba
+relacionadas no queden a ambos lados.» · †«Ningún valor de la cohorte de prueba aparece en «x».» · †«Los valores «…» de la cohorte de prueba no aparecen en «x».» · †«La cohorte de prueba
 comparte grupos con el entrenamiento (N grupos); elija cohortes completas.» · «El presupuesto debe ser «completo» o
 «demostracion».».
 
@@ -482,6 +482,10 @@ def asignar_pliegues(y: pd.Series, grupos: pd.Series | None, semilla: int) -> pd
 
 Mensajes: los del §4.2 marcados con †, con `ValueError`. La API añade el nombre de la columna (la función recibe series;
 se le pasa `grupos.rename(columna)` y usa `grupos.name` en el mensaje).
+Comprobaciones añadidas al implementar (incremento 1): `asignar_pliegues` también falla con el mensaje (sin †) de «solo
+una clase» si `y` tiene una única clase y si `grupos` no tiene el mismo índice que `y`; `reservar_prueba` falla con un modo
+distinto de `valores` o `aleatoria`. En el mensaje de la clase, «x» es el valor de `y` (`True`/`False` si la API pasa `y`
+booleana). `StratifiedGroupKFold(shuffle=True, random_state=...)` funciona tal cual con scikit-learn 1.9.1.
 
 Pruebas (`ml/tests/test_validacion.py`, datos sintéticos):
 `test_pliegues_estratificados_reproducibles_con_semilla` (misma semilla → misma serie; otra → distinta) ·
@@ -753,6 +757,12 @@ importantes antes de la congelación).
 | Revisión 2 del incremento 0 | Instalar `ruff` en el entorno para pasar el linter |
 | Revisión 3 del incremento 0 | El hook que oculta la contraseña solo actúa en informes fallidos (`-rA` mostraría la salida de pruebas superadas) |
 | Revisión 3 del incremento 0 | `modelo_evaluado_congelado` lee `experimento` sin `FOR SHARE`: un INSERT concurrente con la evaluación podría colarse (no ocurre con un solo trabajador) |
-| Revisión 3 del incremento 0 | `clave_cohorte`: `1` y `1.0` dan claves distintas; normalizar los valores en la validación de la configuración |
+| Revisión 3 del incremento 0 | `clave_cohorte`: `1` y `1.0` dan claves distintas; en el incremento 6, normalizar con `automl.validacion.normalizar_valor` (la misma que usa `reservar_prueba`) |
 | Revisión 3 del incremento 0 | **Incremento 6 (no menor, recordatorio):** prueba de API `cohorte_prueba_clave == clave_cohorte(configuracion["cohorte_prueba"])` al crear el experimento; mientras tanto, el desajuste se declara como limitación |
 | Incremento 8 | Exportar el JUnit de `-m postgres` con `--tb=short` |
+| Revisión del incremento 1 | `reservar_prueba` no comprueba que `grupos` tenga el índice de `datos` (si no, la salvaguarda de grupos compartidos se desactiva en silencio) |
+| Revisión del incremento 1 | En modo `aleatoria`, una clase con 1 fila da un `ValueError` de sklearn en inglés; la API no debe devolverlo tal cual |
+| Revisión del incremento 1 | `asignar_pliegues` acepta `y` con 3 clases o con NaN (la API construye `y` binaria sin vacíos) |
+| Revisión del incremento 1 | Pliegue vacío: el mensaje dice «sin filas de una de las clases» aunque no tenga filas |
+| Revisión del incremento 1 | `cohorte` sin la clave `modo` da `KeyError` (lo valida la API) |
+| Revisión del incremento 1 | Pruebas que faltan: prevalencia por pliegue con grupos (distingue `StratifiedGroupKFold` de `GroupKFold`, D-7), índice de grupos distinto, modo desconocido, `y` de una clase |
