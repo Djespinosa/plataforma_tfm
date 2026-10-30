@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T16:40:42",
-  "commit": "4e1511e",
+  "generado": "2026-10-29T19:43:33",
+  "commit": "9fe541b",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -13,7 +13,8 @@
     "experimentos/exp-2026-10-28-03.json",
     "experimentos/exp-2026-10-29-01.json",
     "experimentos/exp-2026-10-29-02.json",
-    "experimentos/exp-2026-10-29-03.json"
+    "experimentos/exp-2026-10-29-03.json",
+    "experimentos/exp-2026-10-29-04.json"
   ],
   "figuras": [
     {

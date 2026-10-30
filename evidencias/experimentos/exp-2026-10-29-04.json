@@ -1,0 +1,424 @@
+{
+  "id": "exp-2026-10-29-04",
+  "tipo": "comparacion",
+  "fecha": "2026-10-29T19:43:33",
+  "commit": "9fe541b",
+  "descripcion": "Estabilidad de SHAP en dos versiones (D9) y SHAP locales extremos de la RL desplegada, desde exp-2026-10-29-02 sin reentrenar (auditoría de exp-2026-10-29-02: m1 y O1).",
+  "analisis": "shap_estabilidad_y_extremos",
+  "experimentos": [
+    "exp-2026-10-29-02",
+    "exp-2026-10-27-01"
+  ],
+  "origen_predicciones": "oof",
+  "metodo": {
+    "estabilidad": "importancia por pliegue = media de |SHAP| de sus filas out-of-fold; Spearman y solapamiento del top-10 entre los 10 pares de pliegues, media y rango, sin umbral. 'todas' usa las 51 variables (reproduce el JSON de origen); 'sin_nulas' quita las variables con SHAP nulo en todos los pliegues y es la lectura principal",
+    "extremos": "filas out-of-fold de la RL desplegada con alguna |SHAP| > 5 log-odds sin calibrar (D32). Percentil = porcentaje de filas de entrenamiento del momento con valor ≤ el de la fila. Alerta = probabilidad calibrada out-of-fold del principal ≥ su umbral (D45); como el calibrador de cada pliegue es monótono y el valor base es constante en el pliegue, equivale a Σ SHAP ≥ s_f (comprobado en todas las filas). Contrafactual: cada SHAP acotado a ±5 y la misma s_f. Es una limitación declarada: el modelo no cambia"
+  },
+  "lectura": "descriptiva: SHAP es contribución a la predicción del modelo, no causa",
+  "evaluado_en_prueba": false,
+  "momentos": [
+    {
+      "semana": 0,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "estabilidad": {
+            "todas": {
+              "variables": 51,
+              "pares": 10,
+              "spearman_media": 0.8539,
+              "spearman_rango": [
+                0.8218,
+                0.9178
+              ],
+              "top10_solape_media": 0.72,
+              "top10_solape_rango": [
+                0.5,
+                0.8
+              ]
+            },
+            "sin_nulas": {
+              "variables": 44,
+              "pares": 10,
+              "spearman_media": 0.7975,
+              "spearman_rango": [
+                0.7513,
+                0.8885
+              ],
+              "top10_solape_media": 0.72,
+              "top10_solape_rango": [
+                0.5,
+                0.8
+              ]
+            },
+            "variables_nulas": [
+              "clics_folder",
+              "clics_repeatactivity",
+              "n_evaluaciones_vencidas",
+              "n_entregadas",
+              "proporcion_entregadas",
+              "antelacion_media",
+              "n_entregas_tardias"
+            ]
+          },
+          "extremos": {
+            "n": 19023,
+            "filas_con_extremo": 54,
+            "proporcion": 0.0028,
+            "shap_abs_max": 10.8,
+            "variables": [
+              {
+                "variable": "n_cma_calificadas",
+                "filas": 47,
+                "shap_min": -10.8,
+                "shap_max": -5.4,
+                "valor_min": 1.0,
+                "valor_max": 2.0,
+                "percentil_min": 99.94,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "clics_glossary",
+                "filas": 3,
+                "shap_min": -9.29,
+                "shap_max": -5.93,
+                "valor_min": 226.0,
+                "valor_max": 354.0,
+                "percentil_min": 99.99,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "falta_date_registration",
+                "filas": 2,
+                "shap_min": -5.39,
+                "shap_max": -5.39,
+                "valor_min": 1.0,
+                "valor_max": 1.0,
+                "percentil_min": 100.0,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "clics_ouelluminate",
+                "filas": 1,
+                "shap_min": -7.02,
+                "shap_max": -7.02,
+                "valor_min": 47.0,
+                "valor_max": 47.0,
+                "percentil_min": 100.0,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "clics_resource",
+                "filas": 1,
+                "shap_min": 10.1,
+                "shap_max": 10.1,
+                "valor_min": 1794.0,
+                "valor_max": 1794.0,
+                "percentil_min": 100.0,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "nota_media_cma",
+                "filas": 1,
+                "shap_min": 5.76,
+                "shap_max": 5.76,
+                "valor_min": 65.0,
+                "valor_max": 65.0,
+                "percentil_min": 6.38,
+                "percentil_max": 6.38
+              }
+            ],
+            "alerta": {
+              "alertadas": 9527,
+              "cambian_al_acotar": 0,
+              "dejan_de_alertar": 0,
+              "pasan_a_alertar": 0,
+              "cambian_entre_filas_con_extremo": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "semana": 4,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "estabilidad": {
+            "todas": {
+              "variables": 51,
+              "pares": 10,
+              "spearman_media": 0.776,
+              "spearman_rango": [
+                0.7195,
+                0.9324
+              ],
+              "top10_solape_media": 0.67,
+              "top10_solape_rango": [
+                0.6,
+                0.8
+              ]
+            },
+            "sin_nulas": {
+              "variables": 49,
+              "pares": 10,
+              "spearman_media": 0.7475,
+              "spearman_rango": [
+                0.6838,
+                0.924
+              ],
+              "top10_solape_media": 0.67,
+              "top10_solape_rango": [
+                0.6,
+                0.8
+              ]
+            },
+            "variables_nulas": [
+              "clics_folder",
+              "clics_repeatactivity"
+            ]
+          },
+          "extremos": {
+            "n": 18304,
+            "filas_con_extremo": 2,
+            "proporcion": 0.0001,
+            "shap_abs_max": 6.25,
+            "variables": [
+              {
+                "variable": "clics_glossary",
+                "filas": 2,
+                "shap_min": -6.25,
+                "shap_max": -5.82,
+                "valor_min": 628.0,
+                "valor_max": 675.0,
+                "percentil_min": 99.99,
+                "percentil_max": 100.0
+              }
+            ],
+            "alerta": {
+              "alertadas": 9034,
+              "cambian_al_acotar": 0,
+              "dejan_de_alertar": 0,
+              "pasan_a_alertar": 0,
+              "cambian_entre_filas_con_extremo": 0
+            }
+          }
+        },
+        {
+          "papel": "mejor_automl",
+          "modelo": "catboost",
+          "estabilidad": {
+            "todas": {
+              "variables": 51,
+              "pares": 10,
+              "spearman_media": 0.8797,
+              "spearman_rango": [
+                0.8139,
+                0.9177
+              ],
+              "top10_solape_media": 0.75,
+              "top10_solape_rango": [
+                0.7,
+                0.9
+              ]
+            },
+            "sin_nulas": {
+              "variables": 49,
+              "pares": 10,
+              "spearman_media": 0.8648,
+              "spearman_rango": [
+                0.7908,
+                0.9075
+              ],
+              "top10_solape_media": 0.75,
+              "top10_solape_rango": [
+                0.7,
+                0.9
+              ]
+            },
+            "variables_nulas": [
+              "clics_folder",
+              "clics_repeatactivity"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "semana": 8,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "estabilidad": {
+            "todas": {
+              "variables": 51,
+              "pares": 10,
+              "spearman_media": 0.8594,
+              "spearman_rango": [
+                0.7951,
+                0.9383
+              ],
+              "top10_solape_media": 0.71,
+              "top10_solape_rango": [
+                0.6,
+                0.8
+              ]
+            },
+            "sin_nulas": {
+              "variables": 50,
+              "pares": 10,
+              "spearman_media": 0.851,
+              "spearman_rango": [
+                0.7826,
+                0.9347
+              ],
+              "top10_solape_media": 0.71,
+              "top10_solape_rango": [
+                0.6,
+                0.8
+              ]
+            },
+            "variables_nulas": [
+              "clics_folder"
+            ]
+          },
+          "extremos": {
+            "n": 17629,
+            "filas_con_extremo": 4,
+            "proporcion": 0.0002,
+            "shap_abs_max": 12.91,
+            "variables": [
+              {
+                "variable": "clics_glossary",
+                "filas": 2,
+                "shap_min": -12.91,
+                "shap_max": -8.16,
+                "valor_min": 757.0,
+                "valor_max": 1197.0,
+                "percentil_min": 99.99,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "clics_page",
+                "filas": 1,
+                "shap_min": 5.37,
+                "shap_max": 5.37,
+                "valor_min": 176.0,
+                "valor_max": 176.0,
+                "percentil_min": 100.0,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "clics_url",
+                "filas": 1,
+                "shap_min": -7.1,
+                "shap_max": -7.1,
+                "valor_min": 1305.0,
+                "valor_max": 1305.0,
+                "percentil_min": 100.0,
+                "percentil_max": 100.0
+              }
+            ],
+            "alerta": {
+              "alertadas": 7974,
+              "cambian_al_acotar": 0,
+              "dejan_de_alertar": 0,
+              "pasan_a_alertar": 0,
+              "cambian_entre_filas_con_extremo": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "semana": 12,
+      "modelos": [
+        {
+          "papel": "rl_desplegada",
+          "modelo": "rl",
+          "estabilidad": {
+            "todas": {
+              "variables": 51,
+              "pares": 10,
+              "spearman_media": 0.8362,
+              "spearman_rango": [
+                0.7481,
+                0.8884
+              ],
+              "top10_solape_media": 0.81,
+              "top10_solape_rango": [
+                0.7,
+                0.9
+              ]
+            },
+            "sin_nulas": {
+              "variables": 50,
+              "pares": 10,
+              "spearman_media": 0.8262,
+              "spearman_rango": [
+                0.7329,
+                0.8816
+              ],
+              "top10_solape_media": 0.81,
+              "top10_solape_rango": [
+                0.7,
+                0.9
+              ]
+            },
+            "variables_nulas": [
+              "clics_folder"
+            ]
+          },
+          "extremos": {
+            "n": 17146,
+            "filas_con_extremo": 16,
+            "proporcion": 0.0009,
+            "shap_abs_max": 40.59,
+            "variables": [
+              {
+                "variable": "clics_glossary",
+                "filas": 14,
+                "shap_min": -40.59,
+                "shap_max": -5.08,
+                "valor_min": 229.0,
+                "valor_max": 1823.0,
+                "percentil_min": 99.9,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "clics_ouelluminate",
+                "filas": 1,
+                "shap_min": 5.06,
+                "shap_max": 5.06,
+                "valor_min": 179.0,
+                "valor_max": 179.0,
+                "percentil_min": 100.0,
+                "percentil_max": 100.0
+              },
+              {
+                "variable": "clics_url",
+                "filas": 1,
+                "shap_min": -10.94,
+                "shap_max": -10.94,
+                "valor_min": 1719.0,
+                "valor_max": 1719.0,
+                "percentil_min": 100.0,
+                "percentil_max": 100.0
+              }
+            ],
+            "alerta": {
+              "alertadas": 7696,
+              "cambian_al_acotar": 0,
+              "dejan_de_alertar": 0,
+              "pasan_a_alertar": 0,
+              "cambian_entre_filas_con_extremo": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
