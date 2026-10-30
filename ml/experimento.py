@@ -361,7 +361,7 @@ def figura_familias(resumenes: list[dict], ruta: Path) -> None:
         mayoritaria = next((i for i, f in enumerate(filas) if f["modelo"] == "mayoritaria"), None)
         if mayoritaria is not None:
             f = filas[mayoritaria]
-            ax.annotate(f"{coma(f['roc_auc_oof'])} agrupada; {coma(f['roc_auc_media'], 2)} en cada pliegue (D40)",
+            ax.annotate(f"{coma(f['roc_auc_oof'])} agrupada; {coma(f['roc_auc_media'], 2)} en cada pliegue",
                         (f["roc_auc_oof"], mayoritaria), xytext=(8, 0), textcoords="offset points", va="center",
                         fontsize=6.5, color=TINTA_SECUNDARIA)
         ax.set_yticks(posiciones, [ETIQUETA_FAMILIA.get(f["modelo"], f["modelo"]) for f in filas])

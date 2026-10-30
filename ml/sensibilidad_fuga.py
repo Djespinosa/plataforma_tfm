@@ -191,8 +191,9 @@ def figura_inflacion(momentos: list[dict], ruta: Path) -> None:
         ax.title.set_fontsize(9)
         _estilo(ax)
     fig.legend(*ejes[0].get_legend_handles_labels(), loc="lower center", ncol=3, fontsize=7, frameon=False)
-    fig.suptitle("Sensibilidad a la fuga (D20): no excluir a los ya retirados, con IC 95 %\n"
-                 "hiperparámetros del principal (D38): la inflación es una cota inferior", color=TINTA, fontsize=10)
+    fig.suptitle("Sensibilidad a la fuga: no excluir a los ya retirados, con IC 95 %\n"
+                 "hiperparámetros buscados sin fuga: la inflación es una estimación previsiblemente sesgada a la baja",
+                 color=TINTA, fontsize=10)
     fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(ruta, dpi=DPI)
     plt.close(fig)
@@ -277,7 +278,8 @@ def main() -> None:
                            "de calibración que eligió el principal; el apilamiento, la salida del metamodelo (D52), y "
                            "solo se reentrena el apilamiento (misma ruta que la ablación; "
                            "test_oulad_ruta_abreviada_reproduce_el_principal_en_la_semana_8 en el JUnit). Los "
-                           "hiperparámetros se buscaron sin fuga: la inflación es una cota inferior (D38)",
+                           "hiperparámetros se buscaron sin fuga: la inflación es una estimación previsiblemente sesgada a la "
+                           "baja (D38)",
         "comparacion": "por modelo y momento: inflación = ROC-AUC out-of-fold del modelo con fuga en su población − la "
                        f"del principal ({principal['id']}, SHA-256 comprobado) en la suya (lectura primaria, D20). "
                        "Descomposición: efecto_evaluar = con fuga en su población − con fuga en las filas comunes; "

@@ -93,7 +93,7 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
                    "candidatos": [{"modelo": "rl", "perdida": 0.0, "ic95_bootstrap": [0.0, 0.0], "delong_p": 0.0, "cumple": true}]},
     "modelo_desplegado": {"modelo": "…", "motivo": "D33/D49-rev: …"},
     "calibracion": {"metodo": "isotonica", "brier_sin_calibrar": 0.0, "brier_calibrado": 0.0, "anidada": true},
-    "punto_operacion_oof": {"umbral": 0.0, "sensibilidad": 0.0, "precision": 0.0, "tasa_alerta": 0.0, "matriz_confusion": [[0, 0], [0, 0]]},
+    "punto_operacion_oof": {"umbral": 0.0, "umbral_exacto": 0.0, "sensibilidad": 0.0, "precision": 0.0, "tasa_alerta": 0.0, "matriz_confusion": [[0, 0], [0, 0]]},
     "desglose": {"CCC": {}, "resto": {}},
     "shap": {"explicador": "tree", "coste_s": 0, "estabilidad": {"spearman_media": 0.0, "spearman_rango": [0.0, 0.0], "top10_solape_media": 0.0, "top10_solape_rango": [0.0, 0.0]}},
     "equidad_oof": {"gender": {"subgrupos": {"F": {"n": 0, "retiros": 0, "retiros_prueba": 0, "sensibilidad": 0.0, "sensibilidad_ic95": [0.0, 0.0],
@@ -116,9 +116,13 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   `por_modelo` lleva los campos de una familia más `roc_auc_con`, `roc_auc_sin`, `diferencia` (con − sin = coste de
   excluirlas), `ic95_bootstrap` (pareado), `delong_p` y `alcanza_margen` (diferencia ≥ 0,02); `mejores` compara el mejor
   candidato de cada variante (`mejor_con`, `mejor_sin`). `salvaguarda_d38`: `{regla, margen, activada, activadores}`.
+- `umbral` va redondeado a 6 decimales; `umbral_exacto` (desde 2026-10-29) es el valor con que se calculan las alertas.
+  Con la isotónica hay bloques de empates en el umbral: aplicar el redondeado puede dejarlos fuera (P-18).
 - Las figuras de un experimento se pueden redibujar desde sus predicciones *out-of-fold* (`ml/figuras_experimento.py`)
   con un sufijo nuevo (p. ej. `_v2`), sin sobrescribir las anteriores; el manifiesto registra el commit del dibujo.
-  Ejes y etiquetas con coma decimal.
+  Las variantes (D8, ablación, D20, SHAP) se redibujan desde su JSON; en SHAP, con la estabilidad sin variables nulas
+  de un análisis `shap_estabilidad_y_extremos` (`--estabilidad`). Ejes y etiquetas con coma decimal y sin códigos de
+  decisión.
 - Las referencias tienen los mismos campos que las familias (la mayoritaria, sin hiperparámetros). `rl_optimizada` repite
   los de la familia `rl` y añade `igual_que`.
 - `shap` es `null` con su motivo en `motivos_null` (`"momentos.shap"`) mientras no se calcule (F3).
@@ -126,8 +130,8 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   (`grupos`: nombre y variables de cada uno) y `reentrenamiento` y `comparacion` (texto). Por momento
   `{semana, n, retiros, modelos, tiempo_s}`; cada elemento de `modelos` es `{papel, modelo, calibracion, grupos}`, con
   `papel` = `mejor_automl` (D44) o `rl_desplegada` (D49-rev), y cada fila de `grupos` lleva `grupo`,
-  `variables_quitadas`, `roc_auc_completo`, `roc_auc_sin_grupo`, `perdida` (completo − sin el grupo; cota superior de
-  la contribución), `ic95_bootstrap` (pareado), `delong_p` y `tiempo_s`.
+  `variables_quitadas`, `roc_auc_completo`, `roc_auc_sin_grupo`, `perdida` (completo − sin el grupo; estimación
+  sesgada al alza de la contribución), `ic95_bootstrap` (pareado), `delong_p` y `tiempo_s`.
 - `sin_exclusion_retirados` (D20, D39, `ml/sensibilidad_fuga.py`): sin búsqueda; mismos papeles que `ablacion`;
   `poblacion`, `reentrenamiento` y `comparacion` (texto). Por momento `{semana, poblaciones, modelos, tiempo_s}`, con
   `poblaciones` = `{principal: {n, retiros, prevalencia}, con_fuga: {n, retiros, prevalencia}, retirados_anadidos}`.
@@ -147,13 +151,16 @@ Esquema de exp-2026-10-05-02: `dataset` (con `distribucion_clases` y `distribuci
   *out-of-fold* por fila van en `data/procesado/oof/<id>_shap_semana_<k>.parquet` (SHA-256 en el JSON).
 - `modelo_final` (D41, D31-rev, `ml/modelo_final.py`): sin búsqueda ni evaluación en prueba (`metricas_test: null`);
   `reentrenamiento` y `umbral_transferido` (texto). Por momento `{semana, n, retiros, presentaciones, modelo,
-  hiperparametros, calibracion: {metodo, cv, ensemble}, umbral: {valor, origen, punto_operacion_oof}, explicador,
+  hiperparametros, calibracion: {metodo, cv, ensemble}, umbral: {valor, valor_exacto, origen, punto_operacion_oof},
+  diagnostico_d41, explicador,
   coeficientes_no_nulos, columnas_transformadas, aditividad_error_max, tiempo_s}`. Los paquetes del modelo (modelo
   calibrado, umbral, columnas y fondo del explicador) van en `data/procesado/modelos/<id>_semana_<k>.joblib`, no
   versionados, con su SHA-256 en `modelos_sha256`. Cada momento lleva además `con_sensibles` (P-13): `{desplegado:
   false}` y los mismos campos para la variante con sensibles, con su método de calibración y su umbral out-of-fold
   (paquete `<id>_con_sensibles_semana_<k>.joblib`); a nivel raíz, `variables_con_sensibles`, `con_sensibles` (texto) y
-  `optuna` (parámetros efectivos del muestreador y el podador, con `vale_para`, P-4).
+  `optuna` (parámetros efectivos del muestreador y el podador, con `vale_para`, P-4). `diagnostico_d41` (P-19):
+  `{sensibilidad_en_entrenamiento, tasa_alerta_en_entrenamiento, lectura}`, el modelo final con el umbral transferido
+  sobre sus propias filas de entrenamiento; diagnóstico de la aproximación D41, dentro de la muestra, no rendimiento.
 - `mejor_automl` (D44): candidato distinto de la RL con mayor `roc_auc_oof`, apilamiento incluido. `parsimonia.mejor`:
   candidato de mayor `roc_auc_oof`, RL incluida. `perdida` = ROC-AUC *out-of-fold* del mejor − la del candidato;
   `cumple` = límite superior de `ic95_bootstrap` < `margen` (D49-rev). `delong_p` solo se informa.
@@ -184,9 +191,18 @@ reentrenar: `metodo` (texto: `estabilidad`, `extremos`) y `lectura`; por momento
 `{papel, modelo, estabilidad: {todas, sin_nulas, variables_nulas}}` (cada versión con `variables` y los campos de
 estabilidad del esquema `shap`; `todas` reproduce el experimento de origen y `sin_nulas` es la lectura principal). La RL
 desplegada añade `extremos`: `{n, filas_con_extremo, proporcion, shap_abs_max, variables, alerta}`, con `variables` =
-lista de `{variable, filas, shap_min, shap_max}` más `valor_min`, `valor_max`, `percentil_min` y `percentil_max` (o
-`valores` si es categórica) y `alerta` = `{alertadas, cambian_al_acotar, dejan_de_alertar, pasan_a_alertar,
-cambian_entre_filas_con_extremo}`.
+lista de `{variable, filas, shap_min, shap_max}` más `valor_min`, `valor_max`, `percentil_min`, `percentil_max`,
+`filas_sin_valor` y `faltantes_entrenamiento` (o `valores` si es categórica) y `alerta` = `{umbral_exacto, alertadas,
+cambian_al_acotar, dejan_de_alertar, pasan_a_alertar, cambian_entre_filas_con_extremo}`. El percentil se calcula sobre
+las filas de entrenamiento con valor; una fila sin valor no tiene percentil (P-22). La alerta usa el umbral exacto y debe
+reproducir las alertas y la sensibilidad del punto de operación registrado (P-18). Lleva `pruebas` (JUnit).
+
+Con `analisis: "diagnostico_d41"` (P-19, `ml/diagnostico_d41.py`), desde un `modelo_final` sin reentrenar: `metodo` y
+`lectura` (texto), `modelos_sha256` (los del modelo final, comprobados al cargar cada paquete) y `pruebas` (JUnit). Por
+momento `{semana, n, retiros, desplegado, con_sensibles}`, y cada variante `{umbral_exacto,
+sensibilidad_en_entrenamiento, tasa_alerta_en_entrenamiento, lectura, sensibilidad_oof, tasa_alerta_oof}`: el paquete
+aplicado a sus propias filas de entrenamiento frente al punto de operación *out-of-fold* del que salió el umbral. Es un
+diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento.
 
 ## `manifest.json`
 

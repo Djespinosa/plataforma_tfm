@@ -39,3 +39,31 @@ def test_extremos_alerta_equivalente_y_contrafactual_acotado():
     assert r["alerta"]["cambian_al_acotar"] == 0  # 7 → 4 sigue ≥ 0,6; −9 → −5 sigue < 0,3
     with pytest.raises(ValueError, match="no cumplen"):
         sa.extremos(phi, datos, np.array([True, True, False, False, True, False]))
+
+
+def test_alerta_con_el_umbral_exacto_no_pierde_los_empates():
+    """P-18: con un bloque de empates justo en el umbral (isotónica), el umbral redondeado a 6 decimales del JSON lo deja
+    fuera; la alerta se calcula con el exacto y reproduce el punto de operación registrado."""
+    from automl.calibracion import punto_operacion
+
+    t = 0.2136118
+    y = pd.Series([1] * 6 + [1] * 4 + [0] * 5 + [0] * 20)
+    p = np.array([0.9] * 6 + [t] * 9 + [0.1] * 20)
+    corte = sa.umbral(y, p, 0.7)
+    punto = punto_operacion(y, p, corte)
+    assert corte == t and punto["umbral"] > t and punto["umbral_exacto"] == t
+    assert (p >= punto["umbral"]).sum() == 6  # el redondeado pierde el bloque
+    alerta, exacto = sa.alerta_principal(y, p, punto, 0.7)
+    assert exacto == t and alerta.sum() == 15 and punto["sensibilidad"] == 1.0
+    with pytest.raises(ValueError, match="no reproduce"):
+        sa.alerta_principal(y, p, punto | {"matriz_confusion": [[20, 4], [0, 10]]}, 0.7)
+
+
+def test_percentil_y_faltantes_de_los_extremos():
+    """P-22: el percentil se calcula sobre las filas con valor; una fila extrema sin valor no tiene percentil y se cuenta."""
+    phi = pd.DataFrame({"a": [6.0, 7.0, 0.1, 0.2]})
+    datos = pd.DataFrame({"a": [np.nan, 4.0, 1.0, 2.0], "pliegue": [1, 1, 1, 1]})
+    r = sa.extremos(phi, datos, np.array([True, True, False, False]))
+    v = r["variables"][0]
+    assert v["filas"] == 2 and v["filas_sin_valor"] == 1 and v["faltantes_entrenamiento"] == 0.25
+    assert v["percentil_min"] == v["percentil_max"] == 100.0

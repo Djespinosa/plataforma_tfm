@@ -183,8 +183,10 @@ def lista_figuras(id_exp: str, papeles: list[str], sufijo: str = "") -> list[tup
              "momento, con el rango entre pliegues y la estabilidad entre pliegues (D9, D32)") for papel in papeles]
 
 
-def figura_importancia(momentos: list[dict], papel: str, ruta: Path, n_variables: int = 15) -> None:
-    """Un panel por momento con el modelo de ese papel: top de variables por media de |SHAP| y su rango entre pliegues."""
+def figura_importancia(momentos: list[dict], papel: str, ruta: Path, n_variables: int = 15,
+                       nota_estabilidad: str = "") -> None:
+    """Un panel por momento con el modelo de ese papel: top de variables por media de |SHAP| y su rango entre pliegues.
+    `nota_estabilidad` describe la versión de la estabilidad de `r["estabilidad"]` (p. ej. sin las variables nulas)."""
     filas = [(m["semana"], next(r for r in m["modelos"] if r["papel"] == papel)) for m in momentos]
     filas = [(s, r) for s, r in filas if r["explicador"]]
     fig, ejes = plt.subplots(1, len(filas), figsize=(max(3.4 * len(filas) + 1.4, 7.5), 5.4), squeeze=False)
@@ -207,7 +209,7 @@ def figura_importancia(momentos: list[dict], papel: str, ruta: Path, n_variables
         _estilo(ax)
     fig.suptitle("Importancia SHAP global out-of-fold con el rango entre pliegues\n"
                  "contribución a la predicción del modelo, no causa\n"
-                 "estabilidad = media entre los 10 pares de pliegues",
+                 f"estabilidad = media entre los 10 pares de pliegues{nota_estabilidad}",
                  color=TINTA, fontsize=9)
     fig.tight_layout()
     fig.savefig(ruta, dpi=DPI)

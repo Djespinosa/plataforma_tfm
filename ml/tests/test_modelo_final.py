@@ -15,7 +15,7 @@ import modelo_final as mf
 import shap_estabilidad as se
 from automl import busqueda
 from automl.calibracion import umbral
-from evidencias import EVIDENCIAS, sha256
+from evidencias import EVIDENCIAS, RAIZ, sha256
 from experimento import OOF, cargar_cortes, cargar_entrenamiento
 from test_automl import COLUMNAS, datos
 from variante import predicciones_principal
@@ -115,3 +115,50 @@ def test_oulad_umbral_de_la_variante_con_sensibles_es_el_registrado():
         datos_ = cargar_entrenamiento(m["semana"], cortes)
         p = mf.leer_oof(con, m["semana"], datos_)["p_rl"].to_numpy()
         assert round(umbral(datos_["etiqueta"], p, 0.7), 6) == m["con"]["punto_operacion_oof"]["umbral"]
+
+
+def test_diagnostico_d41_dentro_de_la_muestra():
+    d = mf.diagnostico_d41(pd.Series([1, 1, 1, 0, 0]), pd.Series([True, True, False, True, False]))
+    assert d["sensibilidad_en_entrenamiento"] == 0.6667 and d["tasa_alerta_en_entrenamiento"] == 0.6
+    assert "no es rendimiento" in d["lectura"]
+
+
+def test_oulad_paquetes_usan_el_umbral_exacto():
+    """P-18: los paquetes del modelo final guardan el umbral exacto (sin redondear) y, aplicado a las predicciones
+    out-of-fold de su variante, reproduce la sensibilidad y las alertas registradas (0,7025 en la semana 0 del
+    desplegado)."""
+    leer = lambda i: json.loads((EVIDENCIAS / "experimentos" / f"{i}.json").read_text(encoding="utf-8"))  # noqa: E731
+    carpeta = RAIZ / leer("exp-2026-10-29-03")["modelos_sha256"]["carpeta"]
+    if not (carpeta / "exp-2026-10-29-03_semana_0.joblib").exists() or not (OOF / "exp-2026-10-27-01_semana_0.parquet").exists():
+        pytest.skip("Sin los paquetes de exp-2026-10-29-03 o las predicciones out-of-fold")
+    principal, con, equidad = leer("exp-2026-10-27-01"), leer("exp-2026-10-28-01"), leer("exp-2026-10-28-02")
+    cortes, _ = cargar_cortes(principal["experimento_cortes"])
+    for m in principal["momentos"]:
+        semana = m["semana"]
+        datos_ = cargar_entrenamiento(semana, cortes)
+        y = datos_["etiqueta"].to_numpy()
+        punto_con = next(e for e in equidad["momentos"] if e["semana"] == semana)["con"]["punto_operacion_oof"]
+        for sufijo, origen, punto in (("", principal, m["punto_operacion_oof"]), ("_con_sensibles", con, punto_con)):
+            p = mf.leer_oof(origen, semana, datos_)["p_rl"].to_numpy()
+            corte = joblib.load(carpeta / f"exp-2026-10-29-03{sufijo}_semana_{semana}.joblib")["umbral"]
+            assert corte == umbral(datos_["etiqueta"], p, 0.7)  # exacto, no el redondeado del JSON
+            alerta = p >= corte
+            (_, fp), (_, tp) = punto["matriz_confusion"]
+            assert alerta.sum() == fp + tp and round(alerta[y == 1].mean(), 4) == punto["sensibilidad"]
+    assert principal["momentos"][0]["punto_operacion_oof"]["sensibilidad"] == 0.7025
+
+
+def test_diagnostico_d41_desde_un_paquete_comprueba_el_umbral_registrado():
+    """P-19: el análisis aparte usa el paquete tal cual y exige que su umbral sea el registrado en el modelo final."""
+    import diagnostico_d41 as dg
+
+    X, y, _, _, paquete_ = final()
+    datos_ = X.assign(etiqueta=y)
+    registrado = {"umbral": {"valor": 0.4, "punto_operacion_oof": {"sensibilidad": 0.7, "tasa_alerta": 0.5}}}
+    d = dg.diagnostico_momento(paquete_, datos_, registrado)
+    alerta = mf.predecir_y_explicar(paquete_, X)[0]["alerta"]
+    assert d["umbral_exacto"] == 0.4 and d["sensibilidad_oof"] == 0.7
+    assert d["sensibilidad_en_entrenamiento"] == round(float(alerta[y == 1].mean()), 4)
+    assert d["lectura"] == mf.LECTURA_DIAGNOSTICO
+    with pytest.raises(ValueError, match="no es el registrado"):
+        dg.diagnostico_momento(paquete_, datos_, registrado | {"umbral": registrado["umbral"] | {"valor": 0.41}})

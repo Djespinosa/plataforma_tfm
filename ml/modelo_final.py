@@ -89,6 +89,19 @@ def predecir_y_explicar(paquete_: dict, X: pd.DataFrame) -> tuple[pd.DataFrame, 
     return prediccion, agregar(phi, paquete_["columnas"])
 
 
+LECTURA_DIAGNOSTICO = ("diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es "
+                       "rendimiento")
+
+
+def diagnostico_d41(y: pd.Series, alerta: pd.Series) -> dict:
+    """Sensibilidad y tasa de alerta del modelo final con el umbral transferido sobre sus propias filas de entrenamiento
+    (auditoría de exp-2026-10-29-03, O1). Es un diagnóstico de la aproximación D41, no una estimación del rendimiento."""
+    y, alerta = y.to_numpy(), alerta.to_numpy()
+    return {"sensibilidad_en_entrenamiento": round(float(alerta[y == 1].mean()), 4),
+            "tasa_alerta_en_entrenamiento": round(float(alerta.mean()), 4),
+            "lectura": LECTURA_DIAGNOSTICO}
+
+
 def leer_oof(experimento: dict, semana: int, datos: pd.DataFrame) -> pd.DataFrame:
     ruta = OOF / f"{experimento['id']}_semana_{semana}.parquet"
     if sha256(ruta) != experimento["predicciones_oof_sha256"][ruta.name]:
@@ -115,7 +128,8 @@ def ajustar(datos: pd.DataFrame, columnas: dict, hiperparametros: dict, metodo: 
     return {
         "modelo": "rl", "hiperparametros": hiperparametros,
         "calibracion": {"metodo": metodo, "cv": "5 pliegues agrupados por presentación (D29-rev)", "ensemble": False},
-        "umbral": {"valor": round(corte, 6), "origen": origen["umbral_de"]},
+        "umbral": {"valor": round(corte, 6), "valor_exacto": float(corte), "origen": origen["umbral_de"]},
+        "diagnostico_d41": diagnostico_d41(y, prediccion["alerta"]),
         "explicador": "lineal exacto en log-odds sin calibrar (D32) con fondo = media de las filas de entrenamiento "
                       "transformadas",
         "coeficientes_no_nulos": int((base.named_steps["modelo"].coef_[0] != 0).sum()),

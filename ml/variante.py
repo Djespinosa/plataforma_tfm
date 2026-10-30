@@ -187,8 +187,8 @@ def figura_diferencias(momentos: list[dict], ruta: Path) -> None:
         ax.xaxis.set_major_locator(ticker.MultipleLocator(0.01))
         _estilo(ax)
     ejes[0][0].invert_yaxis()
-    fig.suptitle("Coste de excluir las variables sensibles (D8): diferencia de ROC-AUC out-of-fold con IC 95 %\n"
-                 "rombo: mejor candidato con − mejor sin; línea discontinua: margen de 0,02 (D38)",
+    fig.suptitle("Coste de excluir las variables sensibles: diferencia de ROC-AUC out-of-fold con IC 95 %\n"
+                 "rombo: mejor candidato con − mejor sin; línea discontinua: margen de 0,02",
                  color=TINTA, fontsize=10)
     fig.tight_layout()
     fig.savefig(ruta, dpi=DPI)

@@ -26,6 +26,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from automl.calibracion import umbral
+from cortes_oulad import ejecutar_pruebas
 from evidencias import EVIDENCIAS, actualizar_manifest, comprobar_arbol_limpio, escribir_json, sha256, siguiente_id
 from experimento import OOF, cargar_cortes, cargar_entrenamiento
 from shap_estabilidad import estabilidad
@@ -50,8 +52,22 @@ def estabilidad_dos_versiones(phi: pd.DataFrame, pliegue: pd.Series) -> dict:
             "variables_nulas": nulas}
 
 
+def alerta_principal(y: pd.Series, p: np.ndarray, punto: dict, sensibilidad_minima: float) -> tuple[np.ndarray, float]:
+    """Alerta out-of-fold con el umbral exacto, recalculado desde las predicciones. El del JSON está redondeado a 6
+    decimales y, con la isotónica, un bloque de empates en el umbral cae por debajo del redondeado; por eso se exige que
+    el recuento de alertas y la sensibilidad reproduzcan el punto de operación registrado."""
+    corte = umbral(y, p, sensibilidad_minima)
+    alerta = p >= corte
+    (_, fp), (_, tp) = punto["matriz_confusion"]
+    if round(corte, 6) != punto["umbral"] or int(alerta.sum()) != fp + tp \
+            or round(float(alerta[y.to_numpy() == 1].mean()), 4) != punto["sensibilidad"]:
+        raise ValueError("La alerta recalculada no reproduce el punto de operación registrado")
+    return alerta, corte
+
+
 def percentil(valores_entrenamiento: pd.Series, x: float) -> float | None:
-    """Porcentaje de filas de entrenamiento con valor ≤ x (sin contar vacíos)."""
+    """Porcentaje de filas de entrenamiento con valor ≤ x, sobre las filas con valor (los vacíos no cuentan en el
+    denominador); None si la fila no tiene valor."""
     validos = valores_entrenamiento.dropna()
     return None if pd.isna(x) or validos.empty else round(float((validos <= x).mean() * 100), 2)
 
@@ -81,10 +97,11 @@ def extremos(phi: pd.DataFrame, datos: pd.DataFrame, alerta: np.ndarray, limite:
         fila = {"variable": v, "filas": int(m.sum()),
                 "shap_min": round(float(phi.loc[m, v].min()), 2), "shap_max": round(float(phi.loc[m, v].max()), 2)}
         if numerica:
-            percentiles = [percentil(datos[v], x) for x in valores]
+            percentiles = [p for p in (percentil(datos[v], x) for x in valores) if p is not None]
             fila |= {"valor_min": float(valores.min()), "valor_max": float(valores.max()),
-                     "percentil_min": min(p for p in percentiles if p is not None),
-                     "percentil_max": max(p for p in percentiles if p is not None)}
+                     "percentil_min": min(percentiles, default=None), "percentil_max": max(percentiles, default=None),
+                     "filas_sin_valor": int(valores.isna().sum()),
+                     "faltantes_entrenamiento": round(float(datos[v].isna().mean()), 4)}
         else:
             fila |= {"valores": sorted(valores.astype(str).unique().tolist())}
         variables.append(fila)
@@ -111,6 +128,11 @@ def main() -> None:
     principal = leer(shap_exp["hiperparametros_de"])
     commit = comprobar_arbol_limpio(args.salida)
     fecha = datetime.now()
+    for carpeta in ("experimentos", "pruebas"):
+        (args.salida / carpeta).mkdir(parents=True, exist_ok=True)
+    id_exp = siguiente_id(args.salida / "experimentos", fecha)
+    archivo_pruebas = f"pruebas/{id_exp}_pruebas.xml"
+    resultado_pruebas = ejecutar_pruebas(args.salida / archivo_pruebas)
     cortes, _ = cargar_cortes(principal["experimento_cortes"])
     variables = shap_exp["variables"]["numericas"] + shap_exp["variables"]["categoricas"]
 
@@ -132,12 +154,14 @@ def main() -> None:
                 raise ValueError(f"semana {semana}: la estabilidad con todas las variables no reproduce {shap_exp['id']}")
             if r["papel"] == "rl_desplegada":
                 oof = predicciones_principal(leer_parquet(principal, f"{principal['id']}_semana_{semana}.parquet"), datos)
-                corte = next(m for m in principal["momentos"] if m["semana"] == semana)["punto_operacion_oof"]["umbral"]
-                fila["extremos"] = extremos(phi, datos, oof["p_rl"].to_numpy() >= corte)
+                punto = next(m for m in principal["momentos"] if m["semana"] == semana)["punto_operacion_oof"]
+                alerta, corte = alerta_principal(datos["etiqueta"], oof["p_rl"].to_numpy(), punto,
+                                                 principal["configuracion"]["sensibilidad_minima"])
+                fila["extremos"] = extremos(phi, datos, alerta)
+                fila["extremos"]["alerta"] = {"umbral_exacto": corte, **fila["extremos"]["alerta"]}
             modelos.append(fila)
         momentos.append({"semana": semana, "modelos": modelos})
 
-    id_exp = siguiente_id(args.salida / "experimentos", fecha)
     experimento = {
         "id": id_exp,
         "tipo": "comparacion",
@@ -154,8 +178,13 @@ def main() -> None:
                            "variables (reproduce el JSON de origen); 'sin_nulas' quita las variables con SHAP nulo en "
                            "todos los pliegues y es la lectura principal",
             "extremos": f"filas out-of-fold de la RL desplegada con alguna |SHAP| > {LIMITE:g} log-odds sin calibrar "
-                        "(D32). Percentil = porcentaje de filas de entrenamiento del momento con valor ≤ el de la fila. "
-                        "Alerta = probabilidad calibrada out-of-fold del principal ≥ su umbral (D45); como el calibrador "
+                        "(D32). Percentil = porcentaje de filas de entrenamiento del momento con valor ≤ el de la fila, "
+                        "sobre las filas con valor (los vacíos no cuentan); una fila sin valor no tiene percentil (su "
+                        "SHAP es el del valor imputado) y se cuenta en filas_sin_valor; faltantes_entrenamiento es la "
+                        "proporción de vacíos de la variable en el entrenamiento del momento. Alerta = probabilidad "
+                        "calibrada out-of-fold del principal ≥ su umbral exacto (D45), recalculado desde las "
+                        "predicciones y comprobado contra el punto de operación registrado (alertas y sensibilidad); "
+                        "como el calibrador "
                         "de cada pliegue es monótono y el valor base es constante en el pliegue, equivale a "
                         "Σ SHAP ≥ s_f (comprobado en todas las filas). Contrafactual: cada SHAP acotado a "
                         f"±{LIMITE:g} y la misma s_f. Es una limitación declarada: el modelo no cambia",
@@ -164,8 +193,11 @@ def main() -> None:
         "evaluado_en_prueba": False,
         "momentos": momentos,
     }
+    experimento["pruebas"] = {"informe": archivo_pruebas} | resultado_pruebas
     escribir_json(args.salida / "experimentos" / f"{id_exp}.json", experimento)
-    actualizar_manifest(args.salida, fecha, commit, id_exp, [])
+    actualizar_manifest(args.salida, fecha, commit, id_exp, [],
+                        [{"archivo": archivo_pruebas, "descripcion": "JUnit de todas las pruebas de ml/tests en el "
+                          "commit del experimento", "experimento": id_exp}])
     print(f"Exportado {id_exp} en {args.salida} (commit {commit})")
 
 

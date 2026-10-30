@@ -160,8 +160,9 @@ def figura_perdidas(momentos: list[dict], ruta: Path) -> None:
         _estilo(ax)
     ejes[0][0].invert_yaxis()
     fig.legend(*ejes[0][0].get_legend_handles_labels(), loc="lower center", ncol=2, fontsize=8, frameon=False)
-    fig.suptitle("Ablación por grupos de variables (D46): pérdida de ROC-AUC out-of-fold con IC 95 %\n"
-                 "hiperparámetros del principal (D38): la pérdida es una cota superior de la contribución",
+    fig.suptitle("Ablación por grupos de variables: pérdida de ROC-AUC out-of-fold con IC 95 %\n"
+                 "hiperparámetros buscados con todas las variables: la pérdida es una estimación sesgada al alza "
+                 "de la contribución",
                  color=TINTA, fontsize=10)
     fig.tight_layout(rect=(0, 0.06, 1, 1))
     fig.savefig(ruta, dpi=DPI)
@@ -248,8 +249,8 @@ def main() -> None:
                            "todas las variables reproduce el apilamiento del principal en la semana 8 con ROC-AUC "
                            "idéntica y diferencias ≤ 1e-9 por coma flotante en paralelo: "
                            "test_oulad_ruta_abreviada_reproduce_el_principal_en_la_semana_8 en el JUnit). Los "
-                           "hiperparámetros se buscaron con todas las variables: la pérdida es una cota superior de "
-                           "la contribución de cada grupo (D46)",
+                           "hiperparámetros se buscaron con todas las variables: la pérdida es una estimación sesgada al "
+                           "alza de la contribución de cada grupo (D46)",
         "comparacion": "por modelo y grupo, ROC-AUC out-of-fold completo − sin el grupo sobre las mismas filas; las "
                        f"predicciones 'completo' son las de {principal['id']} (SHA-256 comprobado); IC bootstrap "
                        "pareado del 95 % sin ajustar y p de DeLong, que solo se informa",

@@ -60,6 +60,7 @@ def punto_operacion(y: pd.Series, p: np.ndarray, corte: float) -> dict:
     tn, fp, fn, tp = confusion_matrix(y, alerta, labels=[0, 1]).ravel()
     return {
         "umbral": round(corte, 6),
+        "umbral_exacto": float(corte),
         "sensibilidad": round(tp / (tp + fn), 4),
         "precision": round(tp / (tp + fp), 4) if tp + fp else None,
         "tasa_alerta": round(float(alerta.mean()), 4),
