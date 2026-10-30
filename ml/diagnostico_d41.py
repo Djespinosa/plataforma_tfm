@@ -63,7 +63,7 @@ def main() -> None:
     args = parser.parse_args()
 
     final = json.loads((EVIDENCIAS / "experimentos" / f"{args.modelo_final}.json").read_text(encoding="utf-8"))
-    if final["tipo"] != "modelo_final":
+    if final.get("variante") != "modelo_final":
         raise ValueError(f"{args.modelo_final} no es un modelo final")
     commit = comprobar_arbol_limpio(args.salida)
     fecha = datetime.now()

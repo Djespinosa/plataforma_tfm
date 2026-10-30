@@ -197,7 +197,7 @@ cambian_al_acotar, dejan_de_alertar, pasan_a_alertar, cambian_entre_filas_con_ex
 las filas de entrenamiento con valor; una fila sin valor no tiene percentil (P-22). La alerta usa el umbral exacto y debe
 reproducir las alertas y la sensibilidad del punto de operación registrado (P-18). Lleva `pruebas` (JUnit).
 
-Con `analisis: "diagnostico_d41"` (P-19, `ml/diagnostico_d41.py`), desde un `modelo_final` sin reentrenar: `metodo` y
+Con `analisis: "diagnostico_d41"` (P-19, `ml/diagnostico_d41.py`), desde un modelo final (`variante: "modelo_final"`) sin reentrenar: `metodo` y
 `lectura` (texto), `modelos_sha256` (los del modelo final, comprobados al cargar cada paquete) y `pruebas` (JUnit). Por
 momento `{semana, n, retiros, desplegado, con_sensibles}`, y cada variante `{umbral_exacto,
 sensibilidad_en_entrenamiento, tasa_alerta_en_entrenamiento, lectura, sensibilidad_oof, tasa_alerta_oof}`: el paquete
