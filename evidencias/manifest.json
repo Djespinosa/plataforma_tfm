@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T21:24:21",
-  "commit": "dcf90f9",
+  "generado": "2026-10-29T21:24:28",
+  "commit": "71601cd",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -153,6 +153,21 @@
       "archivo": "figuras/exp-2026-10-29-02_shap_mejor_automl_v2.png",
       "descripcion": "Importancia SHAP global out-of-fold (media de |SHAP| en log-odds sin calibrar) de el mejor AutoML de árboles por momento, con el rango entre pliegues y la estabilidad entre pliegues (D9, D32) (redibujada con el commit dcf90f9 desde el JSON del experimento y la estabilidad sin variables nulas de exp-2026-10-29-05, sin reentrenar)",
       "experimento": "exp-2026-10-29-02"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-27-01_roc_pr_oof_v3.png",
+      "descripcion": "Curvas ROC y PR out-of-fold por momento: desplegado, mejor AutoML y RL optimizada (redibujada con el commit 71601cd desde las predicciones out-of-fold, sin reentrenar)",
+      "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-27-01_calibracion_oof_v3.png",
+      "descripcion": "Curva de calibración out-of-fold del modelo desplegado por momento (redibujada con el commit 71601cd desde las predicciones out-of-fold, sin reentrenar)",
+      "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-27-01_familias_roc_auc_v3.png",
+      "descripcion": "ROC-AUC out-of-fold por familia y referencia, por momento (redibujada con el commit 71601cd desde las predicciones out-of-fold, sin reentrenar)",
+      "experimento": "exp-2026-10-27-01"
     }
   ],
   "capturas": [],
