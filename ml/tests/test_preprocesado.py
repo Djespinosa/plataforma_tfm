@@ -15,7 +15,7 @@ from sklearn.model_selection import cross_validate
 from sklearn.pipeline import Pipeline
 
 import cortes_oulad as co
-from automl.particion import divisiones
+from automl.particion import PLIEGUES, divisiones
 from automl.preprocesado import imputador_mediana
 
 
@@ -96,3 +96,14 @@ def test_el_indicador_de_faltante_se_conserva_y_no_quedan_vacios():
 def test_divisiones_rechazan_filas_sin_pliegue():
     with pytest.raises(ValueError):
         divisiones(datos()["pliegue"])
+
+
+def test_pliegues_admitidos_son_los_de_los_cortes():
+    assert PLIEGUES == set(range(1, co.N_PLIEGUES + 1))
+
+
+@pytest.mark.parametrize("marca", [0, -1, 6])
+def test_divisiones_rechazan_pliegues_fuera_de_rango(marca):
+    pliegue = pd.Series([1, 2, 3, 4, 5, marca])
+    with pytest.raises(ValueError, match="fuera de"):
+        divisiones(pliegue)

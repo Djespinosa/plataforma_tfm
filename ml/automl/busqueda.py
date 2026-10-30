@@ -246,6 +246,7 @@ DESCRIPCION_OPTUNA = {
         "gamma": "default_gamma: min(ceil(0,1·n), 25)",
         "weights": "default_weights: 1 para los 25 ensayos más recientes y rampa lineal para los anteriores",
     },
+    "constant_liar_efecto": "ninguno: solo actúa con ensayos simultáneos y los ensayos se ejecutan en serie",
     "podador": "MedianPruner(n_startup_trials=5, n_warmup_steps=1); valor intermedio = media acumulada de ROC-AUC "
                "tras cada pliegue",
     "parametros_podador": {"percentil": 50.0, "n_startup_trials": 5, "n_warmup_steps": 1, "interval_steps": 1,

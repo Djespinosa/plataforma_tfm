@@ -49,7 +49,7 @@ from evidencias import (
     siguiente_id,
     versiones_entorno,
 )
-from experimento import CALIBRACION_DEFINICION, OOF, cargar_cortes, cargar_entrenamiento, columnas_modelo
+from experimento import CALIBRACION_DEFINICION, OOF, cargar_cortes, cargar_entrenamiento, columnas_modelo, coma
 from shap_estabilidad import agregar
 from variante import predicciones_principal
 
@@ -252,7 +252,7 @@ def main() -> None:
                            "pliegues agrupados con ensemble=False (D54): calibrador ajustado con sus predicciones "
                            "out-of-fold y modelo base reentrenado con todo el entrenamiento",
         "umbral_transferido": "D41: el umbral se fija sobre las predicciones out-of-fold calibradas de forma anidada "
-                              f"del principal (sensibilidad mínima {principal['configuracion']['sensibilidad_minima']}, "
+                              f"del principal (sensibilidad mínima {coma(principal['configuracion']['sensibilidad_minima'], 2)}, "
                               "sin margen, D45) y se aplica al modelo final. Es una aproximación: el calibrador final se "
                               "ajusta de forma distinta a los anidados, así que la sensibilidad en prueba puede no ser "
                               "la out-of-fold",
