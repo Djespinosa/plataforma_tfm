@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T21:24:16",
-  "commit": "9584146",
+  "generado": "2026-10-29T21:24:21",
+  "commit": "dcf90f9",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -143,6 +143,16 @@
       "archivo": "figuras/exp-2026-10-29-01_sensibilidad_fuga_v2.png",
       "descripcion": "Inflación de la ROC-AUC out-of-fold por no excluir a los ya retirados y su descomposición (evaluar y entrenar con ellos), mejor AutoML y RL desplegada por momento (D20, D39) (redibujada con el commit 9584146 desde el JSON del experimento, sin reentrenar)",
       "experimento": "exp-2026-10-29-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-29-02_shap_rl_desplegada_v2.png",
+      "descripcion": "Importancia SHAP global out-of-fold (media de |SHAP| en log-odds sin calibrar) de la RL desplegada por momento, con el rango entre pliegues y la estabilidad entre pliegues (D9, D32) (redibujada con el commit dcf90f9 desde el JSON del experimento y la estabilidad sin variables nulas de exp-2026-10-29-05, sin reentrenar)",
+      "experimento": "exp-2026-10-29-02"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-29-02_shap_mejor_automl_v2.png",
+      "descripcion": "Importancia SHAP global out-of-fold (media de |SHAP| en log-odds sin calibrar) de el mejor AutoML de árboles por momento, con el rango entre pliegues y la estabilidad entre pliegues (D9, D32) (redibujada con el commit dcf90f9 desde el JSON del experimento y la estabilidad sin variables nulas de exp-2026-10-29-05, sin reentrenar)",
+      "experimento": "exp-2026-10-29-02"
     }
   ],
   "capturas": [],
