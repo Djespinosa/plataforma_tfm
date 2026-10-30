@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T21:24:28",
-  "commit": "71601cd",
+  "generado": "2026-10-29T21:24:32",
+  "commit": "21729cf",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -168,6 +168,11 @@
       "archivo": "figuras/exp-2026-10-27-01_familias_roc_auc_v3.png",
       "descripcion": "ROC-AUC out-of-fold por familia y referencia, por momento (redibujada con el commit 71601cd desde las predicciones out-of-fold, sin reentrenar)",
       "experimento": "exp-2026-10-27-01"
+    },
+    {
+      "archivo": "figuras/exp-2026-10-28-01_coste_excluir_sensibles_v3.png",
+      "descripcion": "Diferencia de ROC-AUC out-of-fold con − sin variables sensibles por modelo y momento, y entre el mejor candidato de cada variante (D8, D38) (redibujada con el commit 21729cf desde el JSON del experimento, sin reentrenar)",
+      "experimento": "exp-2026-10-28-01"
     }
   ],
   "capturas": [],
