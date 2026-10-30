@@ -1,0 +1,22 @@
+# PostgreSQL de la plataforma (docs/diseno-api.md §9). Credenciales y puerto desde .env (no versionado; ver .env.example).
+# Solo escucha en 127.0.0.1: la base de datos no es accesible desde otros equipos.
+services:
+  bd:
+    image: postgres:16.15
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:?Falta POSTGRES_USER: copie .env.example a .env.}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD: copie .env.example a .env.}"
+      POSTGRES_DB: "${POSTGRES_DB:-plataforma}"
+    ports:
+      - "127.0.0.1:${PG_PUERTO:-5433}:5432"
+    volumes:
+      - datos_pg:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  datos_pg:

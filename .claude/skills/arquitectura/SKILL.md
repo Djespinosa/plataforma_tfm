@@ -84,7 +84,15 @@ importado, origen, configuración efectiva JSON, estado, etapa, progreso, latido
 explicación global JSON) → `lote_prediccion` (archivo, SHA-256, umbral, alertas) → `prediccion` (fila, identificador,
 probabilidad calibrada, alerta, log-odds) → `explicacion` (contribuciones SHAP JSON por variable original).
 Los artefactos binarios (CSV subidos, `paquete.joblib`, `oof.parquet`) van a `data/plataforma/` (no versionada); la base
-de datos guarda la ruta y el SHA-256. JSON = JSONB en PostgreSQL. Migraciones con Alembic.
+de datos guarda la ruta y el SHA-256. JSON = JSONB en PostgreSQL. Migraciones con Alembic
+(`alembic -c api/alembic.ini upgrade head`). La evaluación única en la cohorte de prueba la impone la base de datos,
+por datos y cohorte, no por experimento: `experimento.sha256_datos` (copia del conjunto) y `cohorte_prueba_clave`
+(SHA-256 de la definición canónica de la cohorte; en modo aleatorio, sin semilla), índice único parcial sobre ambas
+`WHERE evaluacion_prueba IS NOT NULL`, `CHECK` (evaluación con conjunto, datos y cohorte; SHA-256 en minúsculas), y
+disparadores `evaluacion_prueba_unica` (id inmutable siempre; al evaluar, `sha256_datos` igual al del conjunto; tras
+evaluar, la evaluación, la configuración, `conjunto_id` y las dos claves congeladas), `modelo_evaluado_congelado` (ni
+cambiar, borrar, añadir ni traer modelos de un evaluado) y `conjunto_datos_inmutable` (ruta y SHA-256)
+(`docs/diseno-api.md` §3, con sus limitaciones).
 
 ## Decisiones técnicas (bloque E, 2026-10-30)
 
@@ -102,6 +110,7 @@ de datos guarda la ruta y el SHA-256. JSON = JSONB en PostgreSQL. Migraciones co
 | SQLAlchemy 2.1.6 sin Flask-SQLAlchemy; psycopg[binary] 3.3.6; Alembic 1.20.1 | Flask-SQLAlchemy; `create_all` en PostgreSQL | Una capa menos; la BD guarda experimentos de horas que una migración no debe perder (SQLite de pruebas usa `create_all`) |
 | PostgreSQL `postgres:16.15` en Docker Compose, puerto del host `PG_PUERTO` (5433), solo `127.0.0.1`; `.env` no versionado + `.env.example`; python-dotenv 1.2.4 | `latest`; puerto 5432 | Decisión 3 del estudiante; hay un PostgreSQL 12 local en 5432 |
 | Sin flask-cors (proxy de Angular en desarrollo) ni waitress | Dependencias para CORS y servidor WSGI | Uso local, mismo origen |
+| Evaluación única en prueba (D-2) por (SHA-256 de los datos, clave canónica de la cohorte: valores normalizados; aleatoria sin semilla) con índice único parcial; id del experimento inmutable; `sha256_datos` contrastado con el del conjunto al evaluar; ruta y SHA-256 del conjunto inmutables; tras evaluar, configuración, `conjunto_id`, claves y modelos (incluido añadir o traer) congelados, todo por disparadores y `CHECK` | Unicidad por experimento; comprobación solo en código; semilla en la clave aleatoria | Decisión del estudiante: volver a subir el mismo CSV, alterar el hash copiado o cambiar la semilla no permite otra evaluación; renombrar el experimento no la salta. No protege frente a otro archivo (otro hash), cohortes distintas que se solapan ni un superusuario (se declara en la memoria) |
 | Pruebas: SQLite en memoria para unitarias; funcionales RF-01..RF-09 contra el PostgreSQL del contenedor (`-m postgres`), con requisito y motor en el JUnit; pytest-cov 7.1.0 | Todo contra SQLite | Decisión 3 del estudiante; punto 34 del bloque E |
 
 ## Interfaz Angular

@@ -117,7 +117,9 @@ ml/
 data/plataforma/                 # NO versionada (.gitignore): conjuntos/, experimentos/<id>/, predicciones/
 ```
 
-`api/` se ejecuta desde la raíz del repositorio: `flask --app api run --port 5000` y `flask --app api trabajador`.
+`api/` se ejecuta desde la raíz del repositorio: `flask --app api run --port 5000` y `flask --app api trabajador`
+(`api/__init__.py` expone `create_app = crear_app`, el nombre de factoría que busca Flask). Migraciones:
+`alembic -c api/alembic.ini upgrade head` (URL desde `DATABASE_URL`).
 `api/__init__.py` inserta `RAIZ / "ml"` en `sys.path` **antes** de cualquier `joblib.load`: los paquetes serializan las
 clases como `automl.busqueda.MLPPonderado`, `automl.preprocesado.DescartarVacias`, etc. (módulo de primer nivel `automl`).
 
@@ -128,11 +130,46 @@ PostgreSQL 16; JSON como `JSON().with_variant(JSONB, "postgresql")`; fechas `tim
 | Tabla | Columnas (clave primaria en negrita) | Notas |
 |---|---|---|
 | `conjunto_datos` | **id** serial · nombre_archivo · momento (texto libre, opcional: «semana 4») · ruta · sha256 · n_filas · n_columnas · columnas JSON (`[{nombre, tipo, faltantes, proporcion_faltantes, valores_distintos, valores_frecuentes[≤20]}]`) · avisos JSON · creado_en | El CSV se guarda tal cual en `data/plataforma/conjuntos/<id>.csv` |
-| `experimento` | **id** texto (`web-AAAA-MM-DD-NN` o el id del experimento importado) · origen (`web`/`importado`) · conjunto_id FK nulo · descripcion · configuracion JSON (§6.4) · estado (`en_cola`, `en_curso`, `completado`, `fallido`, `interrumpido`) · etapa texto · progreso JSON `{completadas, total}` · error texto · latido_en · creado_en · iniciado_en · terminado_en · duracion_s · reproducibilidad JSON · procedencia JSON (importados) · evaluacion_prueba JSON nulo (§4.7) · reintento_de FK nulo | `UNIQUE(id)`; el id nunca se reutiliza |
+| `experimento` | **id** texto (`web-AAAA-MM-DD-NN` o el id del experimento importado) · origen (`web`/`importado`) · conjunto_id FK nulo · sha256_datos nulo (copia de `conjunto_datos.sha256` al crearlo) · cohorte_prueba_clave nulo (SHA-256 de la definición canónica de la cohorte de prueba, `tablas.clave_cohorte`; nulo sin cohorte) · descripcion · configuracion JSON (§6.4) · estado (`en_cola`, `en_curso`, `completado`, `fallido`, `interrumpido`) · etapa texto · progreso JSON `{completadas, total}` · error texto · latido_en · creado_en · iniciado_en · terminado_en · duracion_s · reproducibilidad JSON · procedencia JSON (importados) · evaluacion_prueba JSON nulo (§4.7) · reintento_de FK nulo | `UNIQUE(id)`; el id nunca se reutiliza ni cambia (disparador) |
 | `modelo` | **id** serial · experimento_id FK · momento texto nulo · familia · ruta_paquete · sha256_paquete · umbral (float exacto) · metodo_calibracion nulo · columnas JSON · explicador (`lineal`/`arbol`/`permutacion`) · evaluacion JSON (§4.3) · explicacion_global JSON nulo · creado_en | Solo modelos desplegados; los candidatos viven en `evaluacion` |
 | `lote_prediccion` | **id** serial · modelo_id FK · nombre_archivo · ruta · sha256 · n_filas · columna_id nulo · columnas_ignoradas JSON · umbral · n_alertas · creado_en | |
 | `prediccion` | **(lote_id, fila)** · identificador texto nulo · probabilidad · alerta bool · log_odds · base_log_odds · valores JSON (valores de las columnas del modelo) | `fila` = posición 1..n en el CSV |
 | `explicacion` | **(lote_id, fila)** FK → prediccion · contribuciones JSON `{variable: φ}` · explicador · error_aditividad · creado_en | Lineal y árbol: se crea al predecir; permutación: al pedirla (§4.5) |
+
+Evaluación única en la cohorte de prueba (matiz D-2), impuesta en la base de datos desde `0001_inicial`:
+
+- `CHECK (evaluacion_prueba IS NULL OR (origen = 'web' AND estado = 'completado' AND conjunto_id IS NOT NULL AND
+  sha256_datos IS NOT NULL AND cohorte_prueba_clave IS NOT NULL))`.
+- `CHECK` de formato en `conjunto_datos.sha256` y `experimento.sha256_datos`: 64 caracteres hexadecimales en minúsculas
+  (`length(x) = 64 AND trim(x, '0123456789abcdef') = ''`, la misma expresión en PostgreSQL y SQLite).
+- Índice único parcial `uq_experimento_evaluacion_prueba` sobre `(sha256_datos, cohorte_prueba_clave)
+  WHERE evaluacion_prueba IS NOT NULL`: una sola evaluación por datos y definición de cohorte, no por experimento
+  (decisión del estudiante, 2026-10-30). Volver a subir el mismo CSV (otro `conjunto_datos`, mismo SHA-256) y entrenar
+  otro experimento con la misma cohorte no permite una segunda evaluación. Como un índice no cruza tablas, el SHA-256 se
+  copia en `experimento` al crearlo.
+- `clave_cohorte` es canónica (decisión del estudiante, 2026-10-30): en modo «valores», columna y conjunto de valores
+  como texto, sin repetidos y ordenados (`sorted(set(map(str, valores)))`), sin semilla; en modo «aleatoria», solo el
+  modo (ni semilla ni nada más): una sola evaluación con cohorte aleatoria por datos, porque otra semilla da una cohorte
+  que comparte filas con la ya evaluada. «semilla», «filas» y «metodo» no forman parte de la clave.
+- Disparador `evaluacion_prueba_unica` (`BEFORE INSERT OR UPDATE OR DELETE` en `experimento`): rechaza siempre cambiar
+  `id` (si no, renombrar el experimento saltaría lo demás); si ya hay `evaluacion_prueba`, cambiarla o anularla, borrar
+  el experimento y cambiar `configuracion` (contiene la definición de la cohorte), `conjunto_id`, `sha256_datos` o
+  `cohorte_prueba_clave`; y, al evaluar (o crear el experimento ya evaluado), que `sha256_datos` no sea el
+  `conjunto_datos.sha256` de su `conjunto_id`.
+- Disparador `modelo_evaluado_congelado` (`BEFORE INSERT OR UPDATE OR DELETE` en `modelo`): rechaza cambiar o borrar
+  los modelos de un experimento con `evaluacion_prueba` (`OLD.experimento_id`) y añadirle uno o traérselo de otro
+  experimento (`NEW.experimento_id`).
+- Disparador `conjunto_datos_inmutable` (`BEFORE UPDATE` en `conjunto_datos`): la `ruta` y el `sha256` de un conjunto
+  no cambian nunca (si no, se podría alterar el hash del conjunto para que coincidiera con otro `sha256_datos`).
+- Los disparadores responden con `check_violation`. `TRUNCATE` no los dispara (solo lo usan las pruebas en
+  `plataforma_pruebas`). `api/tablas.py` crea el equivalente en SQLite para las pruebas unitarias. Las columnas JSON
+  guardan `None` como `NULL` de SQL (`none_as_null=True`), para que la comprobación sea fiable.
+
+Limitaciones (se declaran en la memoria): un archivo modificado (otro SHA-256) u otra definición de cohorte, aunque se
+solape con la anterior, sí permiten otra evaluación; en particular, los solapamientos parciales entre conjuntos de
+valores distintos (p. ej. `["2014J"]` y `["2014J", "2014B"]`, o una cohorte por valores y otra aleatoria sobre los mismos
+datos) no se impiden y permitirían otra evaluación que comparte filas con la primera; y D-2 protege frente a errores de la aplicación, no frente a un
+administrador de la base de datos (un superusuario puede desactivar los disparadores o borrar el índice).
 
 `experimento.reproducibilidad` (RNF-06): `{id, commit, arbol_limpio, semillas, versiones (versiones_entorno de
 ml/evidencias.py: python, pandas, numpy, scikit-learn, xgboost, lightgbm, catboost, optuna, shap, joblib, flask,
@@ -150,7 +187,8 @@ En disco (`PLATAFORMA_DATOS`, por defecto `data/plataforma/`): `conjuntos/<id>.c
 Convenciones: prefijo `/api`; JSON UTF-8; error = `{"error": "<mensaje en español>"}` y, si hay varios,
 `{"error": "...", "detalles": ["..."]}`. Probabilidades en [0, 1] como números (la interfaz las muestra en % entero); los
 textos que genera la API usan coma decimal. Códigos comunes: 400 cuerpo mal formado («La petición no es JSON válido.»,
-«Falta el campo «x».»), 404 («No existe el <recurso> <id>.»), 409 conflicto de estado, 413 («El archivo supera el tamaño
+«Falta el campo «x».»), 404 («No existe el <recurso> <id>.»; ruta desconocida: «No existe la ruta solicitada.»), 405
+(«Esta ruta no admite el método solicitado.»), 409 conflicto de estado, 413 («El archivo supera el tamaño
 máximo de 50 MB.»), 415, 422 validación, 500 («Error interno de la plataforma. Inténtelo de nuevo; si persiste, consulte
 el registro del servidor.»), 503 («La base de datos no está disponible.»).
 Toda respuesta de resultados (evaluación, predicciones, explicaciones) incluye `aviso_decision` = pie fijo de
@@ -370,9 +408,11 @@ columnas `fila, identificador, probabilidad_estimada_pct, alerta, sugerencia`.
 
 `POST /api/experimentos/{id}/evaluacion-prueba` con `{"confirmar": true}` → 201 con métricas del modelo desplegado en las
 filas reservadas con el umbral ya fijado (`punto_operacion` + ROC-AUC, PR-AUC, Brier; `calibracion.punto_operacion` y
-`roc_auc_score` de ml); se guarda en `experimento.evaluacion_prueba` y no se recalcula nunca. 409 «La evaluación en la
+`roc_auc_score` de ml); se guarda en `experimento.evaluacion_prueba`, junto con `modelo_id` y `sha256_paquete` del modelo
+evaluado, y no se recalcula nunca. 409 «La evaluación en la
 cohorte de prueba ya se hizo (fecha); se usa una sola vez.»; 409 «Este experimento no tiene cohorte de prueba reservada.»
-(siempre para importados); 400 sin `confirmar`. Texto previo obligatorio en la interfaz: «Esta evaluación se hace una sola
+(siempre para importados); 409 si el índice único parcial del §3 la rechaza (los mismos datos ya se evaluaron con
+esta cohorte en otro experimento); 400 sin `confirmar`. Texto previo obligatorio en la interfaz: «Esta evaluación se hace una sola
 vez y no cambia el modelo ni el umbral.».
 
 ## 5. Ejecución en segundo plano (RNF-03)
@@ -700,3 +740,19 @@ Los incrementos 0-6 cubren todos los Must de la plataforma; 7-9 son S/C.
 | D-6 | **Presupuesto `demostracion`** = 5 ensayos por familia y 200 réplicas *bootstrap* | Aceptar; las capturas de evaluación para la memoria, con el modelo importado (resultados reales de 27-01) y no con una demostración |
 | D-7 | **Pliegues agrupados genéricos** con `StratifiedGroupKFold` (equilibra la prevalencia entre pliegues), distinto del reparto de D29-rev (3 presentaciones por pliegue, permutación con semilla), que sigue siendo el de OULAD | Aceptar y declararlo en 5.6 de la memoria |
 | D-8 | **Extraer** `motor.py` y `explicacion.py` de `experimento.py`, `modelo_final.py` y `shap_estabilidad.py` (movimientos con reexportación) en vez de duplicar | Extraer, con la no regresión del §6.2 antes del commit |
+
+## 13. Pendientes menores (para después de la congelación del 06/11)
+
+Hallazgos menores de las revisiones de código, anotados por decisión del estudiante (solo se corrigen bloqueantes e
+importantes antes de la congelación).
+
+| Origen | Pendiente |
+|---|---|
+| Revisión 2 del incremento 0 | Congelar también `experimento.reproducibilidad` tras evaluar |
+| Revisión 2 del incremento 0 | La prueba del catálogo comprueba nombres de disparadores, no las columnas que vigila cada uno |
+| Revisión 2 del incremento 0 | Instalar `ruff` en el entorno para pasar el linter |
+| Revisión 3 del incremento 0 | El hook que oculta la contraseña solo actúa en informes fallidos (`-rA` mostraría la salida de pruebas superadas) |
+| Revisión 3 del incremento 0 | `modelo_evaluado_congelado` lee `experimento` sin `FOR SHARE`: un INSERT concurrente con la evaluación podría colarse (no ocurre con un solo trabajador) |
+| Revisión 3 del incremento 0 | `clave_cohorte`: `1` y `1.0` dan claves distintas; normalizar los valores en la validación de la configuración |
+| Revisión 3 del incremento 0 | **Incremento 6 (no menor, recordatorio):** prueba de API `cohorte_prueba_clave == clave_cohorte(configuracion["cohorte_prueba"])` al crear el experimento; mientras tanto, el desajuste se declara como limitación |
+| Incremento 8 | Exportar el JUnit de `-m postgres` con `--tb=short` |
