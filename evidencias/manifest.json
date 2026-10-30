@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T21:06:13",
-  "commit": "732fed3",
+  "generado": "2026-10-29T21:15:58",
+  "commit": "9d90aed",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -15,7 +15,8 @@
     "experimentos/exp-2026-10-29-02.json",
     "experimentos/exp-2026-10-29-03.json",
     "experimentos/exp-2026-10-29-04.json",
-    "experimentos/exp-2026-10-29-05.json"
+    "experimentos/exp-2026-10-29-05.json",
+    "experimentos/exp-2026-10-29-06.json"
   ],
   "figuras": [
     {
@@ -206,6 +207,11 @@
       "archivo": "pruebas/exp-2026-10-29-05_pruebas.xml",
       "descripcion": "JUnit de todas las pruebas de ml/tests en el commit del experimento",
       "experimento": "exp-2026-10-29-05"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-29-06_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de ml/tests en el commit del experimento",
+      "experimento": "exp-2026-10-29-06"
     }
   ],
   "usabilidad": []

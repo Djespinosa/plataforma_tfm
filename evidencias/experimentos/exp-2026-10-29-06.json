@@ -1,0 +1,117 @@
+{
+  "id": "exp-2026-10-29-06",
+  "tipo": "comparacion",
+  "fecha": "2026-10-29T21:15:58",
+  "commit": "9d90aed",
+  "descripcion": "Diagnóstico del umbral transferido (D41) de los paquetes de exp-2026-10-29-03, sin reentrenar: sensibilidad y tasa de alerta sobre sus propias filas de entrenamiento (auditoría de exp-2026-10-29-03, O1; P-19).",
+  "analisis": "diagnostico_d41",
+  "experimentos": [
+    "exp-2026-10-29-03"
+  ],
+  "metodo": "cada paquete (SHA-256 comprobado contra el modelo final) predice sus filas de entrenamiento del momento; alerta = probabilidad calibrada ≥ umbral exacto del paquete. Se comparan la sensibilidad y la tasa de alerta resultantes con las out-of-fold de las que salió el umbral (punto_operacion_oof)",
+  "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+  "evaluado_en_prueba": false,
+  "modelos_sha256": {
+    "carpeta": "data/procesado/modelos",
+    "exp-2026-10-29-03_semana_0.joblib": "abd5bf8d892cf8f921ce8ff1821055e4a00e179364cfd7395cdf5e3818769a80",
+    "exp-2026-10-29-03_con_sensibles_semana_0.joblib": "33f6ac5da135ee4fe9ca75df09f49a8594223407da9717a617a1d863a6dde516",
+    "exp-2026-10-29-03_semana_4.joblib": "c0fd920e9c6f333daf29eac156bc443c89851c7dadbe6392bf0a8d997375c388",
+    "exp-2026-10-29-03_con_sensibles_semana_4.joblib": "41b426d121b8cdc24b468612a5c77f9a1715f85245266056e56dbeb1de8d5b11",
+    "exp-2026-10-29-03_semana_8.joblib": "78655fd4ec4829d47fce120fe6172b26503ba69e25366fa447301cb8d244a3f6",
+    "exp-2026-10-29-03_con_sensibles_semana_8.joblib": "dc6e5cea184998da5bb82b909b17cc9a849e176821fe7593c5484910ee718187",
+    "exp-2026-10-29-03_semana_12.joblib": "ee5b8d00509ec2028be94779494f80999726793aa6542cb6dd6c3abfef1bd367",
+    "exp-2026-10-29-03_con_sensibles_semana_12.joblib": "226e3d1dbbe6db42c5185e5fe5cd59b805ee1b34415cbcffa5ae5fa47aabf11a"
+  },
+  "momentos": [
+    {
+      "semana": 0,
+      "n": 19023,
+      "retiros": 4111,
+      "desplegado": {
+        "umbral_exacto": 0.21361185983827494,
+        "sensibilidad_en_entrenamiento": 0.7149,
+        "tasa_alerta_en_entrenamiento": 0.5102,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7025,
+        "tasa_alerta_oof": 0.5349
+      },
+      "con_sensibles": {
+        "umbral_exacto": 0.20609318996415774,
+        "sensibilidad_en_entrenamiento": 0.8013,
+        "tasa_alerta_en_entrenamiento": 0.6009,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7105,
+        "tasa_alerta_oof": 0.5382
+      }
+    },
+    {
+      "semana": 4,
+      "n": 18304,
+      "retiros": 3320,
+      "desplegado": {
+        "umbral_exacto": 0.1509521567841299,
+        "sensibilidad_en_entrenamiento": 0.769,
+        "tasa_alerta_en_entrenamiento": 0.5306,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7,
+        "tasa_alerta_oof": 0.4936
+      },
+      "con_sensibles": {
+        "umbral_exacto": 0.15095242581560372,
+        "sensibilidad_en_entrenamiento": 0.7735,
+        "tasa_alerta_en_entrenamiento": 0.5317,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7,
+        "tasa_alerta_oof": 0.4916
+      }
+    },
+    {
+      "semana": 8,
+      "n": 17629,
+      "retiros": 2641,
+      "desplegado": {
+        "umbral_exacto": 0.13251862516178345,
+        "sensibilidad_en_entrenamiento": 0.7618,
+        "tasa_alerta_en_entrenamiento": 0.4974,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7001,
+        "tasa_alerta_oof": 0.4524
+      },
+      "con_sensibles": {
+        "umbral_exacto": 0.14208754208754207,
+        "sensibilidad_en_entrenamiento": 0.7652,
+        "tasa_alerta_en_entrenamiento": 0.5018,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7043,
+        "tasa_alerta_oof": 0.4602
+      }
+    },
+    {
+      "semana": 12,
+      "n": 17146,
+      "retiros": 2154,
+      "desplegado": {
+        "umbral_exacto": 0.11711711711711711,
+        "sensibilidad_en_entrenamiento": 0.6792,
+        "tasa_alerta_en_entrenamiento": 0.3937,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7117,
+        "tasa_alerta_oof": 0.4489
+      },
+      "con_sensibles": {
+        "umbral_exacto": 0.1182870893990672,
+        "sensibilidad_en_entrenamiento": 0.7126,
+        "tasa_alerta_en_entrenamiento": 0.4227,
+        "lectura": "diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento",
+        "sensibilidad_oof": 0.7006,
+        "tasa_alerta_oof": 0.4301
+      }
+    }
+  ],
+  "pruebas": {
+    "informe": "pruebas/exp-2026-10-29-06_pruebas.xml",
+    "superadas": 155,
+    "fallidas": 0,
+    "omitidas": 0
+  }
+}
