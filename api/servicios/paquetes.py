@@ -31,6 +31,12 @@ def _cargar(ruta: str, huella: str) -> dict:
     return paquete
 
 
+def ruta_registrada(ruta: Path) -> str:
+    """Ruta que se guarda en modelo.ruta_paquete: relativa a la raíz del repositorio si está dentro; si no, absoluta."""
+    ruta = ruta.resolve()
+    return (ruta.relative_to(RAIZ) if ruta.is_relative_to(RAIZ) else ruta).as_posix()
+
+
 def cargar_paquete(modelo: Modelo) -> dict:
     """Paquete del modelo (no se debe modificar: es el de la caché). 409 si el archivo no coincide con el registrado o
     el paquete no es de un modelo desplegado."""

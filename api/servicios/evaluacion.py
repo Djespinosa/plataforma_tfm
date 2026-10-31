@@ -58,8 +58,9 @@ def desde_momento(momento: dict, holm_sobre: int, curva: dict | None, equidad: d
         "desplegado": {"modelo": desplegado, "mejor": parsimonia["mejor"],
                        "limite_superior": perdida[desplegado]["ic95_bootstrap"][1]},
         "punto_operacion": dict(momento["punto_operacion_oof"]),
-        "calibracion": {"metodo": calibracion["metodo"], "brier_sin_calibrar": calibracion["brier_sin_calibrar"],
-                        "brier_calibrado": calibracion["brier_calibrado"], "curva": curva},
+        # El apilamiento desplegado no tiene calibración propia (salida del metamodelo): método y Brier nulos.
+        "calibracion": {"metodo": calibracion.get("metodo"), "brier_sin_calibrar": calibracion.get("brier_sin_calibrar"),
+                        "brier_calibrado": calibracion.get("brier_calibrado"), "curva": curva},
         "equidad": _equidad(equidad),
     }
 

@@ -168,3 +168,75 @@ def miles(n: int) -> str:
 
 def fuente_global(n_filas: int) -> str:
     return f"filas de entrenamiento (n = {miles(n_filas)})"
+
+
+# Configuración y entrenamiento (RF-02, RF-03, §4.2 y §5)
+ERROR_JSON = "La petición no es JSON válido."
+ERROR_PRESUPUESTO = "El presupuesto debe ser «completo» o «demostracion»."
+ERROR_SIN_VARIABLES = "No queda ninguna variable para entrenar tras las exclusiones."
+ERROR_OBJETIVO_EXCLUIDO = "La columna objetivo no puede ser también de grupo, excluida ni sensible."
+ERROR_COHORTE = ("La cohorte de prueba debe ser {\"modo\": \"aleatoria\"} o {\"modo\": \"valores\", \"columna\": …, "
+                 "\"valores\": [...]} con al menos un valor.")
+ERROR_CONJUNTO_CAMBIADO = "El archivo del conjunto ha cambiado desde que se cargó."
+ERROR_PLIEGUES_DISTINTOS = "Los pliegues de validación no coinciden con los calculados al configurar el experimento."
+ERROR_CONFIGURACION = "No se puede preparar la validación con estos datos y esta configuración."
+CARACTERES_NO_ADMITIDOS = '[ ] < " , : { }'
+ERROR_ENTRENAMIENTO = "El entrenamiento ha fallado por un error interno."
+ERROR_INTERRUMPIDO = ("El proceso de entrenamiento se detuvo antes de terminar (cierre o reinicio). Puede reintentarlo: se "
+                      "creará un experimento nuevo con la misma configuración.")
+ERROR_TRABAJADOR_ACTIVO = "Ya hay un proceso de entrenamiento en marcha."
+SIN_RESPUESTA = "El proceso de entrenamiento no responde. Compruebe que está en marcha."
+AVISO_SIN_GRUPO = ("Sin columna de grupo, los pliegues se forman al azar (estratificados). Si hay filas relacionadas, como "
+                   "el mismo estudiante en varias cohortes o estudiantes de una misma cohorte, las métricas pueden "
+                   "sobreestimar el rendimiento en una cohorte nueva.")
+AVISO_DEMOSTRACION = ("Presupuesto reducido de demostración: los resultados no son comparables con los de un "
+                      "entrenamiento completo.")
+EXCLUIDA_GRUPO = "columna de grupo"
+EXCLUIDA_COHORTE = "define la cohorte de prueba"
+COHORTE_VALORES = "filas cuyo valor está en la lista"
+COHORTE_ALEATORIA = "20 % de las filas al azar, estratificado por la clase, con semilla"
+ETAPAS = {"referencias": "Referencias", "apilamiento": "Apilamiento",
+          "comparacion": "Comparación y elección del modelo", "final": "Modelo final",
+          "global": "Explicación global", "equidad": "Equidad"}
+
+
+def error_falta_campo(campo: str) -> str:
+    return f"Falta el campo «{campo}»."
+
+
+def error_lista_columnas(campo: str) -> str:
+    return f"El campo «{campo}» debe ser una lista de nombres de columna."
+
+
+def error_nombre_columna(columna: str) -> str:
+    return (f"El nombre de la columna «{columna}» contiene caracteres que algunos modelos no admiten "
+            f"({CARACTERES_NO_ADMITIDOS}); cámbielo en el archivo o exclúyala.")
+
+
+def error_valores_columna(columna: str) -> str:
+    return (f"La columna «{columna}» tiene valores con caracteres que algunos modelos no admiten "
+            f"({CARACTERES_NO_ADMITIDOS}); sustitúyalos en el archivo o exclúyala.")
+
+
+def error_objetivo_no_existe(columna: str) -> str:
+    return f"La columna objetivo «{columna}» no existe en el conjunto."
+
+
+def error_clase_positiva(clase: str) -> str:
+    return f"La clase positiva «{clase}» no aparece en la columna objetivo."
+
+
+def error_columnas_desconocidas(columnas: list[str]) -> str:
+    return f"Columnas desconocidas: {', '.join(columnas)}."
+
+
+def aviso_sin_objetivo(n: int) -> str:
+    return f"{miles(n)} filas no tienen valor en la columna objetivo y no se usan."
+
+
+def aviso_excluida(columna: str, motivo: str) -> str:
+    return f"La columna «{columna}» no se usa para predecir: {motivo}."
+
+
+def etapa_familia(familia: str, numero: int, total: int) -> str:
+    return f"Optimizando {nombre_modelo(familia)} (familia {numero} de {total})"

@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from api import textos
 from api.servicios.evaluacion import desde_momento
+from api.servicios.paquetes import ruta_registrada
 from api.tablas import Experimento, Modelo
 from automl.explicacion import explicacion_global, tipo_explicador
 from automl.motor import curva_calibracion
@@ -52,11 +53,6 @@ def _leer_json(carpeta: Path, id_: str) -> tuple[dict, Path]:
     return json.loads(ruta.read_text(encoding="utf-8")), ruta
 
 
-def _ruta(ruta: Path) -> str:
-    ruta = ruta.resolve()
-    return (ruta.relative_to(RAIZ) if ruta.is_relative_to(RAIZ) else ruta).as_posix()
-
-
 def _curva(evaluado: dict, semana: int, modelo: str) -> dict | None:
     """Curva de calibración del modelo desplegado desde las predicciones out-of-fold registradas; None si no están en
     este equipo. Un archivo presente con otro SHA-256 es un error."""
@@ -68,7 +64,7 @@ def _curva(evaluado: dict, semana: int, modelo: str) -> dict | None:
     if not ruta.exists():
         return None
     if sha256(ruta) != huellas[nombre]:
-        raise ErrorImportacion(f"{_ruta(ruta)} no coincide con el SHA-256 registrado en {evaluado['id']}.")
+        raise ErrorImportacion(f"{ruta_registrada(ruta)} no coincide con el SHA-256 registrado en {evaluado['id']}.")
     oof = pd.read_parquet(ruta, columns=["etiqueta", f"p_{modelo}", f"p_{modelo}_sin_calibrar"])
     return {"calibrada": curva_calibracion(oof["etiqueta"], oof[f"p_{modelo}"]),
             "sin_calibrar": curva_calibracion(oof["etiqueta"], oof[f"p_{modelo}_sin_calibrar"])}
@@ -152,7 +148,7 @@ def importar(sesion: Session, modelos: Path, experimentos: Path, referencia: Pat
         sesion.add(Modelo(
             experimento_id=p.origen["id"], momento=f"semana {p.paquete['semana']}",
             familia=p.paquete.get("familia", momento["modelo_desplegado"]["modelo"]),
-            ruta_paquete=_ruta(p.archivo), sha256_paquete=p.huella, umbral=float(p.paquete["umbral"]),
+            ruta_paquete=ruta_registrada(p.archivo), sha256_paquete=p.huella, umbral=float(p.paquete["umbral"]),
             metodo_calibracion=momento["calibracion"]["metodo"], columnas=p.paquete["columnas"],
             explicador=tipo_explicador(p.paquete),
             evaluacion=desde_momento(momento, len(p.evaluado["momentos"]), p.curva, momento.get("equidad_oof")),

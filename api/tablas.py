@@ -25,6 +25,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from api.bd import JSONB_, Base
+from automl.validacion import normalizar_valor
 
 ESTADOS = ("en_cola", "en_curso", "completado", "fallido", "interrumpido")
 ORIGENES = ("web", "importado")
@@ -68,7 +69,8 @@ def _formato_sha256(columna: str) -> str:
 def clave_cohorte(cohorte: dict) -> str:
     """SHA-256 de la definición canónica de la cohorte de prueba (experimento.cohorte_prueba_clave).
 
-    Modo «valores»: columna y conjunto de valores como texto, sin repetidos y ordenados. Modo «aleatoria»: solo el modo
+    Modo «valores»: columna y conjunto de valores como texto normalizado (validacion.normalizar_valor, el mismo con que
+    reservar_prueba elige las filas: 2014 y 2014.0 dan la misma clave), sin repetidos y ordenados. Modo «aleatoria»: solo el modo
     (decisión del estudiante): otra semilla daría una cohorte que comparte filas con la ya evaluada, así que hay una sola
     evaluación aleatoria por datos. «semilla», «filas» y «metodo» no forman parte de la clave."""
     if cohorte["modo"] == "aleatoria":
@@ -77,7 +79,7 @@ def clave_cohorte(cohorte: dict) -> str:
         definicion = {
             "modo": cohorte["modo"],
             "columna": cohorte.get("columna"),
-            "valores": sorted(set(map(str, cohorte.get("valores") or []))),
+            "valores": sorted(set(map(normalizar_valor, cohorte.get("valores") or []))),
         }
     canonica = json.dumps(definicion, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha256(canonica.encode("utf-8")).hexdigest()

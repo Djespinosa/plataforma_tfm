@@ -148,7 +148,7 @@ Evaluación única en la cohorte de prueba (matiz D-2), impuesta en la base de d
   otro experimento con la misma cohorte no permite una segunda evaluación. Como un índice no cruza tablas, el SHA-256 se
   copia en `experimento` al crearlo.
 - `clave_cohorte` es canónica (decisión del estudiante, 2026-10-30): en modo «valores», columna y conjunto de valores
-  como texto, sin repetidos y ordenados (`sorted(set(map(str, valores)))`), sin semilla; en modo «aleatoria», solo el
+  como texto normalizado, sin repetidos y ordenados (`sorted(set(map(normalizar_valor, valores)))`), sin semilla; en modo «aleatoria», solo el
   modo (ni semilla ni nada más): una sola evaluación con cohorte aleatoria por datos, porque otra semilla da una cohorte
   que comparte filas con la ya evaluada. «semilla», «filas» y «metodo» no forman parte de la clave.
 - Disparador `evaluacion_prueba_unica` (`BEFORE INSERT OR UPDATE OR DELETE` en `experimento`): rechaza siempre cambiar
@@ -231,7 +231,7 @@ Cuerpo de configuración (solo `conjunto_id`, `objetivo` y `clase_positiva` son 
   (20 % estratificado, semilla de modelos; solo sin columna de grupo).
 - `presupuesto`: `completo` (por defecto) o `demostracion` (5 ensayos por familia, 200 réplicas). `prueba` (1 ensayo, 20
   réplicas) solo se acepta con la configuración `Pruebas`; en otro caso, 422.
-- Clase positiva: `y = (objetivo.astype(str) == str(clase_positiva))`; el resto de valores es negativo (como D2). Las filas
+- Clase positiva: `y = (objetivo.map(normalizar_valor) == normalizar_valor(clase_positiva))`; el resto de valores es negativo (como D2). Las filas
   sin objetivo se descartan y se cuentan.
 
 `POST /api/experimentos/validacion` — mismo cuerpo, no crea nada. → **200**
@@ -475,6 +475,32 @@ vez y no cambia el modelo ni el umbral.».
 5. `explicacion.explicacion_global(paquete, X)`; `motor.curva_calibracion(...)`; `motor.auditar_equidad(...)` si hay
    sensibles.
 6. Guarda `oof.parquet`, `reproducibilidad`, `modelo` (+ `evaluacion`) y `completado` en una transacción.
+
+Al implementar (incremento 6):
+- `servicios/configuracion_exp.py`: `configurar` (petición → configuración efectiva del §6.4) y `preparar` (configuración
+  → X, y, pliegue, sensibles y filas de la cohorte de prueba), la misma función en `/validacion`, `POST /experimentos` y
+  el trabajador; el trabajador compara `pliegues_sha256`. La clase positiva y el objetivo se comparan con
+  `normalizar_valor` (1 y 1.0 son la misma clase). Tipos de variable: los del resumen de la carga (§4.1).
+- Presupuesto `prueba` (solo con `TESTING`): familias `rl` y `lgbm`, 1 ensayo, apilamiento y 20 réplicas, para que una
+  prueba entrene en segundos.
+- Equidad web: `auditar_equidad` con los recuentos del **entrenamiento** (`recuentos_de="entrenamiento"`), no de la
+  cohorte de prueba: la plataforma no muestra nada de la cohorte reservada y así sus etiquetas solo se leen en la
+  evaluación única (§4.7).
+- Holm sobre 1 contraste (`delong_p_holm = delong_p`) y `lectura` con `comparacion.holm`/`lectura` de ml/.
+- Si se despliega el apilamiento, `calibracion` lleva método y Brier nulos y la curva sin calibrar es `null`.
+- `prueba.parquet` guarda la posición 1..n en el CSV de las filas reservadas.
+- `GET /api/experimentos/{id}` añade `aviso_sin_respuesta` (texto) cuando `sin_respuesta`.
+- El trabajador suelta el bloqueo con `pg_advisory_unlock` al salir: `close()` devuelve la conexión al pool sin cerrarla.
+- Revisión: (1) los nombres de predictor con `[ ] < " , : { }` y las categorías con `" , : { }` dan 422 al configurar
+  (LightGBM y XGBoost los rechazan en los nombres de columna, también en los one-hot `<variable>_<valor>`; antes fallaba
+  tras horas de entrenamiento); `preprocesado.nombre_columna` no cambia (sin efecto en OULAD ni en la no regresión).
+  (2) `automl.validacion.ErrorValidacion(ValueError)` para los mensajes en español: la API solo reenvía esos y
+  `ErrorPlataforma`; cualquier otro error da un texto genérico (422 `ERROR_CONFIGURACION` o «El entrenamiento ha fallado
+  por un error interno.»). (3) `commit` y `arbol_limpio` se toman al arrancar el trabajador
+  (`app.config["CODIGO_TRABAJADOR"]`), no al terminar; sin trabajador (pruebas), el commit de `crear_app` y
+  `arbol_limpio: null`.
+- Comprobado contra `plataforma_pruebas` (PostgreSQL 16.15, 2026-10-31): configurar, entrenar con el trabajador,
+  evaluar, predecir y explicar (comprobación interna, no citable).
 
 ## 6. Funciones nuevas en `ml/` (primero, con sus pruebas)
 
@@ -826,13 +852,12 @@ Los incrementos 0-6 cubren todos los Must de la plataforma; 7-9 son S/C.
 
 **Obligatorios antes de la congelación del 06/11** (no son menores; el estudiante pidió vigilar que no se aplacen):
 
-- **Incremento 6:** `clave_cohorte` normaliza los valores con `automl.validacion.normalizar_valor` (la misma que usa
-  `reservar_prueba`) antes de que se guarde la primera evaluación (incremento 9). Si no, "2014" y 2014.0 reservarían las
-  mismas filas con claves distintas y se reabriría el hueco I-4. Con su prueba.
-- **Incremento 6:** prueba de API `cohorte_prueba_clave == clave_cohorte(configuracion["cohorte_prueba"])` al crear el
-  experimento.
-- **Incremento 6:** el entrenamiento web prepara las variables con `tablas_csv.coaccionar` (la misma coerción que la
-  predicción, §4.5 «Al implementar»), con una prueba de que una categórica numérica entrena y predice igual.
+- ~~**Incremento 6:** `clave_cohorte` normaliza los valores con `automl.validacion.normalizar_valor`~~ Hecho
+  (incremento 6, `test_clave_de_cohorte_normaliza_los_valores`).
+- ~~**Incremento 6:** prueba de API `cohorte_prueba_clave == clave_cohorte(configuracion["cohorte_prueba"])`~~ Hecho
+  (`test_crear_guarda_configuracion_efectiva_y_clave_de_cohorte`).
+- ~~**Incremento 6:** el entrenamiento web prepara las variables con `tablas_csv.coaccionar`~~ Hecho
+  (`configuracion_exp.preparar`; `test_categorica_escrita_como_numero_predice_igual`).
 
 Las cifras que den las revisiones de código (p. ej. la prevalencia por pliegue de la revisión del incremento 1) son
 comprobaciones internas, no citables: si la memoria las quiere, deben llegar como evidencia exportada con su commit.
@@ -873,3 +898,8 @@ importantes antes de la congelación).
 | Revisión del incremento 4 | `test_arbol_limpio_solo_si_el_json_viene_de_evidencias` solo cubre `None`; el caso `True` se cubre con `monkeypatch` de `api.importar.EVIDENCIAS` a la carpeta temporal |
 | Revisión del incremento 5 | `explicacion_local` con permutación: dos peticiones simultáneas de la misma fila → `IntegrityError` en la clave primaria y 500 (capturar, `rollback` y releer); `valor_llano` con `.4g` da notación científica a partir de 10 000 («1,235e+04») |
 | Revisión del incremento 5 | Pruebas: categórica escrita como número (2014.0 → "2014") de punta a punta; explicación global de un modelo de permutación |
+| Revisión del incremento 6 | Id `web-…-NN` con `SELECT max` + `INSERT` sin reintento (dos POST simultáneos → 500 en uno); fecha local frente a `creado_en` en UTC; `entrenamiento` reutiliza una carpeta `experimentos/<id>` con archivos antiguos si el id se repite tras vaciar la BD |
+| Revisión del incremento 6 | Trabajador: Ctrl+C deja `paquete.joblib` en disco (sin registro en BD); el hilo del latido muere en silencio ante un error de BD; un error de BD en `tomar()` termina el proceso y el `pg_advisory_unlock` del `finally` puede tapar la excepción original; `recuperar_huerfanos` no rellena `duracion_s` |
+| Revisión del incremento 6 | `ERROR_INTERRUMPIDO` promete reintentar (ruta del incremento 7, RF-08 recortable); `_texto` dice «lista» para campos de texto y `objetivo: ""` da ««None»»; `conjunto_id: true` se acepta como 1; `descripcion` sin límite; la fila de un `inf` al entrenar se cuenta sobre las de entrenamiento; `paquetes.ruta_registrada` duplica `evidencias.ruta_registrada` |
+| Revisión del incremento 6 | Pruebas: fallo por `pliegues_sha256` distinto; `sin_respuesta` con su aviso; hilo del latido; despliegue del apilamiento (método y Brier nulos); doble POST; `test_textos.py` del §7 (vocabulario prohibido) aún no existe |
+| Revisión del incremento 6 (2.ª) | `error_valores_columna` lista `[ ] <`, que en las categorías sí se admiten (constante aparte con `" , : { }`); docstring de `textos.py` dice «ValueError de ml/» (ahora `ErrorValidacion`); nombres one-hot repetidos (`nota_1` numérica y `nota` = 1) o que LightGBM iguala (`a b` y `a_b`) fallan en el trabajador con «error interno» (rechazarlos al configurar); sin prueba del comando `trabajador` que rellene `CODIGO_TRABAJADOR` |
