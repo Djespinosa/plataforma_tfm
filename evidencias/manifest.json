@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-29T21:24:32",
-  "commit": "21729cf",
+  "generado": "2026-10-30T16:39:37",
+  "commit": "ac12e7c",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -16,7 +16,8 @@
     "experimentos/exp-2026-10-29-03.json",
     "experimentos/exp-2026-10-29-04.json",
     "experimentos/exp-2026-10-29-05.json",
-    "experimentos/exp-2026-10-29-06.json"
+    "experimentos/exp-2026-10-29-06.json",
+    "experimentos/exp-2026-10-30-01.json"
   ],
   "figuras": [
     {
@@ -252,6 +253,11 @@
       "archivo": "pruebas/exp-2026-10-29-06_pruebas.xml",
       "descripcion": "JUnit de todas las pruebas de ml/tests en el commit del experimento",
       "experimento": "exp-2026-10-29-06"
+    },
+    {
+      "archivo": "pruebas/exp-2026-10-30-01_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de ml/tests en el commit de la comprobación de no regresión",
+      "experimento": "exp-2026-10-30-01"
     }
   ],
   "usabilidad": []

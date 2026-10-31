@@ -1,0 +1,247 @@
+{
+  "id": "exp-2026-10-30-01",
+  "tipo": "comparacion",
+  "analisis": "no_regresion",
+  "fecha": "2026-10-30T16:39:37",
+  "commit": "ac12e7c",
+  "descripcion": "No regresión numérica de la extracción de la parte genérica de experimento.py, modelo_final.py y shap_estabilidad.py a ml/automl/motor.py y ml/automl/explicacion.py (docs/diseno-api.md §6.2): el mismo ensayo en el commit base y en el nuevo debe dar los mismos `momentos` (sin tiempos) y las mismas predicciones out-of-fold.",
+  "commit_base": "3395ab4",
+  "commit_nuevo": "ac12e7c",
+  "arbol_de_trabajo": false,
+  "comando": "python ml/experimento.py ml/configs/principal.json --ensayo --n-trials 2 --semanas 0 --n-bootstrap 50 --salida <carpeta temporal>",
+  "metodo": "El mismo ensayo de experimento.py (mismo intérprete, entorno, datos y semillas) en el commit base, en un git worktree temporal con una copia de data/, y en el commit nuevo. Se comparan `momentos` del JSON sin las claves que empiezan por «tiempo» (igualdad exacta de cada valor, NaN igual a NaN) y las predicciones out-of-fold de cada semana con pandas.testing.assert_frame_equal (columnas no numéricas exactas; probabilidades con atol=1e-09 y rtol=0, y se registra la diferencia absoluta máxima de cada columna). Las claves de tiempo se excluyen porque dependen de la carga del equipo. La tolerancia de las predicciones se debe a que RandomForest (scikit-learn) con n_jobs > 1 suma las predicciones de los árboles en el orden en que terminan los hilos, con diferencias de redondeo de ~1e-16 entre ejecuciones del mismo código, que la calibración isotónica y el apilamiento propagan a ~1e-13",
+  "ensayos": {
+    "base": {
+      "id": "exp-2026-10-30-01",
+      "commit": "3395ab4",
+      "configuracion": {
+        "nombre": "principal",
+        "variante": "principal",
+        "descripcion": "Configuración principal de la Entrega 2: búsqueda sin variables sensibles (D38), 7 familias, apilamiento posterior (D48), solo validación cruzada.",
+        "experimento_cortes": "exp-2026-10-23-02",
+        "semanas": [
+          0
+        ],
+        "familias": [
+          "rl",
+          "rf",
+          "gb",
+          "xgb",
+          "lgbm",
+          "catboost",
+          "mlp"
+        ],
+        "n_trials_por_familia": 2,
+        "sin_sensibles": true,
+        "apilamiento": true,
+        "sensibilidad_minima": 0.7,
+        "n_bootstrap": 50,
+        "semillas": {
+          "optuna": 42,
+          "modelos": 42,
+          "bootstrap": 42
+        },
+        "n_jobs": 8
+      },
+      "pruebas": {
+        "informe": "pruebas/exp-2026-10-30-01_pruebas.xml",
+        "superadas": 169,
+        "fallidas": 0,
+        "omitidas": 0
+      }
+    },
+    "nuevo": {
+      "id": "exp-2026-10-30-01",
+      "commit": "ac12e7c",
+      "configuracion": {
+        "nombre": "principal",
+        "variante": "principal",
+        "descripcion": "Configuración principal de la Entrega 2: búsqueda sin variables sensibles (D38), 7 familias, apilamiento posterior (D48), solo validación cruzada.",
+        "experimento_cortes": "exp-2026-10-23-02",
+        "semanas": [
+          0
+        ],
+        "familias": [
+          "rl",
+          "rf",
+          "gb",
+          "xgb",
+          "lgbm",
+          "catboost",
+          "mlp"
+        ],
+        "n_trials_por_familia": 2,
+        "sin_sensibles": true,
+        "apilamiento": true,
+        "sensibilidad_minima": 0.7,
+        "n_bootstrap": 50,
+        "semillas": {
+          "optuna": 42,
+          "modelos": 42,
+          "bootstrap": 42
+        },
+        "n_jobs": 8
+      },
+      "pruebas": {
+        "informe": "pruebas/exp-2026-10-30-01_pruebas.xml",
+        "superadas": 202,
+        "fallidas": 0,
+        "omitidas": 0
+      }
+    }
+  },
+  "comparaciones": {
+    "momentos": {
+      "claves_comparadas": [
+        "apilamiento",
+        "calibracion",
+        "contraste_central",
+        "desglose",
+        "equidad_oof",
+        "familias",
+        "mejor_automl",
+        "modelo_desplegado",
+        "n",
+        "parsimonia",
+        "punto_operacion_oof",
+        "referencias",
+        "retiros",
+        "semana",
+        "shap"
+      ],
+      "claves_excluidas": [
+        "tiempo_busqueda_s",
+        "tiempo_oof_calibrado_s",
+        "tiempo_s"
+      ],
+      "valores_comparados": 806,
+      "igual": true,
+      "diferencias": []
+    },
+    "predicciones_oof": [
+      {
+        "semana": 0,
+        "filas": 19023,
+        "columnas": [
+          "code_module",
+          "code_presentation",
+          "id_student",
+          "pliegue",
+          "etiqueta",
+          "p_rl",
+          "p_rf",
+          "p_gb",
+          "p_xgb",
+          "p_lgbm",
+          "p_catboost",
+          "p_mlp",
+          "p_ref_mayoritaria",
+          "p_ref_rl_defecto",
+          "p_ref_rl_defecto_sin_calibrar",
+          "p_ref_rl_defecto_platt",
+          "p_ref_rl_defecto_isotonica",
+          "p_apilamiento",
+          "p_rl_sin_calibrar",
+          "p_rl_platt",
+          "p_rl_isotonica",
+          "p_rf_sin_calibrar",
+          "p_rf_platt",
+          "p_rf_isotonica",
+          "p_gb_sin_calibrar",
+          "p_gb_platt",
+          "p_gb_isotonica",
+          "p_xgb_sin_calibrar",
+          "p_xgb_platt",
+          "p_xgb_isotonica",
+          "p_lgbm_sin_calibrar",
+          "p_lgbm_platt",
+          "p_lgbm_isotonica",
+          "p_catboost_sin_calibrar",
+          "p_catboost_platt",
+          "p_catboost_isotonica",
+          "p_mlp_sin_calibrar",
+          "p_mlp_platt",
+          "p_mlp_isotonica"
+        ],
+        "igual": true,
+        "diferencia": null,
+        "tolerancia": 1e-09,
+        "diferencia_maxima": {
+          "p_rf": 4.440892098500626e-16,
+          "p_apilamiento": 9.514611321037592e-14,
+          "p_rf_sin_calibrar": 4.440892098500626e-16,
+          "p_rf_platt": 4.440892098500626e-16,
+          "p_rf_isotonica": 4.5402570592045777e-13
+        },
+        "sha256_base": "8ac3662b05742484d5ec90c16345f8e06e7d4aee81c729554238db1f02a57c93",
+        "sha256_nuevo": "ce22676a6f648b31c5d1910c1529b409a1256c51500923a2cfa0694d88fd579c",
+        "sha256_igual": false
+      }
+    ]
+  },
+  "identico": true,
+  "oof_sha256": {
+    "base": {
+      "0": "8ac3662b05742484d5ec90c16345f8e06e7d4aee81c729554238db1f02a57c93"
+    },
+    "nuevo": {
+      "0": "ce22676a6f648b31c5d1910c1529b409a1256c51500923a2cfa0694d88fd579c"
+    }
+  },
+  "evaluado_en_prueba": false,
+  "dataset": {
+    "nombre": "OULAD",
+    "version": "2017",
+    "licencia": "CC BY 4.0 (Kuzilek et al., 2017)",
+    "tablas_usadas": [
+      "courses.csv",
+      "studentInfo.csv",
+      "studentRegistration.csv",
+      "assessments.csv",
+      "studentAssessment.csv",
+      "vle.csv",
+      "studentVle.csv"
+    ],
+    "sha256": {
+      "courses.csv": "4f16eee7454b15e109b0a21a0e43be820e6846ed6f9301bb7feb5ab5ad737a75",
+      "studentInfo.csv": "815fbc3e2de29f79900bc63f0345a35db62c9146afaa1d86e7107b8b3beffc60",
+      "studentRegistration.csv": "bbc87a0de1fe2a9ec6decce1ca6c1a02cf17b54ad3bdcc673fc6413b41c61d47",
+      "assessments.csv": "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba",
+      "studentAssessment.csv": "b1839e17618a5de36b6d189a242d3123f7939a56c8c9ccef0c17b9199c614a6b",
+      "vle.csv": "d7a146497edd0e47ef536144b58796c07b554002d3753e848b8e4cd8a56f4c38",
+      "studentVle.csv": "52668253d876c5becbcb72185977152700cecab2942aca807fecc3dd54b937f0"
+    },
+    "cortes_sha256": {
+      "semana_0.parquet": "52b64439f6601b04f27ddf878a4453c3e38af446c0d2c51b0eed73cb01b61a1c"
+    }
+  },
+  "entorno": {
+    "python": "3.13.3",
+    "pandas": "3.1.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "scikit-learn": "1.9.1",
+    "optuna": "5.0.0",
+    "xgboost": "3.4.1",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10",
+    "scipy": "1.18.1",
+    "pytest": "9.1.1",
+    "nota": "el mismo intérprete y entorno en los dos ensayos"
+  },
+  "hardware": {
+    "procesador": "AMD Ryzen 7 4800H with Radeon Graphics",
+    "nucleos_fisicos": 8,
+    "nucleos_logicos": 16,
+    "memoria_gb": 15.4,
+    "sistema": "Windows 11"
+  },
+  "pruebas": {
+    "informe": "pruebas/exp-2026-10-30-01_pruebas.xml",
+    "superadas": 202,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "tiempo_ejecucion_s": 4495.9,
+  "figuras": []
+}
