@@ -28,15 +28,17 @@ def _commit() -> str | None:
 def crear_app(configuracion: object | None = None) -> Flask:
     from api import bd, errores
     from api.configuracion import Desarrollo
-    from api.rutas import estado
+    from api.rutas import conjuntos, estado
 
     app = Flask(__name__)
     app.config.from_object(configuracion if configuracion is not None else Desarrollo())
     app.config["COMMIT"] = _commit()
+    app.config["MAX_CONTENT_LENGTH"] = app.config["PLATAFORMA_MAX_MB"] * 1024 * 1024  # 413 al leer request.files
     app.json.ensure_ascii = False
     bd.iniciar(app)
     errores.registrar(app)
     app.register_blueprint(estado.bp)
+    app.register_blueprint(conjuntos.bp)
     return app
 
 

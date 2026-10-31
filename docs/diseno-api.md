@@ -129,7 +129,7 @@ PostgreSQL 16; JSON como `JSON().with_variant(JSONB, "postgresql")`; fechas `tim
 
 | Tabla | Columnas (clave primaria en negrita) | Notas |
 |---|---|---|
-| `conjunto_datos` | **id** serial · nombre_archivo · momento (texto libre, opcional: «semana 4») · ruta · sha256 · n_filas · n_columnas · columnas JSON (`[{nombre, tipo, faltantes, proporcion_faltantes, valores_distintos, valores_frecuentes[≤20]}]`) · avisos JSON · creado_en | El CSV se guarda tal cual en `data/plataforma/conjuntos/<id>.csv` |
+| `conjunto_datos` | **id** serial · nombre_archivo · momento (texto libre, opcional: «semana 4») · ruta · sha256 · n_filas · n_columnas · columnas JSON (`[{nombre, tipo, faltantes, proporcion_faltantes, valores_distintos, valores_frecuentes[≤20]}]`) · avisos JSON · creado_en | El CSV se guarda tal cual en `data/plataforma/conjuntos/<sha256>.csv` (`ruta` relativa a `PLATAFORMA_DATOS`; por hash y no por id porque `ruta` no cambia tras el INSERT, y el mismo contenido comparte archivo) |
 | `experimento` | **id** texto (`web-AAAA-MM-DD-NN` o el id del experimento importado) · origen (`web`/`importado`) · conjunto_id FK nulo · sha256_datos nulo (copia de `conjunto_datos.sha256` al crearlo) · cohorte_prueba_clave nulo (SHA-256 de la definición canónica de la cohorte de prueba, `tablas.clave_cohorte`; nulo sin cohorte) · descripcion · configuracion JSON (§6.4) · estado (`en_cola`, `en_curso`, `completado`, `fallido`, `interrumpido`) · etapa texto · progreso JSON `{completadas, total}` · error texto · latido_en · creado_en · iniciado_en · terminado_en · duracion_s · reproducibilidad JSON · procedencia JSON (importados) · evaluacion_prueba JSON nulo (§4.7) · reintento_de FK nulo | `UNIQUE(id)`; el id nunca se reutiliza ni cambia (disparador) |
 | `modelo` | **id** serial · experimento_id FK · momento texto nulo · familia · ruta_paquete · sha256_paquete · umbral (float exacto) · metodo_calibracion nulo · columnas JSON · explicador (`lineal`/`arbol`/`permutacion`) · evaluacion JSON (§4.3) · explicacion_global JSON nulo · creado_en | Solo modelos desplegados; los candidatos viven en `evaluacion` |
 | `lote_prediccion` | **id** serial · modelo_id FK · nombre_archivo · ruta · sha256 · n_filas · columna_id nulo · columnas_ignoradas JSON · umbral · n_alertas · creado_en | |
@@ -177,7 +177,7 @@ sqlalchemy, psycopg), sha256_datos, sha256_oof, hardware, optuna: busqueda.DESCR
 {valor, nivel: busqueda.NIVEL_N_JOBS}}`. `commit` y `arbol_limpio` con `evidencias.git`; un árbol sucio **no** aborta
 (no es una exportación a `evidencias/`), pero queda registrado y la vista lo muestra.
 
-En disco (`PLATAFORMA_DATOS`, por defecto `data/plataforma/`): `conjuntos/<id>.csv`; `experimentos/<id>/paquete.joblib`,
+En disco (`PLATAFORMA_DATOS`, por defecto `data/plataforma/`): `conjuntos/<sha256>.csv`; `experimentos/<id>/paquete.joblib`,
 `oof.parquet` (predicciones *out-of-fold* `p_<modelo>` y `etiqueta`, para reproducir la evaluación), `prueba.parquet`
 (índices de la cohorte reservada) y `error.log`; `predicciones/<lote>.csv`. Los paquetes importados se quedan en su ruta
 (`data/procesado/modelos/`) y la BD guarda ruta y SHA-256.
@@ -820,3 +820,7 @@ importantes antes de la congelación).
 | Revisión del incremento 2 | `no_regresion.py`: si la copia de `data/` falla, el worktree se elimina igualmente en el `finally`; `--salida evidencias/sub` pasa el filtro de `--arbol-de-trabajo` (usar `is_relative_to`); JUnit huérfano si un ensayo falla |
 | Revisión del incremento 2 | Pruebas que faltan: salvaguardas de base = HEAD y comparación vacía, `proporcion_entregadas` en `variables_sin_valores` de la semana 0 |
 | Revisión del incremento 2 | `explicacion.py`: `calibrated_classifiers_[0]` sin comprobar que haya uno; muestra de `explicacion_global` con `semilla=42` y no `paquete["semilla"]`; guarda `if len(X)` inútil |
+| Revisión del incremento 3 | Prueba del 413: fija `MAX_CONTENT_LENGTH` a mano, así que no comprueba la traducción de `PLATAFORMA_MAX_MB` y afirma «50 MB» con un límite de 1 KB |
+| Revisión del incremento 3 | `tablas_csv.py`: con una línea en blanco inicial, la cabecera de `csv.reader` es `[]` y el archivo se rechaza con 415 sin explicar la causa (saltar las filas vacías iniciales: `next((f for f in lector if f), [])`); varias cabeceras vacías dan «Hay columnas con el mismo nombre: .»; con «;» y un separador al final de cada fila, el Sniffer no detecta el separador y el mensaje es «Se necesitan al menos 2 columnas.» en lugar del 415 |
+| Revisión del incremento 3 | Un NUL (`\u0000`) en un valor, en un nombre de columna o en el nombre del archivo hace fallar el INSERT en PostgreSQL con 500 en lugar de 415/422; con «;» y coma decimal, la columna sale categórica sin aviso |
+| Revisión del incremento 3 | `conjuntos.py`: si falla la escritura, el `.tmp` queda huérfano (`try/finally` con `unlink(missing_ok=True)`); en Windows, `os.replace` da 500 si otra subida simultánea tiene abierto el destino |

@@ -36,7 +36,8 @@ def registrar(app: Flask) -> None:
 
     @app.errorhandler(HTTPException)
     def _http(e: HTTPException):
-        mensajes = {404: textos.ERROR_RUTA_NO_EXISTE, 405: textos.ERROR_METODO_NO_PERMITIDO}
+        mensajes = {404: textos.ERROR_RUTA_NO_EXISTE, 405: textos.ERROR_METODO_NO_PERMITIDO,
+                    413: textos.error_tamano_maximo(app.config["PLATAFORMA_MAX_MB"])}
         return _respuesta(e.code or 500, mensajes.get(e.code, textos.ERROR_PETICION))
 
     @app.errorhandler(Exception)
