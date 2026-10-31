@@ -696,6 +696,22 @@ omitido) · `test_importador_rechaza_sha256_distinto` · `test_importador_es_ide
 `test_evaluacion_importada_sale_del_experimento_origen` · `test_prediccion_rechaza_paquete_no_desplegado` (defensa en
 `servicios.paquetes`, aunque esté en BD).
 
+Al implementar (incremento 4):
+- `modelo.evaluacion` guarda solo la parte numérica (`servicios/evaluacion.desde_momento`) y los textos se añaden al
+  responder (`con_textos`), para que un cambio de texto no obligue a reimportar. De ml/ solo se copian números y
+  etiquetas cerradas: `motivo`, `regla`, `nota` y la `calibracion` textual del apilamiento llevan códigos de decisión. De
+  `equidad_oof` no se copia `retiros_prueba` (recuento de 2014J): la plataforma no muestra nada de la cohorte de prueba.
+  En la respuesta, `equidad = {texto, atributos}`.
+- `validacion` de un importado: `{tipo: "agrupada", k, semilla, columna_grupo: null}`; los experimentos de ml/ validan
+  siempre con los pliegues agrupados por presentación fijados en los cortes, y la API no nombra columnas de OULAD.
+- Mensajes y orden: primero los omitidos y después los importados, por experimento y semana (el orden alfabético
+  pondría «semana_12» antes que «semana_4»); `GET /api/modelos` y la evaluación ordenan por `modelo.id`.
+- `test_prediccion_rechaza_paquete_no_desplegado` pasa al incremento 5, con `servicios/paquetes.py`.
+- Comprobado con los paquetes reales (SQLite temporal, 2026-10-31): 4 importados, los 4 con sensibles omitidos, curva
+  de calibración en las 4 semanas desde los OOF de 27-01, y la explicación global igual bit a bit a la media de |φ| de
+  `modelo_final.predecir_y_explicar` sobre las filas de referencia (identidad del matiz D-3; comprobación interna, no
+  citable hasta que se exporte como evidencia).
+
 ## 9. Dependencias, base de datos y configuración
 
 Nuevas en `requirements.txt` (versiones exactas, como el resto; comprobadas con `pip index versions` el 2026-10-30):
@@ -824,3 +840,8 @@ importantes antes de la congelación).
 | Revisión del incremento 3 | `tablas_csv.py`: con una línea en blanco inicial, la cabecera de `csv.reader` es `[]` y el archivo se rechaza con 415 sin explicar la causa (saltar las filas vacías iniciales: `next((f for f in lector if f), [])`); varias cabeceras vacías dan «Hay columnas con el mismo nombre: .»; con «;» y un separador al final de cada fila, el Sniffer no detecta el separador y el mensaje es «Se necesitan al menos 2 columnas.» en lugar del 415 |
 | Revisión del incremento 3 | Un NUL (`\u0000`) en un valor, en un nombre de columna o en el nombre del archivo hace fallar el INSERT en PostgreSQL con 500 en lugar de 415/422; con «;» y coma decimal, la columna sale categórica sin aviso |
 | Revisión del incremento 3 | `conjuntos.py`: si falla la escritura, el `.tmp` queda huérfano (`try/finally` con `unlink(missing_ok=True)`); en Windows, `os.replace` da 500 si otra subida simultánea tiene abierto el destino |
+| Revisión del incremento 4 | `importar.py`: `joblib.load` antes de verificar el SHA-256 (comprobar primero que la huella está en algún `modelos_sha256`); filas de referencia sin SHA-256 registrado en `explicacion_global` o `procedencia`; `_curva` exige `p_<modelo>_sin_calibrar` (`KeyError` en lugar de `None`) |
+| Revisión del incremento 4 | `servicios/evaluacion.py`: `punto_operacion_oof` copiado entero (filtrar con una lista de campos como `CAMPOS_SUBGRUPO`); `descripcion_importado` muestra «los scripts de ml/» al usuario |
+| Revisión del incremento 4 | Pruebas: `test_comando_importar_paquetes` no llega a probar el paquete sin huella (falla antes por el OOF alterado) ni que sigan siendo 2 modelos; falta una prueba sintética de la identidad de la explicación global con la media de \|φ\| de `explicacion.explicar` |
+| Revisión del incremento 4 | `ml/referencia_oulad.py`: el CSV de demostración no lleva el id del experimento en el nombre (dos experimentos con la misma semana se sobrescriben) |
+| Revisión del incremento 4 | `test_arbol_limpio_solo_si_el_json_viene_de_evidencias` solo cubre `None`; el caso `True` se cubre con `monkeypatch` de `api.importar.EVIDENCIAS` a la carpeta temporal |

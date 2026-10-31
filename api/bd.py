@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from flask import Flask, current_app, g
 from sqlalchemy import JSON, MetaData, create_engine, event
 from sqlalchemy.dialects.postgresql import JSONB
@@ -62,3 +64,8 @@ def _cerrar_sesion(_excepcion: BaseException | None) -> None:
     s = g.pop("bd_sesion", None)
     if s is not None:
         s.close()
+
+
+def fecha_iso(valor: datetime) -> str:
+    """Fecha ISO con zona horaria: se guarda en UTC (tablas._ahora); SQLite la devuelve sin zona y PostgreSQL con ella."""
+    return (valor if valor.tzinfo else valor.replace(tzinfo=UTC)).isoformat()

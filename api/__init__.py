@@ -26,9 +26,9 @@ def _commit() -> str | None:
 
 
 def crear_app(configuracion: object | None = None) -> Flask:
-    from api import bd, errores
+    from api import bd, errores, importar
     from api.configuracion import Desarrollo
-    from api.rutas import conjuntos, estado
+    from api.rutas import conjuntos, estado, experimentos, modelos
 
     app = Flask(__name__)
     app.config.from_object(configuracion if configuracion is not None else Desarrollo())
@@ -39,6 +39,9 @@ def crear_app(configuracion: object | None = None) -> Flask:
     errores.registrar(app)
     app.register_blueprint(estado.bp)
     app.register_blueprint(conjuntos.bp)
+    app.register_blueprint(modelos.bp)
+    app.register_blueprint(experimentos.bp)
+    importar.registrar(app)
     return app
 
 

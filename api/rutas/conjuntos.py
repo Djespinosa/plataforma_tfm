@@ -6,14 +6,13 @@ from __future__ import annotations
 import hashlib
 import os
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 
 from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy import select
 
 from api import textos
-from api.bd import sesion
+from api.bd import fecha_iso, sesion
 from api.errores import ErrorPlataforma
 from api.servicios.tablas_csv import leer_csv, resumir_columnas
 from api.tablas import ConjuntoDatos
@@ -21,15 +20,10 @@ from api.tablas import ConjuntoDatos
 bp = Blueprint("conjuntos", __name__, url_prefix="/api")
 
 
-def _fecha(valor: datetime) -> str:
-    # Se guarda en UTC (tablas._ahora); SQLite la devuelve sin zona horaria y PostgreSQL con ella.
-    return (valor if valor.tzinfo else valor.replace(tzinfo=UTC)).isoformat()
-
-
 def _resumen(c: ConjuntoDatos) -> dict:
     return {"id": c.id, "nombre_archivo": c.nombre_archivo, "momento": c.momento, "sha256": c.sha256,
             "n_filas": c.n_filas, "n_columnas": c.n_columnas, "columnas": c.columnas, "avisos": c.avisos,
-            "aviso_privacidad": textos.AVISO_PRIVACIDAD_CARGA, "creado_en": _fecha(c.creado_en)}
+            "aviso_privacidad": textos.AVISO_PRIVACIDAD_CARGA, "creado_en": fecha_iso(c.creado_en)}
 
 
 @bp.post("/conjuntos")
@@ -65,7 +59,7 @@ def subir():
 def listar():
     conjuntos = sesion().scalars(select(ConjuntoDatos).order_by(ConjuntoDatos.id.desc()))
     return jsonify([{"id": c.id, "nombre_archivo": c.nombre_archivo, "momento": c.momento, "n_filas": c.n_filas,
-                     "n_columnas": c.n_columnas, "creado_en": _fecha(c.creado_en)} for c in conjuntos])
+                     "n_columnas": c.n_columnas, "creado_en": fecha_iso(c.creado_en)} for c in conjuntos])
 
 
 @bp.get("/conjuntos/<int:id_>")

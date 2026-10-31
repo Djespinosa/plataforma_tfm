@@ -41,3 +41,74 @@ def aviso_columna_vacia(columna: str) -> str:
 
 def aviso_columna_constante(columna: str) -> str:
     return f"La columna «{columna}» tiene el mismo valor en todas las filas; no aporta información al modelo."
+
+
+# Resultados (§4, §4.3)
+AVISO_DECISION = ("Herramienta de apoyo a la decisión. Las estimaciones pueden equivocarse; la decisión corresponde "
+                  "siempre al personal académico y debe orientarse a ofrecer apoyo.")
+AVISO_FUENTE_VALIDACION = ("Métricas de validación cruzada sobre los datos de entrenamiento (predicciones out-of-fold), "
+                           "no de una cohorte de prueba.")
+TEXTO_ROC_AUC = ("Capacidad del modelo para ordenar a quien tiene el resultado positivo por encima de quien no (0,5 = "
+                 "azar; 1 = perfecta).")
+TEXTO_CALIBRACION = "Cuando el modelo estima un 30 %, aproximadamente 3 de cada 10 casos son positivos."
+SIN_CURVA_CALIBRACION = "Las predicciones out-of-fold del experimento de origen no están disponibles en este equipo."
+ERROR_NO_TERMINADO = "El experimento aún no ha terminado (estado: {estado})."
+ESTADOS_LLANOS = {"en_cola": "en cola", "en_curso": "en curso", "completado": "completado", "fallido": "fallido",
+                  "interrumpido": "interrumpido"}
+NOMBRES_MODELOS = {
+    "rl": "regresión logística", "rl_optimizada": "regresión logística optimizada", "rf": "bosque aleatorio",
+    "gb": "potenciación de gradiente (scikit-learn)", "xgb": "XGBoost", "lgbm": "LightGBM", "catboost": "CatBoost",
+    "mlp": "red neuronal (perceptrón multicapa)", "apilamiento": "apilamiento de modelos",
+    "rl_defecto": "regresión logística por defecto", "mayoritaria": "clase mayoritaria",
+}
+LECTURAS = {
+    "ventaja_relevante": ("El mejor modelo AutoML ordena mejor que la regresión logística optimizada, con una diferencia "
+                          "relevante (al menos 0,02)."),
+    "detectable_sin_relevancia": "Hay una diferencia detectable, pero menor que 0,02: sin relevancia práctica.",
+    "equivalencia_practica": ("El intervalo de la diferencia queda dentro de ±0,02: rendimiento equivalente en la "
+                              "práctica."),
+    "no_concluyente": "Los datos no permiten concluir si hay diferencia.",
+    "desventaja_relevante": ("La regresión logística optimizada ordena mejor que el mejor modelo AutoML, con una "
+                             "diferencia relevante (al menos 0,02)."),
+}
+
+
+def coma(valor: float, decimales: int = 2) -> str:
+    return f"{valor:.{decimales}f}".replace(".", ",")
+
+
+def nombre_modelo(modelo: str) -> str:
+    return NOMBRES_MODELOS.get(modelo, modelo)
+
+
+def error_no_terminado(estado: str) -> str:
+    return ERROR_NO_TERMINADO.format(estado=ESTADOS_LLANOS.get(estado, estado))
+
+
+def texto_pr_auc(prevalencia: float) -> str:
+    return (f"Resume la precisión del modelo a lo largo de todos los umbrales; un modelo al azar obtendría la proporción "
+            f"de casos positivos ({round(100 * prevalencia)} %).")
+
+
+def textos_punto_operacion(sensibilidad: float, precision: float, tasa_alerta: float) -> dict:
+    return {"sensibilidad": f"De cada 10 casos positivos, el modelo marca a {round(10 * sensibilidad)}.",
+            "precision": f"De cada 10 marcados, {round(10 * precision)} son positivos.",
+            "tasa_alerta": f"Se marcaría al {round(100 * tasa_alerta)} % de los casos."}
+
+
+def texto_motivo(desplegado: str, mejor: str, limite_superior: float | None, margen: float) -> str:
+    if desplegado == mejor:
+        return f"Se despliega {nombre_modelo(desplegado)}: es el modelo con la ROC-AUC más alta."
+    return (f"Se despliega {nombre_modelo(desplegado)}: es el modelo más simple cuya pérdida de ROC-AUC frente al mejor "
+            f"({nombre_modelo(mejor)}) tiene un límite superior del intervalo del 95 % ({coma(limite_superior, 4)}) por "
+            f"debajo de {coma(margen)}.")
+
+
+def texto_sensibles(variables: list[str]) -> str:
+    return (f"Las variables sensibles ({', '.join(variables)}) no se usan para predecir; se muestran las métricas por "
+            "subgrupo.")
+
+
+def descripcion_importado(experimento: str, evaluacion_de: str) -> str:
+    return (f"Modelos finales de {experimento}, preparados con los scripts de ml/; las métricas son las de validación "
+            f"cruzada de {evaluacion_de}.")
