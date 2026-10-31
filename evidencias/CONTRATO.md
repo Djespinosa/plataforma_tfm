@@ -220,6 +220,16 @@ diferencias de redondeo de ~1e-16 que la isotónica y el apilamiento propagan a 
 las predicciones dentro de la tolerancia); `oof_sha256` = `{base, nuevo}` por semana; `dataset` (el del ensayo nuevo), `hardware` y
 `pruebas` (JUnit del commit nuevo).
 
+## Informes de pruebas de la API (`pruebas/api-<fecha>-NN_*`)
+
+`api/exportar_pruebas.py` (docs/diseno-api.md §10), sin experimento asociado: `_pruebas.xml` (JUnit de todo `api/tests`
+con `--tb=short`, sin `hostname`; propiedad de la suite `motor_bd_funcionales` y de cada caso funcional `requisito`), `_cobertura.json`
+(coverage.py, rutas relativas, de `api/` y `ml/automl/` sin las pruebas) y `_resumen.json` = `{id, fecha, commit, comando,
+entorno, superadas, fallidas, omitidas, funcionales, motor_bd_funcionales, funcionales_por_requisito, cobertura: {<paquete>: {archivos, lineas,
+cubiertas, porcentaje}}, informes}`; solo las funcionales (y las unitarias marcadas `postgres`) usan
+PostgreSQL, el resto SQLite en memoria. Solo se exporta con todas superadas y ninguna omitida. En `manifest.json`, sus
+entradas de `pruebas` llevan `id` en lugar de `experimento`.
+
 ## `manifest.json`
 
 ```json

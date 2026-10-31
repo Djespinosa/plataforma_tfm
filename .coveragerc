@@ -1,0 +1,4 @@
+# Cobertura de las pruebas de la API (api/exportar_pruebas.py): solo el código, no las propias pruebas.
+[run]
+omit =
+    */tests/*

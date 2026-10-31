@@ -719,8 +719,9 @@ auditoría de equidad.
 - `api/textos.py` concentra todos los textos (constantes y funciones `texto_lectura`, `texto_motivo`,
   `textos_punto_operacion`, `coma`). Ninguna ruta escribe texto visible fuera de él, salvo los `ValueError` de `ml/`.
 - `test_textos.py` recorre todas las constantes y una respuesta de cada ruta y falla si aparece algún término de la columna
-  «No usar» de `guardarrailes-interfaz` («va a abandonar», «abandonará», «causa», «motivo», «porque», «debido a»,
-  «provoca», «alto riesgo», «en riesgo», «predicción de fracaso») o un código de decisión (`\bD\d+`, `P-\d+`).
+  «No usar» de `guardarrailes-interfaz` («va a abandonar», «abandonará», «seguro», «causa», «motivo», «porque», «por
+  qué», «debido a», «provoca», «alto riesgo», «en riesgo», «predicción de fracaso») o un código de decisión (`\bD-?\d+`,
+  `P-\d+`).
   Excepciones documentadas: las claves JSON (`motivo_texto`, `motivo`) no son texto visible, y las notas fijas que niegan
   la causalidad («No son causas comprobadas…», RE-03) se comprueban por igualdad exacta con `guardarrailes-interfaz`.
 - La interfaz no muestra «riesgo» como hecho: «probabilidad estimada por el modelo», «marcados para seguimiento».
@@ -826,6 +827,23 @@ PLATAFORMA_MAX_FILAS_PREDICCION=20000
   procedimiento de `contrato-evidencias` (sin `hostname`). El informe indica el motor usado.
 - Ninguna prueba usa 2014J ni los CSV reales de OULAD.
 
+Al implementar (incremento 8):
+
+- `api/tests/funcionales/test_rf01…rf08.py` (11 casos; RF-07 no tiene ruta y RF-09 llega en el incremento 9), con el
+  `conftest.py` de la carpeta: `app` es la de PostgreSQL, la propiedad `requisito` sale de la constante `REQUISITO` del
+  módulo y la de la suite `motor_bd_funcionales` (no `motor_bd`: el resto de `api/tests` usa SQLite), de `SHOW
+  server_version`. RF-03 cubre también RNF-03 (consultas mientras entrena el trabajador
+  en otro hilo, cada una en menos de 2 s) y RNF-06; RF-06, también RE-01/02/03.
+- `api/tests/test_textos.py`: constantes y funciones de `textos.py` (con valores de ejemplo por anotación) y 24
+  respuestas de las rutas; la única excepción es la nota fija de causalidad, leída de `guardarrailes-interfaz`.
+- La exportación (`python -m api.exportar_pruebas`) ejecuta **todo** `api/tests`, no solo `-m postgres`: así el JUnit y
+  la cobertura incluyen las pruebas de servicios y rutas, y se aborta si alguna se omite (sin PostgreSQL) o falla. Escribe
+  `evidencias/pruebas/api-AAAA-MM-DD-NN_{pruebas.xml, cobertura.json, resumen.json}` (`--tb=short`, sin `hostname`,
+  rutas relativas, comprobado que no lleva la contraseña) y los añade a `manifest.json`. Revisión del incremento 8: el
+  manifest se lee antes de ejecutar y los tres archivos se preparan en una carpeta temporal y se mueven solo al final; el
+  resumen separa `funcionales` y `motor_bd_funcionales` del total. `.coveragerc` deja fuera las propias pruebas; las
+  salvaguardas del exportador se prueban en `test_exportar_pruebas.py`.
+
 ## 11. Orden de implementación (incrementos pequeños, cada uno verificable)
 
 | # | Incremento | Verificación |
@@ -882,7 +900,7 @@ importantes antes de la congelación).
 | Revisión 2 del incremento 0 | Instalar `ruff` en el entorno para pasar el linter |
 | Revisión 3 del incremento 0 | El hook que oculta la contraseña solo actúa en informes fallidos (`-rA` mostraría la salida de pruebas superadas) |
 | Revisión 3 del incremento 0 | `modelo_evaluado_congelado` lee `experimento` sin `FOR SHARE`: un INSERT concurrente con la evaluación podría colarse (no ocurre con un solo trabajador) |
-| Incremento 8 | Exportar el JUnit de `-m postgres` con `--tb=short` |
+| Incremento 8 | ~~Exportar el JUnit de `-m postgres` con `--tb=short`~~ Hecho (`api/exportar_pruebas.py`) |
 | Revisión del incremento 1 | `reservar_prueba` no comprueba que `grupos` tenga el índice de `datos` (si no, la salvaguarda de grupos compartidos se desactiva en silencio) |
 | Revisión del incremento 1 | En modo `aleatoria`, una clase con 1 fila da un `ValueError` de sklearn en inglés; la API no debe devolverlo tal cual |
 | Revisión del incremento 1 | `asignar_pliegues` acepta `y` con 3 clases o con NaN (la API construye `y` binaria sin vacíos) |
@@ -909,9 +927,12 @@ importantes antes de la congelación).
 | Revisión del incremento 6 | Id `web-…-NN` con `SELECT max` + `INSERT` sin reintento (dos POST simultáneos → 500 en uno); fecha local frente a `creado_en` en UTC; `entrenamiento` reutiliza una carpeta `experimentos/<id>` con archivos antiguos si el id se repite tras vaciar la BD |
 | Revisión del incremento 6 | Trabajador: Ctrl+C deja `paquete.joblib` en disco (sin registro en BD); el hilo del latido muere en silencio ante un error de BD; un error de BD en `tomar()` termina el proceso y el `pg_advisory_unlock` del `finally` puede tapar la excepción original; `recuperar_huerfanos` no rellena `duracion_s` |
 | Revisión del incremento 6 | `ERROR_INTERRUMPIDO` promete reintentar (ruta del incremento 7, RF-08 recortable); `_texto` dice «lista» para campos de texto y `objetivo: ""` da ««None»»; `conjunto_id: true` se acepta como 1; `descripcion` sin límite; la fila de un `inf` al entrenar se cuenta sobre las de entrenamiento; `paquetes.ruta_registrada` duplica `evidencias.ruta_registrada` |
-| Revisión del incremento 6 | Pruebas: fallo por `pliegues_sha256` distinto; `sin_respuesta` con su aviso; hilo del latido; despliegue del apilamiento (método y Brier nulos); doble POST; `test_textos.py` del §7 (vocabulario prohibido) aún no existe |
+| Revisión del incremento 6 | Pruebas: fallo por `pliegues_sha256` distinto; `sin_respuesta` con su aviso; hilo del latido; despliegue del apilamiento (método y Brier nulos); doble POST; ~~`test_textos.py` del §7 (vocabulario prohibido) aún no existe~~ (hecho en el incremento 8) |
 | Revisión del incremento 6 (2.ª) | `error_valores_columna` lista `[ ] <`, que en las categorías sí se admiten (constante aparte con `" , : { }`); docstring de `textos.py` dice «ValueError de ml/» (ahora `ErrorValidacion`); nombres one-hot repetidos (`nota_1` numérica y `nota` = 1) o que LightGBM iguala (`a b` y `a_b`) fallan en el trabajador con «error interno» (rechazarlos al configurar); sin prueba del comando `trabajador` que rellene `CODIGO_TRABAJADOR` |
 | Incremento 7 | `ml/evidencias.py:66` lee `flask.__version__`, obsoleto en Flask 3.2 (`DeprecationWarning` en las pruebas): usar `importlib.metadata.version` |
 | Revisión del incremento 7 | CSV del conjunto borrado del disco: `read_bytes` da `FileNotFoundError` y 500 en `_contenido` (reintentar y configurar), en vez de 409 con texto propio; el reintento no avisa si el anterior falló por algo que se repetirá con la misma configuración (`ERROR_PLIEGUES_DISTINTOS`, one-hot repetidos); el desempate del historial por `id` es alfabético (`-100` tras `-99`) |
 | Revisión del incremento 7 | Pruebas: reintento de un «fallido» con éxito (solo se prueba «interrumpido»); el 404 de reintentar en una prueba propia |
 | Revisión del incremento 7 (2.ª) | Dos `reintentar` simultáneos (waitress con hilos) pasan ambos la comprobación del reintento previo: 500 por id repetido o un reintento duplicado; índice `UNIQUE` en `experimento.reintento_de` (migración 0002) con el `IntegrityError` como 409, o desactivar el botón en la web mientras dura la petición |
+| Revisión del incremento 8 | `test_rf03`: si falla un `assert` dentro del bucle, el hilo del trabajador sigue escribiendo durante el `teardown`, y el bucle no tiene tope si el entrenamiento se cuelga (`try/finally` con `join(timeout)`); `test_textos` no revisa los mensajes de `ErrorValidacion` de `automl.validacion`, que llegan al usuario como 422 |
+| Revisión del incremento 8 | `exportar_pruebas.py`: el manifest se escribe sin escritura atómica y repite la lógica de `ml/evidencias.actualizar_manifest` (exige `id_exp`); claves de `_cobertura.json` y `<temporal>` de `comando` con `\` de Windows; el hook de `conftest.py` que oculta la contraseña no busca la forma escrita en la URL (`urlsplit`), que el exportador ya comprueba |
+| Revisión del incremento 8 (2.ª) | `exportar_pruebas.py`: los tres `shutil.move` van uno tras otro; si falla uno a mitad (bloqueo de OneDrive), quedan archivos sin entrada en el manifest (mover `_pruebas.xml` el último) |
