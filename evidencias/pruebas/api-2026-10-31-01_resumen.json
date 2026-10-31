@@ -1,0 +1,47 @@
+{
+  "id": "api-2026-10-31-01",
+  "fecha": "2026-10-31T14:54:33",
+  "commit": "21b76b5",
+  "comando": "python -m pytest api/tests -q -p no:cacheprovider --tb=short --junitxml=<temporal>\\api-2026-10-31-01_pruebas.xml --cov=api --cov=ml/automl --cov-report=json:<temporal>\\api-2026-10-31-01_cobertura.json",
+  "entorno": {
+    "python": "3.13.3",
+    "pytest": "9.1.1",
+    "flask": "3.1.3",
+    "sqlalchemy": "2.1.6",
+    "psycopg": "3.3.6",
+    "scikit-learn": "1.9.1",
+    "coverage": "7.17.0"
+  },
+  "superadas": 131,
+  "fallidas": 0,
+  "omitidas": 0,
+  "funcionales": 11,
+  "motor_bd_funcionales": "postgresql 16.15",
+  "funcionales_por_requisito": {
+    "RF-01": 2,
+    "RF-02": 2,
+    "RF-03, RNF-03, RNF-06": 1,
+    "RF-04": 2,
+    "RF-05": 2,
+    "RF-06, RE-01, RE-02, RE-03": 1,
+    "RF-08": 1
+  },
+  "cobertura": {
+    "api": {
+      "archivos": 24,
+      "lineas": 1401,
+      "cubiertas": 1300,
+      "porcentaje": 92.8
+    },
+    "ml/automl": {
+      "archivos": 11,
+      "lineas": 627,
+      "cubiertas": 565,
+      "porcentaje": 90.1
+    }
+  },
+  "informes": {
+    "junit": "pruebas/api-2026-10-31-01_pruebas.xml",
+    "cobertura": "pruebas/api-2026-10-31-01_cobertura.json"
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-30T16:39:37",
-  "commit": "ac12e7c",
+  "generado": "2026-10-31T14:54:33",
+  "commit": "21b76b5",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -258,6 +258,21 @@
       "archivo": "pruebas/exp-2026-10-30-01_pruebas.xml",
       "descripcion": "JUnit de todas las pruebas de ml/tests en el commit de la comprobación de no regresión",
       "experimento": "exp-2026-10-30-01"
+    },
+    {
+      "archivo": "pruebas/api-2026-10-31-01_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de api/tests (unitarias en SQLite salvo las marcadas postgres; 11 funcionales contra postgresql 16.15)",
+      "id": "api-2026-10-31-01"
+    },
+    {
+      "archivo": "pruebas/api-2026-10-31-01_cobertura.json",
+      "descripcion": "Cobertura de api/ y ml/automl/ de todas las pruebas de api/tests (unitarias en SQLite salvo las marcadas postgres; 11 funcionales contra postgresql 16.15)",
+      "id": "api-2026-10-31-01"
+    },
+    {
+      "archivo": "pruebas/api-2026-10-31-01_resumen.json",
+      "descripcion": "Resumen: superadas, motor, requisitos y cobertura",
+      "id": "api-2026-10-31-01"
     }
   ],
   "usabilidad": []
