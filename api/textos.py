@@ -112,3 +112,59 @@ def texto_sensibles(variables: list[str]) -> str:
 def descripcion_importado(experimento: str, evaluacion_de: str) -> str:
     return (f"Modelos finales de {experimento}, preparados con los scripts de ml/; las métricas son las de validación "
             f"cruzada de {evaluacion_de}.")
+
+
+# Predicción (RF-05, §4.4)
+TEXTO_PROBABILIDAD = "Probabilidad estimada por el modelo"
+SUGERENCIA = "Sugerencia: priorizar contacto de apoyo"
+AVISO_RENDIMIENTO = ("Estas estimaciones no miden el rendimiento del modelo. Si las filas formaron parte de su "
+                     "entrenamiento, como los datos de demostración, están dentro de la muestra y solo sirven para "
+                     "mostrar el funcionamiento de la plataforma.")
+ERROR_NO_DESPLEGADO = "Este modelo no está desplegado y no puede usarse para predecir."
+ERROR_PAQUETE_DISTINTO = "El archivo del modelo no coincide con el registrado."
+
+
+def error_max_filas(n: int, maximo: int) -> str:
+    return f"El archivo tiene {miles(n)} filas; el máximo por lote es {miles(maximo)}."
+
+
+def error_faltan_columnas(columnas: list[str]) -> str:
+    return f"Faltan columnas que el modelo necesita: {', '.join(columnas)}."
+
+
+def error_no_numerica(columna: str, fila: int, valor: str) -> str:
+    return f"La columna «{columna}» debe ser numérica (fila {fila}: «{valor}»)."
+
+
+def error_columna_id(columna: str) -> str:
+    return f"La columna identificadora «{columna}» no existe."
+
+
+def error_fila_no_existe(fila: int, lote: int) -> str:
+    return f"No existe la fila {fila} del lote {lote}."
+
+
+# Explicaciones (RF-06, §4.5)
+ESCALA = "log-odds sin calibrar"
+SIN_DATO = "sin dato"
+AVISO_ESCALA = ("Las contribuciones están en la escala interna del modelo (log-odds, antes de calibrar). Indican cuánto "
+                "empuja cada variable la estimación hacia arriba o hacia abajo; no suman la probabilidad mostrada, que "
+                "está calibrada.")
+AVISO_CAUSALIDAD = ("Estos factores describen cómo llegó el modelo a su estimación. No son causas comprobadas ni "
+                    "sustituyen el conocimiento del equipo docente sobre el estudiante. La probabilidad es una "
+                    "estimación, no una certeza, y la decisión corresponde siempre a las personas.")
+AVISO_EXTREMA = ("Algunas contribuciones son inusualmente grandes (más de 5 unidades en la escala del modelo). Suelen "
+                 "deberse a un valor poco habitual de la variable en comparación con los datos de entrenamiento; "
+                 "interprételas con cautela. La probabilidad mostrada no cambia.")
+SIN_CONTRIBUCION = "Sin valores en los datos de entrenamiento: no interviene en la estimación."
+SIN_REFERENCIA = ("No hay filas de entrenamiento de referencia para este modelo en este equipo; la explicación global no "
+                  "está disponible.")
+
+
+def miles(n: int) -> str:
+    """Separador de miles con espacio (19 023); hasta 4 cifras, sin separador."""
+    return f"{n:,}".replace(",", " ") if n >= 10000 else str(n)
+
+
+def fuente_global(n_filas: int) -> str:
+    return f"filas de entrenamiento (n = {miles(n_filas)})"

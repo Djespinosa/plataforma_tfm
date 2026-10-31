@@ -397,6 +397,30 @@ hace la interfaz. `sugerencia` solo si `alerta`.
     corresponde siempre a las personas.»
 - Con explicador `permutacion`, la primera petición calcula y guarda la fila (≈ 1-2 s); 404 si la fila no existe.
 
+Al implementar (incremento 5, §4.4 y §4.5):
+- El CSV de un lote se guarda como `predicciones/<sha256>.csv` (no `<lote>.csv`), con la misma escritura atómica que los
+  conjuntos (`tablas_csv.guardar`).
+- `tablas_csv.coaccionar`: numéricas a `float`; categóricas a texto con `normalizar_valor` (2014.0 → "2014") y vacíos
+  como NaN. El entrenamiento web (incremento 6) debe usar la misma coerción, o una categoría leída como número no
+  coincidiría con la del modelo.
+- `servicios.paquetes.cargar_paquete` comprueba el SHA-256 **antes** de `joblib.load` y después `desplegado is True`;
+  caché `lru_cache(8)` por (ruta, SHA-256); los errores no se guardan en caché. La ruta de un paquete es absoluta o
+  relativa a la raíz del repositorio.
+- D-4: la API no puede saber si un CSV es de demostración, así que `POST /predicciones` y `GET /predicciones/{lote}`
+  llevan siempre `aviso_rendimiento` («Estas estimaciones no miden el rendimiento del modelo. Si las filas formaron parte
+  de su entrenamiento, como los datos de demostración, están dentro de la muestra…»).
+- Explicación local: `todas` lleva también `extrema`; `avisos.extrema` solo si `hay_extremas`; `aviso_decision` también
+  en el primer nivel, como en el resto de resultados. Explicación global sin filas de referencia: `variables` y `fuente`
+  `null` con `motivo`. Una variable sin valores en el entrenamiento va a `sin_contribucion` solo si su φ es 0 (con
+  permutación o MLP puede no serlo si la fila trae un valor; entonces se muestra como las demás). `coaccionar` rechaza
+  también `inf` (422).
+- `ml/referencia_oulad.py --demo`: `code_module` es identificación y variable del paquete; va una sola vez (con dos, la
+  carga respondía 422 por columnas repetidas).
+- Comprobado con los 4 paquetes de exp-2026-10-29-03 y los CSV de demostración de 2014B (SQLite temporal, 2026-10-31):
+  probabilidades y φ de la API iguales (`==`) a `modelo_final.predecir_y_explicar`, ≈ 1 s por lote de unas 6 500 filas;
+  en la semana 0, `proporcion_entregadas` y `antelacion_media` salen en `sin_contribucion` (comprobación interna, no
+  citable).
+
 ### 4.6 Exportación (RF-09, C; último incremento)
 
 `GET /api/predicciones/{lote_id}/exportar` → `text/csv; charset=utf-8`, adjunto: primera línea `# <aviso_decision>`,
@@ -807,6 +831,8 @@ Los incrementos 0-6 cubren todos los Must de la plataforma; 7-9 son S/C.
   mismas filas con claves distintas y se reabriría el hueco I-4. Con su prueba.
 - **Incremento 6:** prueba de API `cohorte_prueba_clave == clave_cohorte(configuracion["cohorte_prueba"])` al crear el
   experimento.
+- **Incremento 6:** el entrenamiento web prepara las variables con `tablas_csv.coaccionar` (la misma coerción que la
+  predicción, §4.5 «Al implementar»), con una prueba de que una categórica numérica entrena y predice igual.
 
 Las cifras que den las revisiones de código (p. ej. la prevalencia por pliegue de la revisión del incremento 1) son
 comprobaciones internas, no citables: si la memoria las quiere, deben llegar como evidencia exportada con su commit.
@@ -845,3 +871,5 @@ importantes antes de la congelación).
 | Revisión del incremento 4 | Pruebas: `test_comando_importar_paquetes` no llega a probar el paquete sin huella (falla antes por el OOF alterado) ni que sigan siendo 2 modelos; falta una prueba sintética de la identidad de la explicación global con la media de \|φ\| de `explicacion.explicar` |
 | Revisión del incremento 4 | `ml/referencia_oulad.py`: el CSV de demostración no lleva el id del experimento en el nombre (dos experimentos con la misma semana se sobrescriben) |
 | Revisión del incremento 4 | `test_arbol_limpio_solo_si_el_json_viene_de_evidencias` solo cubre `None`; el caso `True` se cubre con `monkeypatch` de `api.importar.EVIDENCIAS` a la carpeta temporal |
+| Revisión del incremento 5 | `explicacion_local` con permutación: dos peticiones simultáneas de la misma fila → `IntegrityError` en la clave primaria y 500 (capturar, `rollback` y releer); `valor_llano` con `.4g` da notación científica a partir de 10 000 («1,235e+04») |
+| Revisión del incremento 5 | Pruebas: categórica escrita como número (2014.0 → "2014") de punta a punta; explicación global de un modelo de permutación |

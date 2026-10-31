@@ -60,7 +60,9 @@ def main() -> None:
                 raise ValueError(f"{args.demo} no es una presentación de entrenamiento de la semana {paquete['semana']}")
             salida_demo.mkdir(parents=True, exist_ok=True)
             ruta = salida_demo / f"semana_{paquete['semana']}_{args.demo}.csv"
-            demo[IDENTIFICACION + columnas_paquete(paquete)].to_csv(ruta, index=False)
+            # code_module es identificación y también variable del paquete: una sola vez (columnas repetidas → 422).
+            columnas = columnas_paquete(paquete)
+            demo[[c for c in IDENTIFICACION if c not in columnas] + columnas].to_csv(ruta, index=False)
             print(f"  demostración: {len(demo)} filas en {ruta.relative_to(RAIZ).as_posix()}")
 
 

@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
+import os
+import uuid
 from collections import Counter
+from pathlib import Path
 
+import numpy as np
 import pandas as pd
+from flask import current_app
 
 from api import textos
 from api.errores import ErrorPlataforma
@@ -75,3 +81,40 @@ def resumir_columnas(datos: pd.DataFrame) -> tuple[list[dict], list[str]]:
         elif not numerica and len(frecuencias) > PROPORCION_IDENTIFICADOR * len(serie):
             avisos.append(textos.aviso_identificador(nombre))
     return columnas, avisos
+
+
+def guardar(contenido: bytes, carpeta: str) -> tuple[str, str]:
+    """Guarda el archivo como <carpeta>/<sha256>.csv dentro de PLATAFORMA_DATOS; devuelve (ruta relativa, sha256).
+    Nombre por SHA-256 y no por id: la ruta no cambia después del INSERT (disparador conjunto_datos_inmutable) y el mismo
+    contenido comparte archivo."""
+    huella = hashlib.sha256(contenido).hexdigest()
+    ruta = Path(carpeta) / f"{huella}.csv"
+    destino = Path(current_app.config["PLATAFORMA_DATOS"]) / ruta
+    if not destino.exists() or hashlib.sha256(destino.read_bytes()).hexdigest() != huella:
+        # Temporal propio y os.replace: un corte a media escritura o una subida simultánea nunca dejan un archivo
+        # truncado con el nombre del hash (y uno así se reescribe en la siguiente subida).
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        temporal = destino.with_name(f"{huella}.{uuid.uuid4().hex}.tmp")
+        temporal.write_bytes(contenido)
+        os.replace(temporal, destino)
+    return ruta.as_posix(), huella
+
+
+def coaccionar(datos: pd.DataFrame, columnas: dict) -> pd.DataFrame:
+    """Columnas numericas + categoricas del modelo, en ese orden: numéricas a float (422 con la primera fila que no lo
+    es); categóricas a texto normalizado (2014.0 → "2014"), con los vacíos como NaN. 422 si falta alguna."""
+    variables = columnas["numericas"] + columnas["categoricas"]
+    faltan = [c for c in variables if c not in datos.columns]
+    if faltan:
+        raise ErrorPlataforma(422, textos.error_faltan_columnas(faltan))
+    X = pd.DataFrame(index=datos.index)
+    for c in columnas["numericas"]:
+        numeros = pd.to_numeric(datos[c], errors="coerce")
+        malas = datos[c].notna() & ~np.isfinite(numeros)  # texto o inf (sklearn lo rechaza y JSONB no lo admite)
+        if malas.any():
+            posicion = int(np.flatnonzero(malas.to_numpy())[0])
+            raise ErrorPlataforma(422, textos.error_no_numerica(c, posicion + 1, str(datos[c].iloc[posicion])))
+        X[c] = numeros.astype(float)
+    for c in columnas["categoricas"]:
+        X[c] = datos[c].map(normalizar_valor, na_action="ignore").astype(object).where(datos[c].notna(), np.nan)
+    return X

@@ -3,18 +3,13 @@
 
 from __future__ import annotations
 
-import hashlib
-import os
-import uuid
-from pathlib import Path
-
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, jsonify, request
 from sqlalchemy import select
 
 from api import textos
 from api.bd import fecha_iso, sesion
 from api.errores import ErrorPlataforma
-from api.servicios.tablas_csv import leer_csv, resumir_columnas
+from api.servicios.tablas_csv import guardar, leer_csv, resumir_columnas
 from api.tablas import ConjuntoDatos
 
 bp = Blueprint("conjuntos", __name__, url_prefix="/api")
@@ -34,20 +29,9 @@ def subir():
     contenido = archivo.read()
     datos = leer_csv(contenido)
     columnas, avisos = resumir_columnas(datos)
-    huella = hashlib.sha256(contenido).hexdigest()
-    # Nombre por SHA-256 y no por id: la ruta no puede cambiar después del INSERT (disparador conjunto_datos_inmutable)
-    # y el mismo contenido comparte archivo. Relativa a PLATAFORMA_DATOS.
-    ruta = Path("conjuntos") / f"{huella}.csv"
-    destino = Path(current_app.config["PLATAFORMA_DATOS"]) / ruta
-    if not destino.exists() or hashlib.sha256(destino.read_bytes()).hexdigest() != huella:
-        # Temporal propio y os.replace: un corte a media escritura o una subida simultánea nunca dejan un archivo
-        # truncado con el nombre del hash (y uno así se reescribe en la siguiente subida).
-        destino.parent.mkdir(parents=True, exist_ok=True)
-        temporal = destino.with_name(f"{huella}.{uuid.uuid4().hex}.tmp")
-        temporal.write_bytes(contenido)
-        os.replace(temporal, destino)
+    ruta, huella = guardar(contenido, "conjuntos")
     momento = (request.form.get("momento") or "").strip() or None
-    conjunto = ConjuntoDatos(nombre_archivo=archivo.filename, momento=momento, ruta=ruta.as_posix(), sha256=huella,
+    conjunto = ConjuntoDatos(nombre_archivo=archivo.filename, momento=momento, ruta=ruta, sha256=huella,
                              n_filas=len(datos), n_columnas=datos.shape[1], columnas=columnas, avisos=avisos)
     s = sesion()
     s.add(conjunto)
