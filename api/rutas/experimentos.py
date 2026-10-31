@@ -1,6 +1,6 @@
 """Experimentos (docs/diseno-api.md §4.2 y §4.3): POST /api/experimentos/validacion, POST /api/experimentos,
-GET /api/experimentos/{id} y GET /api/experimentos/{id}/evaluacion. El historial y el reintento (RF-08) llegan en el
-incremento 7.
+GET /api/experimentos (historial, RF-08), GET /api/experimentos/{id}, POST /api/experimentos/{id}/reintentar (RF-08) y
+GET /api/experimentos/{id}/evaluacion.
 
 El servidor web solo crea experimentos «en_cola» y lee su estado; los entrena el trabajador (api/trabajador.py).
 """
@@ -25,6 +25,15 @@ from api.tablas import ConjuntoDatos, Experimento, Modelo, clave_cohorte
 bp = Blueprint("experimentos", __name__, url_prefix="/api")
 
 SIN_RESPUESTA_S = 120
+REINTENTABLES = ("fallido", "interrumpido")
+
+
+def _contenido(conjunto: ConjuntoDatos) -> bytes:
+    """Bytes del CSV del conjunto; 409 si el archivo ya no es el que se cargó."""
+    contenido = (Path(current_app.config["PLATAFORMA_DATOS"]) / conjunto.ruta).read_bytes()
+    if hashlib.sha256(contenido).hexdigest() != conjunto.sha256:
+        raise ErrorPlataforma(409, textos.ERROR_CONJUNTO_CAMBIADO)
+    return contenido
 
 
 def _configurar() -> tuple[dict, ConjuntoDatos, dict, Preparados]:
@@ -36,11 +45,8 @@ def _configurar() -> tuple[dict, ConjuntoDatos, dict, Preparados]:
     conjunto = sesion().get(ConjuntoDatos, cuerpo["conjunto_id"]) if isinstance(cuerpo["conjunto_id"], int) else None
     if conjunto is None:
         raise ErrorPlataforma(404, textos.error_no_existe("conjunto de datos", cuerpo["conjunto_id"]))
-    contenido = (Path(current_app.config["PLATAFORMA_DATOS"]) / conjunto.ruta).read_bytes()
-    if hashlib.sha256(contenido).hexdigest() != conjunto.sha256:
-        raise ErrorPlataforma(409, textos.ERROR_CONJUNTO_CAMBIADO)
-    config, preparados = configurar(cuerpo, conjunto, leer_csv(contenido), permitir_prueba=current_app.testing,
-                                    n_jobs=current_app.config["PLATAFORMA_N_JOBS"])
+    config, preparados = configurar(cuerpo, conjunto, leer_csv(_contenido(conjunto)),
+                                    permitir_prueba=current_app.testing, n_jobs=current_app.config["PLATAFORMA_N_JOBS"])
     return cuerpo, conjunto, config, preparados
 
 
@@ -75,12 +81,56 @@ def crear():
         id=_nuevo_id(), origen="web", conjunto_id=conjunto.id, sha256_datos=conjunto.sha256,
         cohorte_prueba_clave=clave_cohorte(config["cohorte_prueba"]) if config["cohorte_prueba"] else None,
         descripcion=descripcion if isinstance(descripcion, str) else None, configuracion=config, estado="en_cola")
+    return _encolar(experimento)
+
+
+def _encolar(experimento: Experimento):
     s = sesion()
     s.add(experimento)
     s.commit()
     respuesta = jsonify(_detalle(experimento))
     respuesta.headers["Location"] = url_for("experimentos.detalle", id_=experimento.id)
     return respuesta, 202
+
+
+@bp.get("/experimentos")
+def historial():
+    s = sesion()
+    experimentos = s.scalars(select(Experimento).order_by(Experimento.creado_en.desc(), Experimento.id.desc())).all()
+    conjuntos = {c.id: c for c in s.scalars(select(ConjuntoDatos))}
+    modelos: dict[str, list[dict]] = {}
+    for m in s.scalars(select(Modelo).order_by(Modelo.id)):
+        modelos.setdefault(m.experimento_id, []).append({"id": m.id, "momento": m.momento, "familia": m.familia})
+    return jsonify([{
+        "id": e.id, "origen": e.origen, "estado": e.estado, "creado_en": fecha_iso(e.creado_en),
+        "duracion_s": e.duracion_s, "descripcion": e.descripcion,
+        "conjunto": ({"id": c.id, "nombre_archivo": c.nombre_archivo, "momento": c.momento}
+                     if (c := conjuntos.get(e.conjunto_id)) else None),
+        "objetivo": e.configuracion.get("objetivo"),  # los importados no lo registran
+        "presupuesto": e.configuracion["presupuesto"]["modo"], "reintento_de": e.reintento_de,
+        "modelos": modelos.get(e.id, []),
+    } for e in experimentos])
+
+
+@bp.post("/experimentos/<id_>/reintentar")
+def reintentar(id_: str):
+    """Experimento nuevo con la misma configuración efectiva (mismos pliegues): no se reanuda el anterior."""
+    s = sesion()
+    anterior = s.get(Experimento, id_)
+    if anterior is None:
+        raise ErrorPlataforma(404, textos.error_no_existe("experimento", id_))
+    if anterior.estado not in REINTENTABLES:  # los importados están siempre completados
+        raise ErrorPlataforma(409, textos.ERROR_REINTENTO)
+    # Un solo reintento por experimento: un doble clic no encola dos entrenamientos iguales (un solo trabajador). Si el
+    # reintento también falla, se reintenta el reintento.
+    previo = s.scalars(select(Experimento.id).where(Experimento.reintento_de == id_).limit(1)).first()
+    if previo is not None:
+        raise ErrorPlataforma(409, textos.error_ya_reintentado(previo))
+    _contenido(s.get(ConjuntoDatos, anterior.conjunto_id))
+    return _encolar(Experimento(
+        id=_nuevo_id(), origen="web", conjunto_id=anterior.conjunto_id, sha256_datos=anterior.sha256_datos,
+        cohorte_prueba_clave=anterior.cohorte_prueba_clave, descripcion=anterior.descripcion,
+        configuracion=anterior.configuracion, estado="en_cola", reintento_de=anterior.id))
 
 
 def _detalle(e: Experimento) -> dict:
@@ -95,6 +145,7 @@ def _detalle(e: Experimento) -> dict:
             "creado_en": fecha(e.creado_en), "iniciado_en": fecha(e.iniciado_en), "terminado_en": fecha(e.terminado_en),
             "duracion_s": e.duracion_s, "descripcion": e.descripcion, "configuracion": e.configuracion,
             "reproducibilidad": e.reproducibilidad, "procedencia": e.procedencia,
+            "reintento_de": e.reintento_de,
             "modelos": [{"id": m.id, "momento": m.momento, "familia": m.familia} for m in modelos]}
 
 

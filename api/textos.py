@@ -81,6 +81,10 @@ def nombre_modelo(modelo: str) -> str:
     return NOMBRES_MODELOS.get(modelo, modelo)
 
 
+def error_ya_reintentado(id_: str) -> str:
+    return f"Este experimento ya se ha reintentado ({id_}); si el reintento falla, reintente ese."
+
+
 def error_no_terminado(estado: str) -> str:
     return ERROR_NO_TERMINADO.format(estado=ESTADOS_LLANOS.get(estado, estado))
 
@@ -184,6 +188,7 @@ CARACTERES_NO_ADMITIDOS = '[ ] < " , : { }'
 ERROR_ENTRENAMIENTO = "El entrenamiento ha fallado por un error interno."
 ERROR_INTERRUMPIDO = ("El proceso de entrenamiento se detuvo antes de terminar (cierre o reinicio). Puede reintentarlo: se "
                       "creará un experimento nuevo con la misma configuración.")
+ERROR_REINTENTO = "Solo se puede reintentar un experimento fallido o interrumpido."
 ERROR_TRABAJADOR_ACTIVO = "Ya hay un proceso de entrenamiento en marcha."
 SIN_RESPUESTA = "El proceso de entrenamiento no responde. Compruebe que está en marcha."
 AVISO_SIN_GRUPO = ("Sin columna de grupo, los pliegues se forman al azar (estratificados). Si hay filas relacionadas, como "

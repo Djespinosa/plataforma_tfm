@@ -273,6 +273,14 @@ Compruebe que está en marcha.»).
 `POST /api/experimentos/{id}/reintentar` → 202 experimento **nuevo** con la misma configuración y `reintento_de = id`; 409
 «Solo se puede reintentar un experimento fallido o interrumpido.».
 
+Al implementar (incremento 7): el historial y el detalle añaden `descripcion` y `reintento_de`, y `presupuesto` del
+historial es el modo (`completo`, `demostracion`; los importados, `completo`); `objetivo` es nulo en los importados. El
+reintento copia la configuración efectiva, `conjunto_id`, `sha256_datos`, `cohorte_prueba_clave` y `descripcion` (el
+trabajador recalcula los pliegues y los compara con `pliegues_sha256`); antes de encolarlo comprueba el SHA-256 del
+archivo (409 «El archivo del conjunto ha cambiado desde que se cargó.», sin crear nada). Un solo reintento por
+experimento (revisión del incremento 7: un doble clic encolaba dos entrenamientos iguales): si ya existe uno, 409
+«Este experimento ya se ha reintentado (id); si el reintento falla, reintente ese.». Pruebas en `test_historial.py`.
+
 ### 4.3 Evaluación (RF-04, M)
 
 `GET /api/experimentos/{id}/evaluacion` → 200; 409 «El experimento aún no ha terminado (estado: en curso).».
@@ -903,3 +911,7 @@ importantes antes de la congelación).
 | Revisión del incremento 6 | `ERROR_INTERRUMPIDO` promete reintentar (ruta del incremento 7, RF-08 recortable); `_texto` dice «lista» para campos de texto y `objetivo: ""` da ««None»»; `conjunto_id: true` se acepta como 1; `descripcion` sin límite; la fila de un `inf` al entrenar se cuenta sobre las de entrenamiento; `paquetes.ruta_registrada` duplica `evidencias.ruta_registrada` |
 | Revisión del incremento 6 | Pruebas: fallo por `pliegues_sha256` distinto; `sin_respuesta` con su aviso; hilo del latido; despliegue del apilamiento (método y Brier nulos); doble POST; `test_textos.py` del §7 (vocabulario prohibido) aún no existe |
 | Revisión del incremento 6 (2.ª) | `error_valores_columna` lista `[ ] <`, que en las categorías sí se admiten (constante aparte con `" , : { }`); docstring de `textos.py` dice «ValueError de ml/» (ahora `ErrorValidacion`); nombres one-hot repetidos (`nota_1` numérica y `nota` = 1) o que LightGBM iguala (`a b` y `a_b`) fallan en el trabajador con «error interno» (rechazarlos al configurar); sin prueba del comando `trabajador` que rellene `CODIGO_TRABAJADOR` |
+| Incremento 7 | `ml/evidencias.py:66` lee `flask.__version__`, obsoleto en Flask 3.2 (`DeprecationWarning` en las pruebas): usar `importlib.metadata.version` |
+| Revisión del incremento 7 | CSV del conjunto borrado del disco: `read_bytes` da `FileNotFoundError` y 500 en `_contenido` (reintentar y configurar), en vez de 409 con texto propio; el reintento no avisa si el anterior falló por algo que se repetirá con la misma configuración (`ERROR_PLIEGUES_DISTINTOS`, one-hot repetidos); el desempate del historial por `id` es alfabético (`-100` tras `-99`) |
+| Revisión del incremento 7 | Pruebas: reintento de un «fallido» con éxito (solo se prueba «interrumpido»); el 404 de reintentar en una prueba propia |
+| Revisión del incremento 7 (2.ª) | Dos `reintentar` simultáneos (waitress con hilos) pasan ambos la comprobación del reintento previo: 500 por id repetido o un reintento duplicado; índice `UNIQUE` en `experimento.reintento_de` (migración 0002) con el `IntegrityError` como 409, o desactivar el botón en la web mientras dura la petición |
