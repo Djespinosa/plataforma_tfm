@@ -1,6 +1,7 @@
-"""Experimentos (docs/diseno-api.md §4.2 y §4.3): POST /api/experimentos/validacion, POST /api/experimentos,
-GET /api/experimentos (historial, RF-08), GET /api/experimentos/{id}, POST /api/experimentos/{id}/reintentar (RF-08) y
-GET /api/experimentos/{id}/evaluacion.
+"""Experimentos (docs/diseno-api.md §4.2, §4.3, §4.6 y §4.7): POST /api/experimentos/validacion, POST /api/experimentos,
+GET /api/experimentos (historial, RF-08), GET /api/experimentos/{id}, POST /api/experimentos/{id}/reintentar (RF-08),
+GET /api/experimentos/{id}/evaluacion, GET /api/experimentos/{id}/evaluacion/exportar (RF-09) y
+POST /api/experimentos/{id}/evaluacion-prueba (evaluación única en la cohorte de prueba reservada).
 
 El servidor web solo crea experimentos «en_cola» y lee su estado; los entrena el trabajador (api/trabajador.py).
 """
@@ -8,19 +9,25 @@ El servidor web solo crea experimentos «en_cola» y lee su estado; los entrena 
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from flask import Blueprint, current_app, jsonify, request, url_for
+import numpy as np
+import pandas as pd
+from flask import Blueprint, Response, current_app, jsonify, request, url_for
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from api import textos
 from api.bd import fecha_iso, sesion
 from api.errores import ErrorPlataforma
-from api.servicios.configuracion_exp import Preparados, configurar
-from api.servicios.evaluacion import con_textos
+from api.servicios.configuracion_exp import Preparados, configurar, preparar_prueba
+from api.servicios.evaluacion import con_textos, en_prueba, prueba_con_textos
+from api.servicios.paquetes import cargar_paquete
 from api.servicios.tablas_csv import leer_csv
 from api.tablas import ConjuntoDatos, Experimento, Modelo, clave_cohorte
+from automl import explicacion
 
 bp = Blueprint("experimentos", __name__, url_prefix="/api")
 
@@ -145,7 +152,7 @@ def _detalle(e: Experimento) -> dict:
             "creado_en": fecha(e.creado_en), "iniciado_en": fecha(e.iniciado_en), "terminado_en": fecha(e.terminado_en),
             "duracion_s": e.duracion_s, "descripcion": e.descripcion, "configuracion": e.configuracion,
             "reproducibilidad": e.reproducibilidad, "procedencia": e.procedencia,
-            "reintento_de": e.reintento_de,
+            "reintento_de": e.reintento_de, "evaluacion_prueba": _prueba(e),
             "modelos": [{"id": m.id, "momento": m.momento, "familia": m.familia} for m in modelos]}
 
 
@@ -157,20 +164,87 @@ def detalle(id_: str):
     return jsonify(_detalle(experimento))
 
 
-@bp.get("/experimentos/<id_>/evaluacion")
-def evaluacion(id_: str):
-    s = sesion()
-    experimento = s.get(Experimento, id_)
+def _prueba(e: Experimento) -> dict | None:
+    return prueba_con_textos(e.evaluacion_prueba) if e.evaluacion_prueba is not None else None
+
+
+def _completado(id_: str) -> Experimento:
+    experimento = sesion().get(Experimento, id_)
     if experimento is None:
         raise ErrorPlataforma(404, textos.error_no_existe("experimento", id_))
     if experimento.estado != "completado":
         raise ErrorPlataforma(409, textos.error_no_terminado(experimento.estado))
-    modelos = s.scalars(select(Modelo).where(Modelo.experimento_id == id_).order_by(Modelo.id))
+    return experimento
+
+
+def _evaluacion(experimento: Experimento) -> dict:
+    modelos = sesion().scalars(select(Modelo).where(Modelo.experimento_id == experimento.id).order_by(Modelo.id))
     config = experimento.configuracion
-    return jsonify({
+    return {
         "experimento": experimento.id, "origen": experimento.origen, "fuente": "validacion_cruzada",
         "aviso_fuente": textos.AVISO_FUENTE_VALIDACION,
         "presupuesto": config["presupuesto"], "validacion": config["validacion"],
         "modelos": [{"modelo_id": m.id, "momento": m.momento, **con_textos(m.evaluacion)} for m in modelos],
         "aviso_decision": textos.AVISO_DECISION,
-    })
+    }
+
+
+@bp.get("/experimentos/<id_>/evaluacion")
+def evaluacion(id_: str):
+    return jsonify(_evaluacion(_completado(id_)))
+
+
+@bp.get("/experimentos/<id_>/evaluacion/exportar")
+def exportar_evaluacion(id_: str):
+    """RF-09: la evaluación (§4.3) con la configuración, la reproducibilidad y, si se hizo, la evaluación en la cohorte
+    de prueba, como JSON descargable."""
+    experimento = _completado(id_)
+    contenido = {**_evaluacion(experimento), "configuracion": experimento.configuracion,
+                 "reproducibilidad": experimento.reproducibilidad, "evaluacion_prueba": _prueba(experimento)}
+    return Response(json.dumps(contenido, ensure_ascii=False, indent=2), mimetype="application/json",
+                    headers={"Content-Disposition": f'attachment; filename="evaluacion_{id_}.json"'})
+
+
+def _fecha_texto(fecha: str) -> str:
+    return f"{datetime.fromisoformat(fecha):%d/%m/%Y %H:%M} UTC"
+
+
+@bp.post("/experimentos/<id_>/evaluacion-prueba")
+def evaluacion_prueba(id_: str):
+    """Evaluación única (§4.7): el modelo desplegado y su umbral, sin cambios, sobre las filas reservadas. Se guarda y
+    no se recalcula nunca; la base de datos impide una segunda evaluación del experimento o de los mismos datos con la
+    misma cohorte (§3)."""
+    cuerpo = request.get_json(silent=True)
+    if not isinstance(cuerpo, dict) or cuerpo.get("confirmar") is not True:
+        raise ErrorPlataforma(400, textos.ERROR_CONFIRMAR)
+    s = sesion()
+    experimento = s.get(Experimento, id_, with_for_update=True)  # dos peticiones a la vez: la segunda espera
+    if experimento is None:
+        raise ErrorPlataforma(404, textos.error_no_existe("experimento", id_))
+    if experimento.evaluacion_prueba is not None:
+        raise ErrorPlataforma(409, textos.error_ya_evaluado(_fecha_texto(experimento.evaluacion_prueba["fecha"])))
+    if experimento.cohorte_prueba_clave is None:  # siempre en los importados
+        raise ErrorPlataforma(409, textos.ERROR_SIN_COHORTE)
+    if experimento.estado != "completado":
+        raise ErrorPlataforma(409, textos.error_no_terminado(experimento.estado))
+    modelo = s.scalars(select(Modelo).where(Modelo.experimento_id == id_)).one()
+    paquete = cargar_paquete(modelo)
+    X, y, filas = preparar_prueba(leer_csv(_contenido(s.get(ConjuntoDatos, experimento.conjunto_id))),
+                                  experimento.configuracion)
+    reservadas = Path(current_app.config["PLATAFORMA_DATOS"]) / "experimentos" / id_ / "prueba.parquet"
+    if not reservadas.is_file() or not np.array_equal(pd.read_parquet(reservadas)["fila"].to_numpy(), filas):
+        raise ErrorPlataforma(409, textos.ERROR_COHORTE_DISTINTA)
+    if y.nunique() < 2:
+        raise ErrorPlataforma(409, textos.ERROR_PRUEBA_UNA_CLASE)
+    metricas = en_prueba(y, explicacion.predecir(paquete, X)["probabilidad"].to_numpy(), paquete["umbral"])
+    experimento.evaluacion_prueba = {"fecha": datetime.now(UTC).isoformat(timespec="seconds"), "modelo_id": modelo.id,
+                                     "sha256_paquete": modelo.sha256_paquete, **metricas}
+    # La respuesta se compone antes de guardar: lo guardado queda congelado (§3) y un fallo después dejaría el
+    # experimento evaluado sin poder mostrarse.
+    respuesta = _prueba(experimento)
+    try:
+        s.commit()
+    except IntegrityError:  # índice único parcial: los mismos datos ya se evaluaron con esta cohorte
+        s.rollback()
+        raise ErrorPlataforma(409, textos.ERROR_DATOS_YA_EVALUADOS) from None
+    return jsonify(respuesta), 201

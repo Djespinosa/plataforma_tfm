@@ -54,16 +54,29 @@ def huella_pliegues(pliegue: pd.Series) -> str:
     return hashlib.sha256(np.asarray(pliegue, dtype=np.int64).tobytes()).hexdigest()
 
 
-def preparar(datos: pd.DataFrame, config: dict) -> Preparados:
-    """Datos de entrenamiento según la configuración (efectiva o en construcción). ErrorValidacion de automl.validacion
-    si la validación o la cohorte de prueba no son posibles."""
-    objetivo = datos[config["objetivo"]]
-    con_objetivo = objetivo.notna().to_numpy()
+def _reservar(datos: pd.DataFrame, config: dict) -> tuple[pd.DataFrame, pd.Series, np.ndarray, np.ndarray]:
+    """(filas con objetivo, y de esas filas, máscara de la cohorte de prueba entre ellas, máscara con objetivo)."""
+    con_objetivo = datos[config["objetivo"]].notna().to_numpy()
     filas = datos[con_objetivo]
     y = (filas[config["objetivo"]].map(normalizar_valor) == config["clase_positiva"]).astype(int)
     columna_grupo = config["validacion"]["columna_grupo"]
     grupos = filas[columna_grupo] if columna_grupo else None
     prueba = reservar_prueba(filas, y, config["cohorte_prueba"], grupos, config["semillas"]["modelos"]).to_numpy()
+    return filas, y, prueba, con_objetivo
+
+
+def preparar_prueba(datos: pd.DataFrame, config: dict) -> tuple[pd.DataFrame, pd.Series, np.ndarray]:
+    """(X, y, posición 1..n en el CSV) de la cohorte de prueba reservada. Solo para la evaluación única (§4.7)."""
+    filas, y, prueba, con_objetivo = _reservar(datos, config)
+    return (coaccionar(filas[prueba].reset_index(drop=True), config["variables"]), y[prueba].reset_index(drop=True),
+            np.flatnonzero(con_objetivo)[prueba] + 1)
+
+
+def preparar(datos: pd.DataFrame, config: dict) -> Preparados:
+    """Datos de entrenamiento según la configuración (efectiva o en construcción). ErrorValidacion de automl.validacion
+    si la validación o la cohorte de prueba no son posibles."""
+    filas, y, prueba, con_objetivo = _reservar(datos, config)
+    columna_grupo = config["validacion"]["columna_grupo"]
     entrenamiento = filas[~prueba].reset_index(drop=True)
     y = y[~prueba].reset_index(drop=True)
     grupos = entrenamiento[columna_grupo].rename(columna_grupo) if columna_grupo else None

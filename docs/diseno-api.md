@@ -436,7 +436,7 @@ columnas `fila, identificador, probabilidad_estimada_pct, alerta, sugerencia`.
 `GET /api/experimentos/{id}/evaluacion/exportar` → `application/json`, adjunto: la respuesta de §4.3 + `configuracion` y
 `reproducibilidad`.
 
-### 4.7 Cohorte de prueba reservada (pendiente de D-2)
+### 4.7 Cohorte de prueba reservada (D-2)
 
 `POST /api/experimentos/{id}/evaluacion-prueba` con `{"confirmar": true}` → 201 con métricas del modelo desplegado en las
 filas reservadas con el umbral ya fijado (`punto_operacion` + ROC-AUC, PR-AUC, Brier; `calibracion.punto_operacion` y
@@ -446,6 +446,29 @@ cohorte de prueba ya se hizo (fecha); se usa una sola vez.»; 409 «Este experim
 (siempre para importados); 409 si el índice único parcial del §3 la rechaza (los mismos datos ya se evaluaron con
 esta cohorte en otro experimento); 400 sin `confirmar`. Texto previo obligatorio en la interfaz: «Esta evaluación se hace una sola
 vez y no cambia el modelo ni el umbral.».
+
+Al implementar (incremento 9):
+
+- §4.7: `configuracion_exp.preparar_prueba` reconstruye X e y de las filas reservadas con la misma reserva que `preparar`
+  (función común `_reservar`) y la ruta comprueba que sus posiciones coinciden con `prueba.parquet` (409 si no). Las
+  probabilidades salen de `automl.explicacion.predecir` con el paquete cargado por `cargar_paquete` (SHA-256 y
+  `desplegado is True`); las métricas, de `servicios.evaluacion.en_prueba` (`calibracion.punto_operacion` con el umbral
+  del paquete, `roc_auc_score`, `average_precision_score`, `brier_score_loss` de scikit-learn, como `motor`). Se guarda
+  `{fecha, modelo_id, sha256_paquete, n, positivos, roc_auc, pr_auc, brier, punto_operacion}`; la respuesta y el detalle
+  del experimento (`evaluacion_prueba`, `null` si no se ha hecho) añaden `fuente: "cohorte_prueba"`, `aviso_fuente`,
+  los textos del punto de operación, de ROC-AUC y PR-AUC y `aviso_decision`.
+- Orden de las comprobaciones: 400 sin `"confirmar": true` (el mensaje incluye el texto previo); 404; 409 ya evaluado
+  (con la fecha); 409 sin cohorte (importados y web sin cohorte); 409 no terminado; 409 si la cohorte reservada tiene una
+  sola clase (no se guarda nada); 409 si el índice único parcial lo rechaza (`IntegrityError`). La fila del experimento se
+  lee con `FOR UPDATE`: dos peticiones simultáneas se atienden una tras otra y la segunda recibe «ya se hizo».
+- Revisión del incremento 9: si el umbral no marca a nadie en la cohorte de prueba, `precision` es `None`;
+  `textos_punto_operacion` lo admite (`SIN_MARCADOS`) y la respuesta se compone antes del commit, para que un fallo al
+  componerla no deje guardada (y congelada) una evaluación que no se puede mostrar.
+- §4.6: el CSV va en UTF-8 **con BOM** (las hojas de cálculo de Windows leen mal las tildes sin él; sigue siendo
+  `charset=utf-8`), con **dos** líneas de comentario antes de la cabecera, `# <aviso_decision>` y `# <aviso_rendimiento>`
+  (matiz D-4: las estimaciones de demostración no miden el rendimiento), `probabilidad_estimada_pct` con 1 decimal y
+  `alerta` como «sí»/«no». El JSON de la evaluación lleva además `evaluacion_prueba` (con textos, o `null`); 409 si el
+  experimento no está completado, como `GET …/evaluacion`.
 
 ## 5. Ejecución en segundo plano (RNF-03)
 
@@ -829,7 +852,8 @@ PLATAFORMA_MAX_FILAS_PREDICCION=20000
 
 Al implementar (incremento 8):
 
-- `api/tests/funcionales/test_rf01…rf08.py` (11 casos; RF-07 no tiene ruta y RF-09 llega en el incremento 9), con el
+- `api/tests/funcionales/test_rf01…rf08.py` (11 casos; RF-07 no tiene ruta y RF-09 llega en el incremento 9; en el
+  incremento 9, `test_rf09.py` y la evaluación única en `test_rf04.py`: 13 casos), con el
   `conftest.py` de la carpeta: `app` es la de PostgreSQL, la propiedad `requisito` sale de la constante `REQUISITO` del
   módulo y la de la suite `motor_bd_funcionales` (no `motor_bd`: el resto de `api/tests` usa SQLite), de `SHOW
   server_version`. RF-03 cubre también RNF-03 (consultas mientras entrena el trabajador
@@ -936,3 +960,5 @@ importantes antes de la congelación).
 | Revisión del incremento 8 | `test_rf03`: si falla un `assert` dentro del bucle, el hilo del trabajador sigue escribiendo durante el `teardown`, y el bucle no tiene tope si el entrenamiento se cuelga (`try/finally` con `join(timeout)`); `test_textos` no revisa los mensajes de `ErrorValidacion` de `automl.validacion`, que llegan al usuario como 422 |
 | Revisión del incremento 8 | `exportar_pruebas.py`: el manifest se escribe sin escritura atómica y repite la lógica de `ml/evidencias.actualizar_manifest` (exige `id_exp`); claves de `_cobertura.json` y `<temporal>` de `comando` con `\` de Windows; el hook de `conftest.py` que oculta la contraseña no busca la forma escrita en la URL (`urlsplit`), que el exportador ya comprueba |
 | Revisión del incremento 8 (2.ª) | `exportar_pruebas.py`: los tres `shutil.move` van uno tras otro; si falla uno a mitad (bloqueo de OneDrive), quedan archivos sin entrada en el manifest (mover `_pruebas.xml` el último) |
+| Revisión del incremento 9 | Evaluación única: ninguna prueba lanza dos peticiones simultáneas (la serialización con `FOR UPDATE` que afirma el §4.7 no está probada) y el segundo 409 de `test_rf04` no comprueba el mensaje; cualquier `IntegrityError` (también de un disparador, o la carrera en SQLite) responde «Estos datos ya se evaluaron…»; un `prueba.parquet` dañado o un CSV del conjunto borrado dan 500 en vez de 409 |
+| Revisión del incremento 9 | CSV exportado: `identificador` sin neutralizar fórmulas de hoja de cálculo (`=…`); los avisos de las líneas de comentario llevan comas sin comillas y un lector sin comentarios las lee como filas; Excel con configuración regional española separa por «;»; un lote de 0 filas saldría sin cabecera; `test_rf09` solo comprueba que la segunda línea empiece por «# » |

@@ -3,6 +3,7 @@ valor de las respuestas de las rutas presenta la explicación como causa ni el r
 decisión de la memoria. Solo se miran los valores: las claves JSON (`motivo`, `motivo_texto`) no son texto visible."""
 
 import inspect
+import json
 import re
 from pathlib import Path
 
@@ -86,9 +87,16 @@ def test_respuestas_de_las_rutas(app, cliente, entorno):  # noqa: F811
         respuestas.append(r.get_json())
         obtener(f"/api/predicciones/{r.get_json()['lote_id']}")
         obtener(f"/api/predicciones/{r.get_json()['lote_id']}/filas/1/explicacion")
+        respuestas.append(cliente.get(f"/api/predicciones/{r.get_json()['lote_id']}/exportar").data.decode("utf-8-sig"))
     respuestas.append(cliente.post(f"/api/experimentos/{id_}/reintentar").get_json())  # un error 409
     respuestas.append(cliente.get("/api/no-existe").get_json())
-    assert len(respuestas) == 9 + 5 * 3 and all(respuestas)  # 3 modelos: el web y 2 importados
+    prueba = f"/api/experimentos/{id_}/evaluacion-prueba"
+    respuestas.append(cliente.post(prueba, json={}).get_json())  # 400 sin confirmar
+    respuestas.append(cliente.post(prueba, json={"confirmar": True}).get_json())
+    respuestas.append(cliente.post(prueba, json={"confirmar": True}).get_json())  # 409: ya se hizo
+    respuestas.append(cliente.post(f"/api/experimentos/{FINAL}/evaluacion-prueba", json={"confirmar": True}).get_json())
+    respuestas.append(json.loads(cliente.get(f"/api/experimentos/{id_}/evaluacion/exportar").data))
+    assert len(respuestas) == 14 + 6 * 3 and all(respuestas)  # 3 modelos: el web y 2 importados
     assert problemas(respuestas) == []
 
 

@@ -1,6 +1,6 @@
 """Evaluación de un modelo (RF-04, docs/diseno-api.md §4.3): del resumen de un momento de ml/ (mismas claves que
 `momentos[]` de los experimentos de ml/experimento.py) a la parte numérica que se guarda en modelo.evaluacion, y de ella a
-la respuesta con textos.
+la respuesta con textos; y la evaluación única en la cohorte de prueba reservada (§4.7).
 
 Solo se copian campos numéricos y etiquetas cerradas: los textos de ml/ (motivo, regla, nota) llevan códigos de
 decisión y no se reenvían. De la equidad no se copian los recuentos de la prueba (retiros_prueba): la plataforma no
@@ -9,7 +9,12 @@ muestra nada de la cohorte de prueba.
 
 from __future__ import annotations
 
+import numpy as np
+import pandas as pd
+from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
+
 from api import textos
+from automl.calibracion import punto_operacion
 
 METRICAS = ("roc_auc_oof", "roc_auc_media", "roc_auc_desv", "pr_auc_oof", "brier_oof")
 CAMPOS_SUBGRUPO = ("n", "retiros", "sensibilidad", "sensibilidad_ic95", "tasa_falsos_positivos",
@@ -81,3 +86,22 @@ def con_textos(evaluacion: dict) -> dict:
         e["equidad"] = {"texto": textos.texto_sensibles(list(e["equidad"])), "atributos": e["equidad"]}
     e["textos"] = {"roc_auc": textos.TEXTO_ROC_AUC, "pr_auc": textos.texto_pr_auc(e["positivos"] / e["n"])}
     return e
+
+
+def en_prueba(y: pd.Series, probabilidad: np.ndarray, umbral: float) -> dict:
+    """Métricas del modelo desplegado en la cohorte de prueba con el umbral ya fijado (y con las dos clases)."""
+    return {"n": len(y), "positivos": int(y.sum()), "roc_auc": round(roc_auc_score(y, probabilidad), 4),
+            "pr_auc": round(average_precision_score(y, probabilidad), 4),
+            "brier": round(brier_score_loss(y, probabilidad), 4),
+            "punto_operacion": punto_operacion(y, probabilidad, umbral)}
+
+
+def prueba_con_textos(evaluacion: dict) -> dict:
+    """La evaluación en la cohorte de prueba guardada, con sus textos."""
+    po = evaluacion["punto_operacion"]
+    return {**evaluacion, "fuente": "cohorte_prueba", "aviso_fuente": textos.AVISO_FUENTE_PRUEBA,
+            "punto_operacion": {**po, "textos": textos.textos_punto_operacion(po["sensibilidad"], po["precision"],
+                                                                              po["tasa_alerta"])},
+            "textos": {"roc_auc": textos.TEXTO_ROC_AUC,
+                       "pr_auc": textos.texto_pr_auc(evaluacion["positivos"] / evaluacion["n"])},
+            "aviso_decision": textos.AVISO_DECISION}

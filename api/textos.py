@@ -73,6 +73,24 @@ LECTURAS = {
 }
 
 
+# Cohorte de prueba reservada (§4.7)
+TEXTO_PREVIO_PRUEBA = "Esta evaluación se hace una sola vez y no cambia el modelo ni el umbral."
+AVISO_FUENTE_PRUEBA = ("Métricas en la cohorte de prueba reservada, calculadas una sola vez con el modelo y el umbral "
+                       "fijados en el entrenamiento; estas filas no intervinieron en el entrenamiento ni en la "
+                       "elección del modelo.")
+ERROR_CONFIRMAR = ("La evaluación en la cohorte de prueba debe confirmarse («confirmar»: true). " + TEXTO_PREVIO_PRUEBA)
+ERROR_SIN_COHORTE = "Este experimento no tiene cohorte de prueba reservada."
+ERROR_DATOS_YA_EVALUADOS = ("Estos datos ya se evaluaron con esta cohorte de prueba en otro experimento; la cohorte de "
+                            "prueba se usa una sola vez.")
+ERROR_PRUEBA_UNA_CLASE = "La cohorte de prueba solo tiene casos de una clase: no se pueden calcular las métricas."
+SIN_MARCADOS = "Con este umbral no se marca a ningún caso; la precisión no se puede calcular."
+ERROR_COHORTE_DISTINTA = "Las filas de la cohorte de prueba no coinciden con las reservadas al entrenar."
+
+
+def error_ya_evaluado(fecha: str) -> str:
+    return f"La evaluación en la cohorte de prueba ya se hizo ({fecha}); se usa una sola vez."
+
+
 def coma(valor: float, decimales: int = 2) -> str:
     return f"{valor:.{decimales}f}".replace(".", ",")
 
@@ -94,9 +112,11 @@ def texto_pr_auc(prevalencia: float) -> str:
             f"de casos positivos ({round(100 * prevalencia)} %).")
 
 
-def textos_punto_operacion(sensibilidad: float, precision: float, tasa_alerta: float) -> dict:
+def textos_punto_operacion(sensibilidad: float, precision: float | None, tasa_alerta: float) -> dict:
+    # precision es None si el umbral no marca a ningún caso (posible en la cohorte de prueba).
     return {"sensibilidad": f"De cada 10 casos positivos, el modelo marca a {round(10 * sensibilidad)}.",
-            "precision": f"De cada 10 marcados, {round(10 * precision)} son positivos.",
+            "precision": (f"De cada 10 marcados, {round(10 * precision)} son positivos." if precision is not None
+                          else SIN_MARCADOS),
             "tasa_alerta": f"Se marcaría al {round(100 * tasa_alerta)} % de los casos."}
 
 

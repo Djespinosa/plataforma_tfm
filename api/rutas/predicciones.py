@@ -1,5 +1,6 @@
-"""Predicción (RF-05) y explicación local (RF-06): POST /api/modelos/{id}/predicciones, GET /api/predicciones/{lote_id} y
-GET /api/predicciones/{lote_id}/filas/{fila}/explicacion (docs/diseno-api.md §4.4 y §4.5).
+"""Predicción (RF-05), explicación local (RF-06) y exportación (RF-09): POST /api/modelos/{id}/predicciones,
+GET /api/predicciones/{lote_id}, GET /api/predicciones/{lote_id}/filas/{fila}/explicacion y
+GET /api/predicciones/{lote_id}/exportar (docs/diseno-api.md §4.4, §4.5 y §4.6).
 
 Nunca se calculan métricas con las filas de predicción: la columna objetivo, si viene, se ignora como cualquier otra
 columna que el modelo no usa. Con explicador lineal o de árbol se explican todas las filas al predecir; con permutación,
@@ -10,7 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, Response, current_app, jsonify, request
 from sqlalchemy import insert, select
 
 from api import textos
@@ -117,6 +118,22 @@ def lote(lote_id: int):
         "textos": {"probabilidad": textos.TEXTO_PROBABILIDAD, "sugerencia": textos.SUGERENCIA},
         "aviso_rendimiento": textos.AVISO_RENDIMIENTO, "aviso_decision": textos.AVISO_DECISION,
     })
+
+
+@bp.get("/predicciones/<int:lote_id>/exportar")
+def exportar(lote_id: int):
+    """RF-09: el lote en CSV (UTF-8 con BOM, para que las hojas de cálculo lean bien las tildes), con los avisos de
+    decisión y de rendimiento como líneas de comentario antes de la cabecera."""
+    _lote(lote_id)
+    filas = sesion().scalars(select(Prediccion).where(Prediccion.lote_id == lote_id).order_by(Prediccion.fila))
+    tabla = pd.DataFrame([{"fila": p.fila, "identificador": p.identificador,
+                           "probabilidad_estimada_pct": round(100 * p.probabilidad, 1),
+                           "alerta": "sí" if p.alerta else "no", "sugerencia": textos.SUGERENCIA if p.alerta else ""}
+                          for p in filas])
+    contenido = (f"# {textos.AVISO_DECISION}\n# {textos.AVISO_RENDIMIENTO}\n"
+                 + tabla.to_csv(index=False, lineterminator="\n"))
+    return Response(contenido.encode("utf-8-sig"), content_type="text/csv; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="prediccion_lote_{lote_id}.csv"'})
 
 
 def _explicar_fila(paquete: dict, modelo: Modelo, prediccion: Prediccion) -> Explicacion:
