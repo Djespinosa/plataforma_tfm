@@ -8,10 +8,14 @@ Para cada paquete con origen["desplegado"] is True de --modelos escribe:
   - con --demo <presentación>: data/procesado/demo/semana_<k>_<presentación>.csv con las filas de esa presentación de
     entrenamiento, sin la etiqueta (identificación + columnas del paquete). Es una demostración dentro de la muestra:
     nunca sirve para medir el rendimiento.
+  - con --entrenamiento: data/procesado/demo/entrenamiento_semana_<k>.csv con todas las filas de entrenamiento de su
+    semana y todas las columnas del corte salvo «particion» (constante) y «pliegue» (D29-rev, lo asigna la validación de
+    la plataforma), con la etiqueta: el CSV del flujo genérico de la plataforma (carga, configuración y entrenamiento
+    web; decisión W-9 de docs/diseno-web.md).
 2014J no se lee (el filtro de cargar_entrenamiento se aplica al leer el parquet). Las salidas no se versionan.
 
 Uso:
-    python ml/referencia_oulad.py [--modelos data/procesado/modelos] [--demo 2014B]
+    python ml/referencia_oulad.py [--modelos data/procesado/modelos] [--demo 2014B] [--entrenamiento]
 """
 
 from __future__ import annotations
@@ -37,6 +41,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--modelos", type=Path, default=RAIZ / "data" / "procesado" / "modelos")
     parser.add_argument("--demo", help="Presentación de entrenamiento para el CSV de demostración, p. ej. 2014B")
+    parser.add_argument("--entrenamiento", action="store_true",
+                        help="Escribe también el CSV de entrenamiento de cada semana para el flujo genérico")
     args = parser.parse_args()
 
     salida_ref, salida_demo = PROCESADO.parent / "referencia", PROCESADO.parent / "demo"
@@ -64,6 +70,11 @@ def main() -> None:
             columnas = columnas_paquete(paquete)
             demo[[c for c in IDENTIFICACION if c not in columnas] + columnas].to_csv(ruta, index=False)
             print(f"  demostración: {len(demo)} filas en {ruta.relative_to(RAIZ).as_posix()}")
+        if args.entrenamiento:
+            salida_demo.mkdir(parents=True, exist_ok=True)
+            ruta = salida_demo / f"entrenamiento_semana_{paquete['semana']}.csv"
+            datos.drop(columns=["particion", "pliegue"]).to_csv(ruta, index=False)
+            print(f"  entrenamiento: {len(datos)} filas en {ruta.relative_to(RAIZ).as_posix()}")
 
 
 if __name__ == "__main__":
