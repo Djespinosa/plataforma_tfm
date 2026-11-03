@@ -1,0 +1,50 @@
+<h1 tabindex="-1">{{ t.modelos.titulo }}</h1>
+<p>{{ t.modelos.introduccion }}</p>
+
+@if (error(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (modelos(); as lista) {
+  @if (lista.length) {
+    <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.modelos.tabla">
+      <table>
+        <caption>{{ t.modelos.tabla }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ t.modelos.experimento }}</th>
+            <th scope="col">{{ t.modelos.momento }}</th>
+            <th scope="col">{{ t.modelos.familia }}</th>
+            <th scope="col">{{ t.modelos.origen }}</th>
+            <th scope="col" class="numero">{{ t.modelos.umbral }}</th>
+            <th scope="col">{{ t.modelos.acciones }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of lista; track m.id) {
+            <tr>
+              <th scope="row">{{ m.experimento_id }}</th>
+              <td>{{ m.momento ?? t.modelos.sinMomento }}</td>
+              <td>{{ nombreModelo(m.familia) }}</td>
+              <td>{{ t.origenes[m.origen] }}</td>
+              <td class="numero">{{ porcentaje1(m.umbral) }}</td>
+              <td>
+                <ul class="acciones">
+                  <li><a [routerLink]="['/modelos', m.id, 'prediccion']">{{ t.modelos.estimar }}</a></li>
+                  <li>
+                    <a [routerLink]="['/experimentos', m.experimento_id, 'evaluacion']" [queryParams]="{ modelo: m.id }">
+                      {{ t.modelos.verEvaluacion }}
+                    </a>
+                  </li>
+                  <li><a [routerLink]="['/modelos', m.id, 'explicacion']">{{ t.modelos.verExplicacion }}</a></li>
+                </ul>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p>{{ t.modelos.ninguno }}</p>
+  }
+} @else {
+  <p role="status">{{ t.modelos.cargando }}</p>
+}

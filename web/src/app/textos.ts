@@ -54,6 +54,72 @@ export const TEXTOS = {
     version: 'Versión del código',
     comprobando: 'Comprobando el servidor…',
   },
+  modelos: {
+    titulo: 'Modelos desplegados',
+    introduccion:
+      'Modelos ya entrenados y listos para estimar. Cada uno conserva la evaluación con la que se eligió y su umbral.',
+    tabla: 'Modelos desplegados',
+    experimento: 'Experimento',
+    momento: 'Momento',
+    familia: 'Modelo',
+    origen: 'Origen',
+    umbral: 'Umbral de alerta',
+    acciones: 'Acciones',
+    verEvaluacion: 'Ver evaluación',
+    verExplicacion: 'Ver explicación global',
+    estimar: 'Estimar una cohorte',
+    ninguno: 'Todavía no hay modelos desplegados. Entrene uno con sus datos o importe un modelo ya preparado.',
+    sinMomento: 'sin indicar',
+    cargando: 'Cargando los modelos…',
+  },
+  origenes: { web: 'entrenado en la plataforma', importado: 'importado' } as Record<string, string>,
+  demostracion: 'Entrenamiento de demostración',
+  prediccion: {
+    titulo: 'Estimar una cohorte',
+    modelo: 'Modelo',
+    columnasNecesarias: 'Columnas que debe traer el archivo',
+    numericas: 'Numéricas',
+    categoricas: 'Categóricas',
+    columnasAyuda:
+      'Las demás columnas del archivo se ignoran; si trae la columna objetivo, tampoco se usa: aquí no se calcula ' +
+      'ninguna métrica.',
+    archivo: 'Archivo CSV con los casos que se van a estimar',
+    archivoAyuda: 'CSV en UTF-8 separado por comas o por punto y coma, con una fila de encabezado.',
+    columnaId: 'Columna identificadora (opcional)',
+    columnaIdAyuda: 'Solo se muestra en la lista para reconocer cada caso; nunca entra al modelo.',
+    enviar: 'Estimar',
+    enviando: 'Estimando…',
+    sinArchivo: 'Elija un archivo CSV.',
+    cargando: 'Cargando el modelo…',
+  },
+  lote: {
+    titulo: 'Probabilidades estimadas',
+    resumen: 'Resumen',
+    archivo: 'Archivo',
+    umbral: 'Umbral de alerta',
+    ignoradas: 'Columnas ignoradas',
+    ninguna: 'ninguna',
+    bajoDemanda: 'La explicación de cada fila se calcula al abrirla (unos segundos).',
+    tabla: 'Casos del lote',
+    fila: 'Fila',
+    identificador: 'Identificador',
+    alerta: 'Alerta',
+    sugerencia: 'Sugerencia',
+    explicacion: 'Explicación',
+    verExplicacion: 'Ver la explicación',
+    marcado: 'Marcado para seguimiento',
+    noMarcado: 'No marcado',
+    filtros: 'Filtrar la lista',
+    todos: 'Todos los casos',
+    soloMarcados: 'Solo los marcados para seguimiento',
+    buscar: 'Buscar por identificador',
+    minimo: 'Probabilidad mínima (%)',
+    ordenarPor: 'Ordenar por',
+    anterior: 'Página anterior',
+    siguiente: 'Página siguiente',
+    cargando: 'Cargando el lote…',
+    sinFilas: 'Ningún caso cumple los filtros.',
+  },
   noEncontrada: {
     titulo: 'Página no encontrada',
     texto: 'La dirección no corresponde a ninguna vista de la plataforma.',
@@ -77,6 +143,18 @@ export const TEXTOS = {
 
 export function nombreModelo(modelo: string): string {
   return NOMBRES_MODELOS[modelo] ?? modelo;
+}
+
+export function textoMarcados(marcados: string, total: string, porcentaje: string): string {
+  return `Se marcan para seguimiento ${marcados} de ${total} casos (${porcentaje}).`;
+}
+
+export function textoMostrando(desde: number, hasta: number, total: number): string {
+  return `Mostrando ${desde}-${hasta} de ${total}`;
+}
+
+export function textoPagina(pagina: number, paginas: number): string {
+  return `Página ${pagina} de ${paginas}`;
 }
 
 export function tituloRuta(titulo: string): string {

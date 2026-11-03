@@ -1,0 +1,117 @@
+<h1 tabindex="-1">{{ t.lote.titulo }}</h1>
+
+@if (error(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (respuesta(); as r) {
+  <app-aviso tipo="cautela"><p>{{ r.aviso_rendimiento }}</p></app-aviso>
+
+  <section aria-labelledby="resumen-lote">
+    <h2 id="resumen-lote">{{ t.lote.resumen }}</h2>
+    <p>{{ marcados() }}</p>
+    <dl class="datos">
+      <dt>{{ t.lote.archivo }}</dt>
+      <dd>{{ r.lote.nombre_archivo }}</dd>
+      <dt>{{ t.lote.umbral }}</dt>
+      <dd>{{ porcentaje1(r.lote.umbral) }}</dd>
+      <dt>{{ t.lote.ignoradas }}</dt>
+      <dd>{{ r.lote.columnas_ignoradas.length ? r.lote.columnas_ignoradas.join(', ') : t.lote.ninguna }}</dd>
+    </dl>
+    @if (r.lote.explicaciones === 'bajo_demanda') {
+      <p class="ayuda">{{ t.lote.bajoDemanda }}</p>
+    }
+  </section>
+
+  <section aria-labelledby="casos-lote">
+    <h2 id="casos-lote">{{ t.lote.tabla }}</h2>
+    <fieldset class="filtros">
+      <legend>{{ t.lote.filtros }}</legend>
+      <p>
+        <label>
+          <input type="radio" name="marcados" [checked]="!soloMarcados()"
+                 (change)="cambiarFiltro(() => soloMarcados.set(false))" />
+          {{ t.lote.todos }}
+        </label>
+        <label>
+          <input type="radio" name="marcados" [checked]="soloMarcados()"
+                 (change)="cambiarFiltro(() => soloMarcados.set(true))" />
+          {{ t.lote.soloMarcados }}
+        </label>
+      </p>
+      <p>
+        <label for="buscar">{{ t.lote.buscar }}</label>
+        <input id="buscar" type="search" [value]="identificador()"
+               (input)="cambiarFiltro(() => identificador.set($any($event.target).value))" />
+      </p>
+      <p>
+        <label for="minimo">{{ t.lote.minimo }}</label>
+        <input id="minimo" type="number" min="0" max="100" step="1" [value]="minimoPct()"
+               (input)="cambiarFiltro(() => minimoPct.set(leerMinimo($any($event.target).value)))" />
+      </p>
+    </fieldset>
+
+    @let v = vista();
+    <p role="status">{{ textoMostrando(v.desde, v.hasta, v.total) }}</p>
+    @if (v.total) {
+      <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.lote.tabla">
+        <table>
+          <caption>{{ t.lote.tabla }}</caption>
+          <thead>
+            <tr>
+              <th scope="col" [attr.aria-sort]="ariaSort('fila')">
+                <button type="button" class="orden" (click)="ordenarPor('fila')">{{ t.lote.fila }}</button>
+              </th>
+              <th scope="col" [attr.aria-sort]="ariaSort('identificador')">
+                <button type="button" class="orden" (click)="ordenarPor('identificador')">
+                  {{ t.lote.identificador }}
+                </button>
+              </th>
+              <th scope="col" class="numero" [attr.aria-sort]="ariaSort('probabilidad')">
+                <button type="button" class="orden" (click)="ordenarPor('probabilidad')">
+                  {{ r.textos.probabilidad }}
+                </button>
+              </th>
+              <th scope="col">{{ t.lote.alerta }}</th>
+              <th scope="col">{{ t.lote.sugerencia }}</th>
+              <th scope="col">{{ t.lote.explicacion }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of v.filas; track f.fila) {
+              <tr>
+                <td class="numero">{{ f.fila }}</td>
+                <td>{{ f.identificador }}</td>
+                <td class="numero">{{ porcentaje(f.probabilidad) }}</td>
+                <td>
+                  @if (f.alerta) {
+                    <span class="marcado"><span aria-hidden="true">⚑</span> {{ t.lote.marcado }}</span>
+                  } @else {
+                    {{ t.lote.noMarcado }}
+                  }
+                </td>
+                <td>{{ f.sugerencia }}</td>
+                <td><a [routerLink]="['/predicciones', r.lote.id, 'filas', f.fila]">{{ t.lote.verExplicacion }}</a></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (v.paginas > 1) {
+        <nav class="paginacion" [attr.aria-label]="textoPagina(v.pagina, v.paginas)">
+          <button type="button" class="secundario" [disabled]="v.pagina === 1" (click)="pagina.set(v.pagina - 1)">
+            {{ t.lote.anterior }}
+          </button>
+          <span>{{ textoPagina(v.pagina, v.paginas) }}</span>
+          <button type="button" class="secundario" [disabled]="v.pagina === v.paginas" (click)="pagina.set(v.pagina + 1)">
+            {{ t.lote.siguiente }}
+          </button>
+        </nav>
+      }
+    } @else {
+      <p>{{ t.lote.sinFilas }}</p>
+    }
+  </section>
+
+  <app-pie-decision [texto]="r.aviso_decision" />
+} @else {
+  <p role="status">{{ t.lote.cargando }}</p>
+}

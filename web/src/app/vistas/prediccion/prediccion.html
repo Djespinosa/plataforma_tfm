@@ -1,0 +1,61 @@
+<h1 tabindex="-1">{{ t.prediccion.titulo }}</h1>
+
+@if (errorCarga(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (detalle(); as m) {
+  <dl class="datos">
+    <dt>{{ t.prediccion.modelo }}</dt>
+    <dd>{{ nombreModelo(m.familia) }} · {{ m.experimento_id }}@if (m.momento) { · {{ m.momento }}}</dd>
+  </dl>
+  @if (experimento()?.configuracion?.presupuesto?.modo === 'demostracion') {
+    <app-aviso tipo="cautela">
+      <p>{{ t.demostracion }}</p>
+      <p>{{ t.apiCopias.avisoDemostracion }}</p>
+    </app-aviso>
+  }
+
+  <app-aviso><p>{{ t.apiCopias.avisoPrivacidad }}</p></app-aviso>
+
+  <details>
+    <summary>{{ t.prediccion.columnasNecesarias }}</summary>
+    <p class="ayuda">{{ t.prediccion.columnasAyuda }}</p>
+    <dl class="datos">
+      <dt>{{ t.prediccion.numericas }}</dt>
+      <dd>{{ m.columnas.numericas.join(', ') }}</dd>
+      <dt>{{ t.prediccion.categoricas }}</dt>
+      <dd>{{ m.columnas.categoricas.join(', ') }}</dd>
+    </dl>
+  </details>
+
+  <form (submit)="enviar($event)" novalidate>
+    <p>
+      <label for="archivo">{{ t.prediccion.archivo }}</label><br />
+      <input id="archivo" type="file" accept=".csv,text/csv" aria-describedby="archivo-ayuda"
+             (change)="elegirArchivo($event)" />
+      <br /><span id="archivo-ayuda" class="ayuda">{{ t.prediccion.archivoAyuda }}</span>
+    </p>
+    <p>
+      <label for="columna-id">{{ t.prediccion.columnaId }}</label><br />
+      <input id="columna-id" type="text" aria-describedby="columna-id-ayuda" [value]="columnaId()"
+             (input)="columnaId.set($any($event.target).value)" />
+      <br /><span id="columna-id-ayuda" class="ayuda">{{ t.prediccion.columnaIdAyuda }}</span>
+    </p>
+    @if (errorEnvio(); as e) {
+      <app-aviso tipo="error">
+        <p>{{ e.mensaje }}</p>
+        @if (e.detalles.length) {
+          <ul>
+            @for (d of e.detalles; track $index) {
+              <li>{{ d }}</li>
+            }
+          </ul>
+        }
+      </app-aviso>
+    }
+    <button type="submit" [disabled]="enviando()">
+      {{ enviando() ? t.prediccion.enviando : t.prediccion.enviar }}
+    </button>
+  </form>
+} @else {
+  <p role="status">{{ t.prediccion.cargando }}</p>
+}
