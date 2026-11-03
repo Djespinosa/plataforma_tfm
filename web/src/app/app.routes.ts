@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { TEXTOS, tituloRuta } from './textos';
+import { Carga } from './vistas/carga/carga';
 import { Evaluacion } from './vistas/evaluacion/evaluacion';
 import { ExplicacionGlobal } from './vistas/explicacion-global/explicacion-global';
 import { ExplicacionLocal } from './vistas/explicacion-local/explicacion-local';
@@ -13,6 +14,7 @@ import { Prediccion } from './vistas/prediccion/prediccion';
 /** Rutas de docs/diseno-web.md §3.1; data.paso es el paso del flujo (1-6) que se marca en la cabecera. */
 export const routes: Routes = [
   { path: '', component: Inicio, title: tituloRuta(TEXTOS.inicio.titulo) },
+  { path: 'datos', component: Carga, title: tituloRuta(TEXTOS.carga.titulo), data: { paso: 1 } },
   {
     path: 'experimentos/:id/evaluacion',
     component: Evaluacion,

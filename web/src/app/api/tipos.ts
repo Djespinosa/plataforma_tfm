@@ -14,6 +14,33 @@ export type Origen = 'web' | 'importado';
 export type Explicador = 'lineal' | 'arbol' | 'permutacion';
 export type EstadoExperimento = 'en_cola' | 'en_curso' | 'completado' | 'fallido' | 'interrumpido';
 
+/** GET /api/conjuntos (cada elemento) */
+export interface ConjuntoResumen {
+  id: number;
+  nombre_archivo: string;
+  momento: string | null;
+  n_filas: number;
+  n_columnas: number;
+  creado_en: string;
+}
+
+export interface Columna {
+  nombre: string;
+  tipo: 'numerica' | 'categorica';
+  faltantes: number;
+  proporcion_faltantes: number;
+  valores_distintos: number;
+  valores_frecuentes: { valor: string; n: number }[];
+}
+
+/** POST /api/conjuntos → 201 y GET /api/conjuntos/{id} */
+export interface Conjunto extends ConjuntoResumen {
+  sha256: string;
+  columnas: Columna[];
+  avisos: string[];
+  aviso_privacidad: string;
+}
+
 /** GET /api/modelos (cada elemento) */
 export interface Modelo {
   id: number;
