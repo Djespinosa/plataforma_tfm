@@ -19,6 +19,12 @@
     @if (r.lote.explicaciones === 'bajo_demanda') {
       <p class="ayuda">{{ t.lote.bajoDemanda }}</p>
     }
+    <p>
+      <a [href]="'/api/predicciones/' + r.lote.id + '/exportar'" download aria-describedby="descargar-ayuda">
+        {{ t.lote.descargar }}
+      </a>
+      <br /><span id="descargar-ayuda" class="ayuda">{{ t.lote.descargarAyuda }}</span>
+    </p>
   </section>
 
   <section aria-labelledby="casos-lote">

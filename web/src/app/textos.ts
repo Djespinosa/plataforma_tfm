@@ -275,6 +275,9 @@ export const TEXTOS = {
     siguiente: 'Página siguiente',
     cargando: 'Cargando el lote…',
     sinFilas: 'Ningún caso cumple los filtros.',
+    descargar: 'Descargar las estimaciones (CSV)',
+    descargarAyuda:
+      'Todos los casos del lote, sin filtros, con la probabilidad estimada en % y los avisos en las primeras líneas.',
   },
   detalleTecnico: 'Ver el detalle técnico',
   grafico: { verTabla: 'Ver los datos del gráfico en una tabla' },
@@ -381,6 +384,9 @@ export const TEXTOS = {
     replicas: 'réplicas bootstrap',
     sinValor: 'no aplica',
     cargando: 'Cargando la evaluación…',
+    descargar: 'Descargar la evaluación (JSON)',
+    descargarAyuda:
+      'Incluye la configuración, la reproducibilidad y, si se hizo, la evaluación en la cohorte de prueba.',
   },
   evaluacionPrueba: {
     titulo: 'Evaluación en la cohorte de prueba',

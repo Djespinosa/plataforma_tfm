@@ -272,6 +272,10 @@
       }
     </section>
   }
+  <p>
+    <a [href]="exportar()" download aria-describedby="descargar-evaluacion-ayuda">{{ t.evaluacion.descargar }}</a>
+    <br /><span id="descargar-evaluacion-ayuda" class="ayuda">{{ t.evaluacion.descargarAyuda }}</span>
+  </p>
   <app-pie-decision [texto]="r.aviso_decision" />
 } @else {
   <p role="status">{{ t.evaluacion.cargando }}</p>

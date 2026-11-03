@@ -119,6 +119,8 @@ describe('Evaluacion', () => {
     }
     expect(texto).toContain('Umbral de alerta: 15,0 %');
     expect(html.querySelector('app-grafico-calibracion svg')).not.toBeNull();
+    const descarga = html.querySelector('a[href="/api/experimentos/exp-1/evaluacion/exportar"]');
+    expect(descarga?.hasAttribute('download')).toBe(true);
   });
 
   it('con ?modelo= muestra ese modelo; sin curva, el motivo; la matriz con encabezados en su sitio', async () => {

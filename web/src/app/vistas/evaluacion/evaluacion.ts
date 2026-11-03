@@ -76,6 +76,9 @@ export class Evaluacion implements OnInit {
 
   protected readonly demostracion = computed(() => this.respuesta()?.presupuesto.modo === 'demostracion');
 
+  /** RF-09: el navegador descarga por el proxy; la API pone el nombre del archivo. */
+  protected readonly exportar = computed(() => `/api/experimentos/${encodeURIComponent(this.id())}/evaluacion/exportar`);
+
   /** Solo en los entrenados en la plataforma con cohorte reservada y sin evaluar; nunca en los importados. */
   protected readonly puedeEvaluarPrueba = computed(() => {
     const e = this.experimento();
