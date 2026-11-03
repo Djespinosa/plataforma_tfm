@@ -240,6 +240,15 @@ cubiertas, porcentaje}}, informes}`; solo las funcionales (y las unitarias marca
 PostgreSQL, el resto SQLite en memoria. Solo se exporta con todas superadas y ninguna omitida. En `manifest.json`, sus
 entradas de `pruebas` llevan `id` en lugar de `experimento`.
 
+## Capturas de la interfaz (`capturas/web-<vista>.png`)
+
+Manuales (docs/diseno-web.md §12, decisión W-10): Chrome a 1440 × 900, zoom 100 %, con `web/` y `api/` confirmados en un
+commit. `python -m scripts.registrar_capturas [--experimento-web <id>]`, con el árbol limpio salvo los PNG, añade o
+sustituye en `capturas` una entrada por PNG nuevo o cambiado (sin confirmar nada entre la toma y el registro; las ya
+confirmadas sin cambios conservan su entrada): `{archivo, descripcion, commit, datos: {experimento, csv?: {ruta, sha256}}}`
+(`commit` = el del código que se ve; `experimento` = el que muestra la vista; `csv` = el archivo cargado en ella). Nunca
+2014J, ni la evaluación única en la cohorte de prueba con datos de OULAD, ni métricas de prueba.
+
 ## `manifest.json`
 
 ```json
@@ -248,7 +257,7 @@ entradas de `pruebas` llevan `id` en lugar de `experimento`.
   "commit": "a1b2c3d",
   "experimentos": ["experimentos/exp-2026-11-03-01.json"],
   "figuras": [{"archivo": "figuras/exp-2026-11-03-01_roc.png", "descripcion": "Curva ROC del modelo seleccionado", "experimento": "exp-2026-11-03-01"}],
-  "capturas": [{"archivo": "capturas/explicabilidad-local.png", "descripcion": "Vista de explicación local de un estudiante"}],
+  "capturas": [{"archivo": "capturas/web-explicacion-local.png", "descripcion": "Explicación local de un caso marcado (semana 4)", "commit": "a1b2c3d", "datos": {"experimento": "exp-2026-10-29-03", "csv": {"ruta": "data/procesado/demo/semana_4_2014B.csv", "sha256": "…"}}}],
   "arquitectura": [],
   "pruebas": [],
   "usabilidad": []

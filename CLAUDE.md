@@ -34,7 +34,7 @@ LightGBM, Optuna, SHAP (pipeline ML).
 ```
 ml/                  Núcleo ML y scripts (exploracion_oulad.py, cortes_oulad.py, evidencias.py, automl/, tests/; próximo: configs/)
 api/                 API Flask + PostgreSQL (semana 2)
-scripts/             Evidencias que cruzan api/ y ml/ con datos de OULAD (evidencia_global_api.py, D-3)
+scripts/             Evidencias que cruzan api/ y ml/ con datos de OULAD (evidencia_global_api.py, D-3) y registro de capturas (registrar_capturas.py)
 web/                 Interfaz Angular (semana 3)
 data/raw/oulad/      7 CSV de OULAD, CC-BY 4.0 (no versionados)
 evidencias/          Lo único que consume la memoria (ver CONTRATO.md)
