@@ -41,6 +41,38 @@ export interface Conjunto extends ConjuntoResumen {
   aviso_privacidad: string;
 }
 
+export type CohortePrueba = null | { modo: 'aleatoria' } | { modo: 'valores'; columna: string; valores: string[] };
+
+/** Cuerpo de POST /api/experimentos/validacion y POST /api/experimentos */
+export interface CuerpoExperimento {
+  conjunto_id: number;
+  objetivo: string;
+  clase_positiva: string;
+  excluidas: string[];
+  sensibles: string[];
+  columna_grupo: string | null;
+  cohorte_prueba: CohortePrueba;
+  presupuesto: 'completo' | 'demostracion';
+  descripcion: string | null;
+}
+
+/** POST /api/experimentos/validacion → 200 (esquema efectivo) */
+export interface ValidacionExperimento {
+  filas_entrenamiento: number;
+  filas_prueba: number;
+  filas_sin_objetivo: number;
+  positivos_entrenamiento: number;
+  prevalencia_entrenamiento: number;
+  variables: { numericas: string[]; categoricas: string[] };
+  excluidas_automaticamente: { columna: string; motivo: string }[];
+  validacion: { tipo: string; k: number; semilla: number; columna_grupo: string | null; n_grupos: number | null };
+  cohorte_prueba:
+    | null
+    | { modo: 'aleatoria' | 'valores'; columna?: string; valores?: string[]; filas: number; metodo: string };
+  presupuesto: { modo: string; familias: string[]; n_trials_por_familia: number; n_bootstrap: number };
+  avisos: string[];
+}
+
 /** GET /api/modelos (cada elemento) */
 export interface Modelo {
   id: number;

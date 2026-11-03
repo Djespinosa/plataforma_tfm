@@ -1,0 +1,239 @@
+<h1 tabindex="-1">{{ t.configuracion.titulo }}</h1>
+
+@if (errorCarga(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (datos(); as d) {
+  <dl class="datos">
+    <dt>{{ t.configuracion.conjunto }}</dt>
+    <dd>
+      {{ d.nombre_archivo }}@if (d.momento) { · {{ d.momento }}} · {{ miles(d.n_filas) }} {{ t.configuracion.filas }}
+    </dd>
+  </dl>
+
+  <form [formGroup]="form" (ngSubmit)="comprobar()" novalidate>
+    <fieldset>
+      <legend>{{ t.configuracion.objetivoGrupo }}</legend>
+      <p>
+        <label for="objetivo">{{ t.configuracion.objetivo }}</label><br />
+        <select id="objetivo" formControlName="objetivo" aria-describedby="objetivo-ayuda">
+          <option value="">{{ t.configuracion.elegirColumna }}</option>
+          @for (c of d.columnas; track c.nombre) {
+            <option [value]="c.nombre">{{ c.nombre }}</option>
+          }
+        </select>
+        <br /><span id="objetivo-ayuda" class="ayuda">{{ t.configuracion.objetivoAyuda }}</span>
+      </p>
+      @if (columnaObjetivo(); as obj) {
+        <p>
+          <label for="clase-positiva">{{ t.configuracion.clasePositiva }}</label><br />
+          @if (obj.valores_distintos > maxValores) {
+            <input id="clase-positiva" type="text" formControlName="clasePositiva"
+                   aria-describedby="clase-positiva-ayuda clase-positiva-texto" />
+            <br /><span id="clase-positiva-texto" class="ayuda">{{ t.configuracion.clasePositivaTexto }}</span>
+          } @else {
+            <select id="clase-positiva" formControlName="clasePositiva" aria-describedby="clase-positiva-ayuda">
+              <option value="">{{ t.configuracion.elegirValor }}</option>
+              @for (v of obj.valores_frecuentes; track v.valor) {
+                <option [value]="v.valor">{{ v.valor }} ({{ miles(v.n) }})</option>
+              }
+            </select>
+          }
+          <br /><span id="clase-positiva-ayuda" class="ayuda">{{ t.configuracion.clasePositivaAyuda }}</span>
+        </p>
+      }
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ t.configuracion.validacionGrupo }}</legend>
+      <p>
+        <label for="columna-grupo">{{ t.configuracion.columnaGrupo }}</label><br />
+        <select id="columna-grupo" formControlName="columnaGrupo" aria-describedby="columna-grupo-ayuda">
+          <option value="">{{ t.configuracion.ninguna }}</option>
+          @for (c of otras(); track c.nombre) {
+            <option [value]="c.nombre">{{ c.nombre }}</option>
+          }
+        </select>
+        <br /><span id="columna-grupo-ayuda" class="ayuda">{{ t.configuracion.columnaGrupoAyuda }}</span>
+      </p>
+    </fieldset>
+
+    <fieldset aria-describedby="cohorte-ayuda">
+      <legend>{{ t.configuracion.cohorteGrupo }}</legend>
+      <p id="cohorte-ayuda" class="ayuda">{{ t.configuracion.cohorteAyuda }}</p>
+      <p><label><input type="radio" formControlName="cohorteModo" value="ninguna" /> {{ t.configuracion.cohorteNinguna }}</label></p>
+      <p><label><input type="radio" formControlName="cohorteModo" value="valores" /> {{ t.configuracion.cohorteValores }}</label></p>
+      <p><label><input type="radio" formControlName="cohorteModo" value="aleatoria" /> {{ t.configuracion.cohorteAleatoria }}</label></p>
+      @if (valor().cohorteModo === 'valores') {
+        <p>
+          <label for="cohorte-columna">{{ t.configuracion.cohorteColumna }}</label><br />
+          <select id="cohorte-columna" formControlName="cohorteColumna">
+            <option value="">{{ t.configuracion.elegirColumna }}</option>
+            @for (c of otras(); track c.nombre) {
+              <option [value]="c.nombre">{{ c.nombre }}</option>
+            }
+          </select>
+        </p>
+        @if (columnaCohorte(); as col) {
+          <fieldset>
+            <legend>{{ t.configuracion.cohorteValoresLeyenda }}</legend>
+            @for (v of col.valores_frecuentes; track v.valor) {
+              <p>
+                <label>
+                  <input type="checkbox" [checked]="marcado(form.controls.cohorteValores, v.valor)"
+                         (change)="alternar(form.controls.cohorteValores, v.valor, $event)" />
+                  {{ v.valor }} ({{ miles(v.n) }})
+                </label>
+              </p>
+            }
+            @if (col.valores_distintos > maxValores) {
+              <p class="ayuda">{{ t.configuracion.cohorteMasValores }}</p>
+            }
+          </fieldset>
+        }
+      }
+    </fieldset>
+
+    <fieldset aria-describedby="variables-ayuda">
+      <legend>{{ t.configuracion.variablesGrupo }}</legend>
+      <p id="variables-ayuda" class="ayuda">{{ t.configuracion.variablesAyuda }}</p>
+      <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.configuracion.tablaVariables">
+        <table>
+          <caption>{{ t.configuracion.tablaVariables }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ t.configuracion.columna }}</th>
+              <th scope="col">{{ t.configuracion.tipo }}</th>
+              <th scope="col">{{ t.configuracion.excluir }}</th>
+              <th scope="col">{{ t.configuracion.sensible }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of otras(); track c.nombre) {
+              <tr>
+                <th scope="row">{{ c.nombre }}</th>
+                <td>{{ t.carga.tipos[c.tipo] }}</td>
+                <td>
+                  <input type="checkbox" [attr.aria-label]="t.configuracion.excluir + ': ' + c.nombre"
+                         [checked]="marcado(form.controls.excluidas, c.nombre)"
+                         (change)="alternar(form.controls.excluidas, c.nombre, $event)" />
+                </td>
+                <td>
+                  <input type="checkbox" [attr.aria-label]="t.configuracion.sensible + ': ' + c.nombre"
+                         [checked]="marcado(form.controls.sensibles, c.nombre)"
+                         (change)="alternar(form.controls.sensibles, c.nombre, $event)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ t.configuracion.presupuestoGrupo }}</legend>
+      <p><label><input type="radio" formControlName="presupuesto" value="completo" /> {{ t.configuracion.presupuestoCompleto }}</label></p>
+      <p><label><input type="radio" formControlName="presupuesto" value="demostracion" /> {{ t.configuracion.presupuestoDemostracion }}</label></p>
+      @if (valor().presupuesto === 'demostracion') {
+        <app-aviso tipo="cautela"><p>{{ t.apiCopias.avisoDemostracion }}</p></app-aviso>
+      }
+    </fieldset>
+
+    <p>
+      <label for="descripcion">{{ t.configuracion.descripcion }}</label><br />
+      <textarea id="descripcion" rows="2" formControlName="descripcion" aria-describedby="descripcion-ayuda"></textarea>
+      <br /><span id="descripcion-ayuda" class="ayuda">{{ t.configuracion.descripcionAyuda }}</span>
+    </p>
+
+    @if (error(); as e) {
+      <app-aviso tipo="error">
+        <p>{{ e.mensaje }}</p>
+        @if (e.detalles.length) {
+          <ul>
+            @for (x of e.detalles; track $index) {
+              <li>{{ x }}</li>
+            }
+          </ul>
+        }
+      </app-aviso>
+    }
+
+    <p>
+      <button type="submit" class="secundario" [disabled]="comprobando() || enviando()">
+        {{ comprobando() ? t.configuracion.comprobando : t.configuracion.comprobar }}
+      </button>
+    </p>
+  </form>
+
+  @if (resultado(); as r) {
+    @if (vigente()) {
+      <section aria-labelledby="esquema">
+        <h2 id="esquema" tabindex="-1">{{ t.configuracion.esquema }}</h2>
+        @let s = r.esquema;
+        <dl class="datos">
+          <dt>{{ t.configuracion.filasEntrenamiento }}</dt>
+          <dd>{{ miles(s.filas_entrenamiento) }}</dd>
+          <dt>{{ t.configuracion.filasPrueba }}</dt>
+          <dd>{{ miles(s.filas_prueba) }}</dd>
+          <dt>{{ t.configuracion.filasSinObjetivo }}</dt>
+          <dd>{{ miles(s.filas_sin_objetivo) }}</dd>
+          <dt>{{ t.configuracion.positivos }}</dt>
+          <dd>{{ miles(s.positivos_entrenamiento) }} ({{ porcentaje1(s.prevalencia_entrenamiento) }})</dd>
+          <dt>{{ t.configuracion.numericas }} ({{ s.variables.numericas.length }})</dt>
+          <dd>{{ s.variables.numericas.join(', ') || t.lote.ninguna }}</dd>
+          <dt>{{ t.configuracion.categoricas }} ({{ s.variables.categoricas.length }})</dt>
+          <dd>{{ s.variables.categoricas.join(', ') || t.lote.ninguna }}</dd>
+          @if (s.excluidas_automaticamente.length) {
+            <dt>{{ t.configuracion.excluidasAutomaticamente }}</dt>
+            <dd>
+              <ul>
+                @for (x of s.excluidas_automaticamente; track x.columna) {
+                  <li>{{ x.columna }}: {{ x.motivo }}</li>
+                }
+              </ul>
+            </dd>
+          }
+          <dt>{{ t.configuracion.validacion }}</dt>
+          <dd>
+            {{ textoValidacion(s.validacion) }}@if (s.validacion.columna_grupo) {
+              · {{ s.validacion.columna_grupo }} ({{ miles(s.validacion.n_grupos ?? 0) }} {{ t.configuracion.grupos }})
+            }
+          </dd>
+          <dt>{{ t.configuracion.cohorte }}</dt>
+          <dd>
+            @if (s.cohorte_prueba; as ch) {
+              {{ ch.metodo }}@if (ch.columna) { · {{ ch.columna }}: {{ ch.valores?.join(', ') }}} ·
+              {{ miles(ch.filas) }} {{ t.configuracion.filas }}
+            } @else {
+              {{ t.lote.ninguna }}
+            }
+          </dd>
+          <dt>{{ t.configuracion.presupuesto }}</dt>
+          <dd>
+            {{ t.configuracion.modos[s.presupuesto.modo] ?? s.presupuesto.modo }} ·
+            {{ s.presupuesto.familias.length }} {{ t.configuracion.familias }} ·
+            {{ s.presupuesto.n_trials_por_familia }} {{ t.configuracion.ensayos }} ·
+            {{ miles(s.presupuesto.n_bootstrap) }} {{ t.configuracion.replicas }}
+          </dd>
+        </dl>
+        @if (s.avisos.length) {
+          <app-aviso tipo="cautela">
+            @for (a of s.avisos; track $index) {
+              <p>{{ a }}</p>
+            }
+          </app-aviso>
+        }
+      </section>
+    } @else {
+      <app-aviso tipo="cautela"><p>{{ t.configuracion.cambiada }}</p></app-aviso>
+    }
+  }
+
+  <p>
+    <button type="button" [disabled]="!vigente() || enviando()" aria-describedby="entrenar-ayuda" (click)="entrenar()">
+      {{ enviando() ? t.configuracion.enviando : t.configuracion.entrenar }}
+    </button>
+    <br /><span id="entrenar-ayuda" class="ayuda">{{ t.configuracion.entrenarAyuda }}</span>
+  </p>
+} @else {
+  <p role="status">{{ t.configuracion.cargando }}</p>
+}

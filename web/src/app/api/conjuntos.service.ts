@@ -19,4 +19,8 @@ export class ConjuntosService {
   listar(): Observable<ConjuntoResumen[]> {
     return this.http.get<ConjuntoResumen[]>('/api/conjuntos');
   }
+
+  detalle(id: number): Observable<Conjunto> {
+    return this.http.get<Conjunto>(`/api/conjuntos/${id}`);
+  }
 }
