@@ -1,4 +1,4 @@
-import { contribucion, decimal, fecha, intervalo, miles, pValor, porcentaje, porcentaje1 } from './formato';
+import { contribucion, decimal, fecha, intervalo, miles, pValor, porcentaje, porcentaje1, puntos } from './formato';
 
 describe('formato', () => {
   it('porcentaje entero sin sugerir certeza en los extremos', () => {
@@ -31,6 +31,11 @@ describe('formato', () => {
     expect(intervalo([-0.0123, 0.0046])).toBe('[−0,012; 0,005]');
     expect(pValor(0.0004)).toBe('< 0,001');
     expect(pValor(0.0412)).toBe('0,041');
+  });
+
+  it('diferencias de proporciones en puntos porcentuales', () => {
+    expect(puntos(0.123, [0.041, 0.205])).toBe('12,3 p. p. [4,1; 20,5]');
+    expect(puntos(-0.05)).toBe('−5,0 p. p.');
   });
 
   it('fecha en hora local', () => {

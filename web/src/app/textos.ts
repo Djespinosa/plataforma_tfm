@@ -160,6 +160,72 @@ export const TEXTOS = {
     volver: 'Volver a la lista del lote',
     cargando: 'Calculando la explicación…',
   },
+  calibracion: {
+    titulo: 'Curva de calibración',
+    descripcion:
+      'Cada punto compara la probabilidad estimada por el modelo en un grupo de casos (eje horizontal) con la ' +
+      'proporción de positivos observada en ese grupo (eje vertical). Cuanto más cerca de la diagonal, mejor ' +
+      'calibradas están las probabilidades.',
+    ejeX: 'Probabilidad estimada',
+    ejeY: 'Proporción observada de positivos',
+    calibrada: 'Probabilidad calibrada (la que muestra la plataforma)',
+    sinCalibrar: 'Antes de calibrar',
+    diagonal: 'Calibración perfecta (diagonal)',
+  },
+  evaluacion: {
+    titulo: 'Evaluación del modelo',
+    elegirMomento: 'Elegir el momento',
+    resumen: 'Resumen',
+    desplegado: 'Modelo desplegado',
+    puntoOperacion: 'Con el umbral de alerta elegido',
+    umbral: 'Umbral de alerta',
+    ordenacion: 'Capacidad para ordenar los casos',
+    rocAuc: 'ROC-AUC (out-of-fold)',
+    calibracion: 'Calibración',
+    modelosComparados: 'Modelos comparados',
+    casos: 'Casos',
+    positivos: 'Positivos',
+    papel: 'Papel',
+    papeles: { desplegado: 'desplegado', candidato: 'candidato', referencia: 'referencia' },
+    rocAucPliegues: 'ROC-AUC por pliegue (media ± desv.)',
+    prAuc: 'PR-AUC',
+    brier: 'Brier',
+    metodoCalibracion: 'Método de calibración',
+    contraste: 'Comparación con la regresión logística optimizada',
+    comparados: 'Modelos comparados',
+    diferencia: 'Diferencia de ROC-AUC e intervalo del 95 %',
+    pDelong: 'p de DeLong',
+    pHolm: 'p corregido (Holm)',
+    holmSobre: 'Holm sobre',
+    parsimonia: 'Elección del modelo más simple',
+    parsimoniaTabla: 'Pérdida de ROC-AUC frente al mejor e intervalo del 95 %',
+    perdida: 'Pérdida e intervalo del 95 %',
+    cumple: 'Dentro del margen',
+    si: 'sí',
+    no: 'no',
+    matriz: 'Casos marcados y no marcados',
+    marcados: 'Marcados para seguimiento',
+    noMarcados: 'No marcados',
+    positivosReales: 'Positivos reales',
+    negativosReales: 'Negativos reales',
+    tasaFalsosPositivos: 'Tasa de falsos positivos',
+    brierSinCalibrar: 'Brier antes de calibrar',
+    brierCalibrado: 'Brier calibrado',
+    equidad: 'Resultados por subgrupo',
+    subgrupo: 'Subgrupo',
+    sensibilidad: 'Sensibilidad e intervalo del 95 %',
+    nota: 'Nota',
+    soloDescriptiva: 'solo descriptiva (subgrupo pequeño)',
+    diferenciaSensibilidad: 'Diferencia máxima de sensibilidad',
+    diferenciaFalsosPositivos: 'diferencia máxima de tasa de falsos positivos',
+    validacionPresupuesto: 'Validación y presupuesto',
+    validacion: 'Validación',
+    presupuesto: 'Presupuesto',
+    ensayos: 'ensayos por familia',
+    replicas: 'réplicas bootstrap',
+    sinValor: 'no aplica',
+    cargando: 'Cargando la evaluación…',
+  },
   noEncontrada: {
     titulo: 'Página no encontrada',
     texto: 'La dirección no corresponde a ninguna vista de la plataforma.',
@@ -195,6 +261,16 @@ export function textoProbabilidad(porcentaje: string): string {
 
 export function textoResto(variables: number, suma: string): string {
   return `Otras ${variables} variables suman ${suma} en la escala del modelo.`;
+}
+
+const VALIDACIONES: Record<string, string> = {
+  agrupada: 'validación cruzada agrupada',
+  agrupada_estratificada: 'validación cruzada agrupada y estratificada',
+  estratificada: 'validación cruzada estratificada',
+};
+
+export function textoValidacion(tipo: string, k: number): string {
+  return `${VALIDACIONES[tipo] ?? tipo} de ${k} pliegues`;
 }
 
 export function textoMostrando(desde: number, hasta: number, total: number): string {

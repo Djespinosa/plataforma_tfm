@@ -302,3 +302,26 @@ th[aria-sort='descending'] button.orden::after {
   font-size: 1.25rem;
   font-weight: 700;
 }
+
+/* Evaluación */
+.selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.selector button[aria-pressed='true'] {
+  background: var(--primario);
+  color: var(--fondo);
+  text-decoration: underline; /* además del color: el elegido también va subrayado */
+}
+
+.grafico-calibracion {
+  max-width: 28rem;
+}
+
+.leyenda {
+  list-style: none;
+  padding: 0;
+}

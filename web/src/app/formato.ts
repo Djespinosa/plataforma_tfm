@@ -22,6 +22,12 @@ export function porcentaje1(p: number): string {
   return `${conComa(100 * p, 1)} %`;
 }
 
+/** Diferencia entre dos proporciones en puntos porcentuales, con su intervalo: «12,3 p. p. [4,1; 20,5]». */
+export function puntos(x: number, ic: [number, number] | null = null): string {
+  const texto = `${decimal(100 * x, 1)} p. p.`;
+  return ic ? `${texto} [${decimal(100 * ic[0], 1)}; ${decimal(100 * ic[1], 1)}]` : texto;
+}
+
 /** Decimal con coma y signo menos tipográfico: «−0,125». */
 export function decimal(x: number, decimales = 3): string {
   const texto = conComa(Math.abs(x), decimales);

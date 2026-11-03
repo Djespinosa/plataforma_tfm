@@ -131,3 +131,97 @@ export interface ExplicacionLocal {
   aviso_rendimiento: string;
   aviso_decision: string;
 }
+
+export interface FilaMetricas {
+  modelo: string;
+  papel: 'desplegado' | 'candidato' | 'referencia';
+  roc_auc_oof: number | null;
+  roc_auc_media: number | null;
+  roc_auc_desv: number | null;
+  pr_auc_oof: number | null;
+  brier_oof: number | null;
+  calibracion: string | null;
+}
+
+export interface PuntoCurva {
+  predicha: number;
+  observada: number;
+}
+
+export interface Subgrupo {
+  n: number;
+  /** Positivos del subgrupo (la clave es la de la API). */
+  retiros: number;
+  sensibilidad: number | null;
+  sensibilidad_ic95: [number, number] | null;
+  tasa_falsos_positivos: number | null;
+  tasa_falsos_positivos_ic95: [number, number] | null;
+  solo_descriptiva: boolean;
+}
+
+export interface AtributoEquidad {
+  subgrupos: Record<string, Subgrupo>;
+  diferencia_sensibilidad: number | null;
+  diferencia_sensibilidad_ic95: [number, number] | null;
+  diferencia_tasa_falsos_positivos: number | null;
+  diferencia_tasa_falsos_positivos_ic95: [number, number] | null;
+}
+
+/** Evaluación de un modelo (un momento) en GET /api/experimentos/{id}/evaluacion. */
+export interface EvaluacionModelo {
+  modelo_id: number;
+  momento: string | null;
+  n: number;
+  positivos: number;
+  candidatos: FilaMetricas[];
+  referencias: FilaMetricas[];
+  contraste: {
+    modelo_a: string;
+    modelo_b: string;
+    diferencia: number;
+    ic95_bootstrap: [number, number];
+    delong_p: number;
+    delong_p_holm: number;
+    lectura: string;
+    lectura_texto: string;
+    holm_sobre: number;
+  };
+  parsimonia: {
+    mejor: string;
+    margen: number;
+    candidatos: { modelo: string; roc_auc_oof: number; perdida: number; ic95_bootstrap: [number, number]; cumple: boolean }[];
+  };
+  desplegado: { modelo: string; mejor: string; limite_superior: number | null; motivo_texto: string };
+  punto_operacion: {
+    umbral: number;
+    sensibilidad: number;
+    precision: number | null;
+    tasa_alerta: number;
+    tasa_falsos_positivos: number;
+    /** [[VN, FP], [FN, VP]] */
+    matriz_confusion: [[number, number], [number, number]];
+    textos: { sensibilidad: string; precision: string; tasa_alerta: string };
+  };
+  calibracion: {
+    metodo: string | null;
+    brier_sin_calibrar: number | null;
+    brier_calibrado: number | null;
+    curva: { calibrada: PuntoCurva[]; sin_calibrar: PuntoCurva[] | null } | null;
+    texto: string;
+    motivo?: string;
+  };
+  equidad: { texto: string; atributos: Record<string, AtributoEquidad> } | null;
+  textos: { roc_auc: string; pr_auc: string };
+}
+
+/** GET /api/experimentos/{id}/evaluacion */
+export interface Evaluacion {
+  experimento: string;
+  origen: Origen;
+  fuente: 'validacion_cruzada';
+  aviso_fuente: string;
+  presupuesto: { modo: string; familias: string[]; n_trials_por_familia: number; apilamiento: boolean; n_bootstrap: number };
+  validacion: { tipo: string; k: number; semilla: number; columna_grupo: string | null; n_grupos?: number | null };
+  modelos: EvaluacionModelo[];
+  aviso_decision: string;
+}

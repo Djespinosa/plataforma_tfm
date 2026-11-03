@@ -1,0 +1,234 @@
+<h1 tabindex="-1">{{ t.evaluacion.titulo }}</h1>
+
+@if (error(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (respuesta(); as r) {
+  <dl class="datos">
+    <dt>{{ t.modelos.experimento }}</dt>
+    <dd>{{ r.experimento }} ({{ t.origenes[r.origen] }})</dd>
+  </dl>
+  <app-aviso><p>{{ r.aviso_fuente }}</p></app-aviso>
+  @if (demostracion()) {
+    <app-aviso tipo="cautela">
+      <p>{{ t.demostracion }}</p>
+      @for (a of experimento()?.configuracion?.avisos ?? []; track $index) {
+        <p>{{ a }}</p>
+      }
+    </app-aviso>
+  }
+
+  @if (r.modelos.length > 1) {
+    <div class="selector" role="group" [attr.aria-label]="t.evaluacion.elegirMomento">
+      @for (m of r.modelos; track m.modelo_id) {
+        <button type="button" class="secundario" [attr.aria-pressed]="m.modelo_id === elegido()?.modelo_id"
+                (click)="elegir(m.modelo_id)">
+          {{ m.momento ?? t.modelos.sinMomento }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (elegido(); as m) {
+    <section aria-labelledby="resumen-evaluacion">
+      <h2 id="resumen-evaluacion">{{ t.evaluacion.resumen }}@if (m.momento) { · {{ m.momento }}}</h2>
+
+      <h3>{{ t.evaluacion.desplegado }}</h3>
+      <p>{{ m.desplegado.motivo_texto }}</p>
+
+      <h3>{{ t.evaluacion.puntoOperacion }}</h3>
+      <p>{{ t.evaluacion.umbral }}: {{ porcentaje1(m.punto_operacion.umbral) }}</p>
+      <ul>
+        <li>{{ m.punto_operacion.textos.sensibilidad }}</li>
+        <li>{{ m.punto_operacion.textos.precision }}</li>
+        <li>{{ m.punto_operacion.textos.tasa_alerta }}</li>
+      </ul>
+
+      <h3>{{ t.evaluacion.ordenacion }}</h3>
+      @if (filaDesplegado(); as d) {
+        <p>{{ t.evaluacion.rocAuc }}: {{ opcional(d.roc_auc_oof) }}. {{ m.textos.roc_auc }}</p>
+      }
+      <p>{{ m.contraste.lectura_texto }}</p>
+
+      <h3>{{ t.evaluacion.calibracion }}</h3>
+      <p>{{ m.calibracion.texto }}</p>
+      @if (m.calibracion.curva; as curva) {
+        <app-grafico-calibracion [calibrada]="curva.calibrada" [sinCalibrar]="curva.sin_calibrar" />
+      } @else {
+        <app-aviso tipo="cautela"><p>{{ m.calibracion.motivo }}</p></app-aviso>
+      }
+    </section>
+
+    <details>
+      <summary>{{ t.detalleTecnico }}</summary>
+
+      <h3>{{ t.evaluacion.modelosComparados }}</h3>
+      <p>{{ t.evaluacion.casos }}: {{ miles(m.n) }} · {{ t.evaluacion.positivos }}: {{ miles(m.positivos) }}</p>
+      <p class="ayuda">{{ m.textos.pr_auc }}</p>
+      <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.evaluacion.modelosComparados">
+        <table>
+          <caption>{{ t.evaluacion.modelosComparados }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ t.modelos.familia }}</th>
+              <th scope="col">{{ t.evaluacion.papel }}</th>
+              <th scope="col" class="numero">{{ t.evaluacion.rocAuc }}</th>
+              <th scope="col" class="numero">{{ t.evaluacion.rocAucPliegues }}</th>
+              <th scope="col" class="numero">{{ t.evaluacion.prAuc }}</th>
+              <th scope="col" class="numero">{{ t.evaluacion.brier }}</th>
+              <th scope="col">{{ t.evaluacion.metodoCalibracion }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of [...m.candidatos, ...m.referencias]; track f.modelo + f.papel) {
+              <tr>
+                <th scope="row">{{ nombreModelo(f.modelo) }}</th>
+                <td>{{ f.modelo === m.desplegado.modelo ? t.evaluacion.papeles.desplegado : t.evaluacion.papeles[f.papel] }}</td>
+                <td class="numero">{{ opcional(f.roc_auc_oof) }}</td>
+                <td class="numero">{{ opcional(f.roc_auc_media) }} ± {{ opcional(f.roc_auc_desv) }}</td>
+                <td class="numero">{{ opcional(f.pr_auc_oof) }}</td>
+                <td class="numero">{{ opcional(f.brier_oof) }}</td>
+                <td>{{ f.calibracion ?? t.evaluacion.sinValor }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h3>{{ t.evaluacion.contraste }}</h3>
+      <dl class="datos">
+        <dt>{{ t.evaluacion.comparados }}</dt>
+        <dd>{{ nombreModelo(m.contraste.modelo_a) }} · {{ nombreModelo(m.contraste.modelo_b) }}</dd>
+        <dt>{{ t.evaluacion.diferencia }}</dt>
+        <dd>{{ decimal(m.contraste.diferencia, 4) }} {{ intervalo(m.contraste.ic95_bootstrap, 4) }}</dd>
+        <dt>{{ t.evaluacion.pDelong }}</dt>
+        <dd>{{ pValor(m.contraste.delong_p) }}</dd>
+        <dt>{{ t.evaluacion.pHolm }}</dt>
+        <dd>{{ pValor(m.contraste.delong_p_holm) }} ({{ t.evaluacion.holmSobre }} {{ m.contraste.holm_sobre }})</dd>
+      </dl>
+
+      <h3>{{ t.evaluacion.parsimonia }}</h3>
+      <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.evaluacion.parsimonia">
+        <table>
+          <caption>{{ t.evaluacion.parsimoniaTabla }} ({{ nombreModelo(m.parsimonia.mejor) }})</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ t.modelos.familia }}</th>
+              <th scope="col" class="numero">{{ t.evaluacion.rocAuc }}</th>
+              <th scope="col" class="numero">{{ t.evaluacion.perdida }}</th>
+              <th scope="col">{{ t.evaluacion.cumple }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of m.parsimonia.candidatos; track p.modelo) {
+              <tr>
+                <th scope="row">{{ nombreModelo(p.modelo) }}</th>
+                <td class="numero">{{ decimal(p.roc_auc_oof) }}</td>
+                <td class="numero">{{ decimal(p.perdida, 4) }} {{ intervalo(p.ic95_bootstrap, 4) }}</td>
+                <td>{{ p.cumple ? t.evaluacion.si : t.evaluacion.no }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h3>{{ t.evaluacion.matriz }}</h3>
+      @let mc = m.punto_operacion.matriz_confusion;
+      <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.evaluacion.matriz">
+        <table>
+          <caption>{{ t.evaluacion.matriz }} ({{ t.evaluacion.umbral }} {{ porcentaje1(m.punto_operacion.umbral) }})</caption>
+          <thead>
+            <tr>
+              <td></td>
+              <th scope="col" class="numero">{{ t.evaluacion.marcados }}</th>
+              <th scope="col" class="numero">{{ t.evaluacion.noMarcados }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">{{ t.evaluacion.positivosReales }}</th>
+              <td class="numero">{{ miles(mc[1][1]) }}</td>
+              <td class="numero">{{ miles(mc[1][0]) }}</td>
+            </tr>
+            <tr>
+              <th scope="row">{{ t.evaluacion.negativosReales }}</th>
+              <td class="numero">{{ miles(mc[0][1]) }}</td>
+              <td class="numero">{{ miles(mc[0][0]) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>{{ t.evaluacion.tasaFalsosPositivos }}: {{ porcentaje1(m.punto_operacion.tasa_falsos_positivos) }}</p>
+
+      <h3>{{ t.evaluacion.calibracion }}</h3>
+      <dl class="datos">
+        <dt>{{ t.evaluacion.metodoCalibracion }}</dt>
+        <dd>{{ m.calibracion.metodo ?? t.evaluacion.sinValor }}</dd>
+        <dt>{{ t.evaluacion.brierSinCalibrar }}</dt>
+        <dd>{{ opcional(m.calibracion.brier_sin_calibrar, 4) }}</dd>
+        <dt>{{ t.evaluacion.brierCalibrado }}</dt>
+        <dd>{{ opcional(m.calibracion.brier_calibrado, 4) }}</dd>
+      </dl>
+
+      @if (m.equidad; as eq) {
+        <h3>{{ t.evaluacion.equidad }}</h3>
+        <p>{{ eq.texto }}</p>
+        @for (a of eq.atributos | keyvalue; track a.key) {
+          <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="a.key">
+            <table>
+              <caption>{{ a.key }}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{{ t.evaluacion.subgrupo }}</th>
+                  <th scope="col" class="numero">{{ t.evaluacion.casos }}</th>
+                  <th scope="col" class="numero">{{ t.evaluacion.positivos }}</th>
+                  <th scope="col" class="numero">{{ t.evaluacion.sensibilidad }}</th>
+                  <th scope="col" class="numero">{{ t.evaluacion.tasaFalsosPositivos }}</th>
+                  <th scope="col">{{ t.evaluacion.nota }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of subgrupos(a.value); track s.nombre) {
+                  <tr>
+                    <th scope="row">{{ s.nombre }}</th>
+                    <td class="numero">{{ miles(s.n) }}</td>
+                    <td class="numero">{{ miles(s.retiros) }}</td>
+                    <td class="numero">{{ opcionalPct(s.sensibilidad) }} {{ intervaloPct(s.sensibilidad_ic95) }}</td>
+                    <td class="numero">
+                      {{ opcionalPct(s.tasa_falsos_positivos) }} {{ intervaloPct(s.tasa_falsos_positivos_ic95) }}
+                    </td>
+                    <td>{{ s.solo_descriptiva ? t.evaluacion.soloDescriptiva : '' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p>
+            {{ t.evaluacion.diferenciaSensibilidad }}:
+            {{ diferencia(a.value.diferencia_sensibilidad, a.value.diferencia_sensibilidad_ic95) }} ·
+            {{ t.evaluacion.diferenciaFalsosPositivos }}:
+            {{ diferencia(a.value.diferencia_tasa_falsos_positivos, a.value.diferencia_tasa_falsos_positivos_ic95) }}
+          </p>
+        }
+      }
+
+      <h3>{{ t.evaluacion.validacionPresupuesto }}</h3>
+      <dl class="datos">
+        <dt>{{ t.evaluacion.validacion }}</dt>
+        <dd>{{ validacion() }}@if (r.validacion.columna_grupo) { · {{ r.validacion.columna_grupo }}}</dd>
+        <dt>{{ t.evaluacion.presupuesto }}</dt>
+        <dd>
+          {{ r.presupuesto.n_trials_por_familia }} {{ t.evaluacion.ensayos }} · {{ r.presupuesto.n_bootstrap }}
+          {{ t.evaluacion.replicas }}
+        </dd>
+      </dl>
+    </details>
+
+    <p>
+      <a [routerLink]="['/modelos', m.modelo_id, 'prediccion']">{{ t.modelos.estimar }}</a> ·
+      <a [routerLink]="['/modelos', m.modelo_id, 'explicacion']">{{ t.modelos.verExplicacion }}</a>
+    </p>
+  }
+  <app-pie-decision [texto]="r.aviso_decision" />
+} @else {
+  <p role="status">{{ t.evaluacion.cargando }}</p>
+}
