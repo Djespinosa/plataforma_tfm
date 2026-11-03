@@ -73,6 +73,7 @@ def test_prediccion_lineal_igual_que_predecir_y_explicar(app, cliente, importado
         assert local["log_odds"] == esperada["log_odds"].iloc[fila - 1]
     assert {i["variable"]: i["valor"] for i in local["todas"]}["x2"] == "sin dato"  # fila 4: x2 vacío
     assert local["escala"] == "log-odds sin calibrar" and set(local["avisos"]) == {"escala", "causalidad", "decision"}
+    assert local["aviso_rendimiento"] == cuerpo["aviso_rendimiento"]
 
 
 def test_prediccion_rechaza_paquete_no_desplegado(app, cliente, importados):

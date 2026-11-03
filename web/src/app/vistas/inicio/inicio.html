@@ -1,0 +1,35 @@
+<h1 tabindex="-1">{{ t.inicio.titulo }}</h1>
+<p>{{ t.inicio.introduccion }}</p>
+
+<ul class="entradas">
+  <li>
+    <a class="entrada" routerLink="/modelos">{{ t.inicio.usarModelo }}</a>
+    <p>{{ t.inicio.usarModeloAyuda }}</p>
+  </li>
+  <li>
+    <a class="entrada" routerLink="/datos">{{ t.inicio.entrenar }}</a>
+    <p>{{ t.inicio.entrenarAyuda }}</p>
+  </li>
+</ul>
+
+<section aria-labelledby="estado-servidor">
+  <h2 id="estado-servidor">{{ t.inicio.estadoServidor }}</h2>
+  @if (error(); as e) {
+    <app-aviso tipo="error">
+      <p>{{ e.mensaje }}</p>
+    </app-aviso>
+  } @else if (estado(); as e) {
+    <dl class="datos">
+      <dt>{{ t.inicio.baseDatos }}</dt>
+      <dd>{{ e.motor_bd }}</dd>
+      <dt>{{ t.inicio.trabajador }}</dt>
+      <dd>{{ trabajador(e) }}</dd>
+      @if (e.commit) {
+        <dt>{{ t.inicio.version }}</dt>
+        <dd>{{ e.commit }}</dd>
+      }
+    </dl>
+  } @else {
+    <p role="status">{{ t.inicio.comprobando }}</p>
+  }
+</section>

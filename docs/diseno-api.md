@@ -391,7 +391,8 @@ hace la interfaz. `sugerencia` solo si `alerta`.
  "todas": [{"variable": "...", "valor": "...", "contribucion": 0.0}],
  "sin_contribucion": [{"variable": "antelacion_media", "motivo": "..."}],
  "hay_extremas": true,
- "avisos": {"escala": "...", "extrema": "...", "causalidad": "...", "decision": "..."}}
+ "avisos": {"escala": "...", "extrema": "...", "causalidad": "...", "decision": "..."},
+ "aviso_rendimiento": "...", "aviso_decision": "..."}
 ```
 
 - Top-5 por |φ| entre las variables con contribución, repartidas por signo (`guardarrailes-interfaz`); `todas` para la
@@ -419,8 +420,8 @@ Al implementar (incremento 5, §4.4 y §4.5):
 - `servicios.paquetes.cargar_paquete` comprueba el SHA-256 **antes** de `joblib.load` y después `desplegado is True`;
   caché `lru_cache(8)` por (ruta, SHA-256); los errores no se guardan en caché. La ruta de un paquete es absoluta o
   relativa a la raíz del repositorio.
-- D-4: la API no puede saber si un CSV es de demostración, así que `POST /predicciones` y `GET /predicciones/{lote}`
-  llevan siempre `aviso_rendimiento` («Estas estimaciones no miden el rendimiento del modelo. Si las filas formaron parte
+- D-4: la API no puede saber si un CSV es de demostración, así que `POST /predicciones`, `GET /predicciones/{lote}` y
+  (ajuste A-1 de docs/diseno-web.md, 2026-11-03) la explicación local llevan siempre `aviso_rendimiento` («Estas estimaciones no miden el rendimiento del modelo. Si las filas formaron parte
   de su entrenamiento, como los datos de demostración, están dentro de la muestra…»).
 - Explicación local: `todas` lleva también `extrema`; `avisos.extrema` solo si `hay_extremas`; `aviso_decision` también
   en el primer nivel, como en el resto de resultados. Explicación global sin filas de referencia: `variables` y `fuente`
@@ -969,3 +970,5 @@ importantes antes de la congelación).
 | Revisión del incremento 9 | CSV exportado: `identificador` sin neutralizar fórmulas de hoja de cálculo (`=…`); los avisos de las líneas de comentario llevan comas sin comillas y un lector sin comentarios las lee como filas; Excel con configuración regional española separa por «;»; un lote de 0 filas saldría sin cabecera; `test_rf09` solo comprueba que la segunda línea empiece por «# » |
 | Revisión de la evidencia D-3 | `scripts/evidencia_global_api.py`: no comprueba que ninguna variable nula esté en los top-10 (el `metodo` afirma que el top-10 no cambia al quitarlas); con empates (la OOF está redondeada a 4 decimales) el orden depende del de entrada y podría cambiar `entran`/`salen` (hoy no hay empates en las 11 primeras); «una RL» y «5 modelos de pliegue» escritos a mano sin comprobar; el JUnit es el de `ml/tests` y no el de `api/tests`, que ejercita el importador y la ruta; un `ErrorImportacion` de otro paquete sale con traza |
 | Revisión de la evidencia D-3 | `scripts/tests/test_evidencia_global_api.py`: `sin_nulas.spearman < 1` es una aserción débil y no hay prueba de que `identidad` aborte con un valor u orden distinto o con φ ≠ 0 en una variable sin contribución |
+| Diseño de la web (A-2 y limitaciones) | `GET /api/textos` y nombre llano de los modelos en las respuestas, para no copiar cuatro textos en `web/` (W-6); la clave JSON `retiros` de los subgrupos de equidad es terminología de OULAD (no visible; la web la muestra como «positivos») |
+| Revisión del incremento web I-0 | `web/src/styles.css`: los bordes de cautela y error se midieron sobre blanco (sobre sus fondos, 5,8:1 y 6,8:1; cumplen); faltan pruebas de vocabulario de todos los `NOMBRES_MODELOS` y del foco al navegar; `pruebas/vocabulario.ts` se compila con la aplicación; `toFixed` redondea las mitades exactas distinto que Python (0,125 → «0,13») |

@@ -171,4 +171,5 @@ def explicacion_local(lote_id: int, fila: int):
                     "sugerencia": textos.SUGERENCIA if prediccion.alerta else None,
                     "escala": textos.ESCALA, "valor_base": prediccion.base_log_odds, "log_odds": prediccion.log_odds,
                     "explicador": fila_explicada.explicador, **detalle, "avisos": avisos,
-                    "aviso_decision": textos.AVISO_DECISION})
+                    # La vista local se abre por URL sin el lote: lleva también el aviso de D-4 (diseno-web.md, A-1).
+                    "aviso_rendimiento": textos.AVISO_RENDIMIENTO, "aviso_decision": textos.AVISO_DECISION})

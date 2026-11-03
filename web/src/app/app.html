@@ -1,0 +1,8 @@
+<a class="saltar" href="#contenido" (click)="saltarAlContenido($event)">{{ t.aplicacion.saltar }}</a>
+<header class="cabecera">
+  <a class="marca" routerLink="/">{{ t.aplicacion.nombre }}</a>
+  <app-pasos [actual]="paso()" />
+</header>
+<main id="contenido">
+  <router-outlet />
+</main>

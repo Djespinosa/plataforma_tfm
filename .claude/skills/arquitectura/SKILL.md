@@ -121,3 +121,19 @@ cambiar, borrar, añadir ni traer modelos de un evaluado) y `conjunto_datos_inmu
 Flujo guiado de seis pasos: carga → configuración → entrenamiento → evaluación → predicción → explicación.
 Todo texto visible sigue la skill `guardarrailes-interfaz`. Accesibilidad WCAG 2.1 AA desde el principio
 (etiquetas, contraste, foco visible, sin información solo por color); la auditoría formal es de la Entrega 3.
+
+Diseño: `docs/diseno-web.md` (aprobado el 2026-11-03). Decisiones W-1 a W-12:
+- Angular 21.2.25 (CLI y build 21.2.27; la 22 exige Node ≥ 22.22.3), TypeScript 5.9.3, Vitest 4.1.12 + jsdom;
+  versiones exactas, `.npmrc` con `save-exact` y `package-lock.json` versionado.
+- *Standalone*, signals, *zoneless*; el contexto del flujo en la URL (sin almacén global); formularios reactivos solo en
+  la configuración.
+- CSS propio con elementos nativos (sin Angular Material); gráficos en SVG propio con tabla equivalente.
+- Proxy de desarrollo `/api` → 127.0.0.1:5000, sin CORS; descargas por enlace.
+- Textos propios solo en `web/src/app/textos.ts`; los textos de la API se muestran tal cual; cuatro copias literales de
+  `api/textos.py` con comentario de origen.
+- Sondeo del experimento cada 3 s mientras esté en cola o en curso.
+- Pruebas con Vitest (formato, errores, servicios, textos, vocabulario renderizado, lista, sondeo, configuración);
+  JUnit sin `hostname` al exportar.
+- Probabilidades extremas como «< 1 %» y «> 99 %», nunca «0 %» ni «100 %».
+- Capturas manuales a 1440 × 900, registradas con `{archivo, descripcion, commit, datos}`.
+- Nada de OULAD en `web/` (D10); ninguna petición fuera del equipo (sin CDN, fuentes ni analítica).
