@@ -1,0 +1,68 @@
+<h1 tabindex="-1">{{ t.explicacionGlobal.titulo }}</h1>
+
+@if (error(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (respuesta(); as r) {
+  @if (detalle(); as m) {
+    <dl class="datos">
+      <dt>{{ t.explicacionGlobal.modelo }}</dt>
+      <dd>{{ nombreModelo(m.familia) }} · {{ m.experimento_id }}@if (m.momento) { · {{ m.momento }}}</dd>
+      @if (r.fuente) {
+        <dt>{{ t.explicacionGlobal.fuente }}</dt>
+        <dd>{{ r.fuente }}</dd>
+      }
+    </dl>
+  }
+
+  @if (r.variables; as variables) {
+    <app-aviso><p>{{ r.avisos.escala }}</p></app-aviso>
+    <app-grafico-barras [barras]="barras()" [titulo]="t.explicacionGlobal.grafico"
+                        [descripcion]="t.explicacionGlobal.graficoDescripcion"
+                        [cabeceraEtiqueta]="t.explicacionGlobal.variable"
+                        [cabeceraValor]="t.explicacionGlobal.importancia" />
+
+    <details>
+      <summary>{{ t.detalleTecnico }}</summary>
+      <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.explicacionGlobal.tablaCompleta">
+        <table>
+          <caption>{{ t.explicacionGlobal.tablaCompleta }} ({{ r.escala }})</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="numero">{{ t.explicacionGlobal.posicion }}</th>
+              <th scope="col">{{ t.explicacionGlobal.variable }}</th>
+              <th scope="col" class="numero">{{ t.explicacionGlobal.importancia }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of variables; track v.variable; let i = $index) {
+              <tr>
+                <td class="numero">{{ i + 1 }}</td>
+                <th scope="row">{{ v.variable }}</th>
+                <td class="numero">{{ decimal(v.importancia_media_abs, 4) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  } @else {
+    <app-aviso tipo="cautela"><p>{{ r.motivo }}</p></app-aviso>
+  }
+
+  @if (r.sin_contribucion.length) {
+    <section aria-labelledby="sin-contribucion">
+      <h2 id="sin-contribucion">{{ t.explicacion.sinContribucion }}</h2>
+      <ul>
+        @for (s of r.sin_contribucion; track s.variable) {
+          <li>{{ s.variable }}: {{ s.motivo }}</li>
+        }
+      </ul>
+    </section>
+  }
+
+  <app-aviso><p>{{ r.avisos.causalidad }}</p></app-aviso>
+  <p><a [routerLink]="['/modelos', modelo(), 'prediccion']">{{ t.modelos.estimar }}</a></p>
+  <app-pie-decision [texto]="r.aviso_decision" />
+} @else {
+  <p role="status">{{ t.explicacionGlobal.cargando }}</p>
+}

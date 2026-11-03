@@ -285,3 +285,20 @@ th[aria-sort='descending'] button.orden::after {
   margin-top: 2rem;
   color: var(--texto-secundario);
 }
+
+/* Explicaciones */
+.grafico {
+  margin: 1rem 0;
+  max-width: 48rem;
+}
+
+.factores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 0 2rem;
+}
+
+.probabilidad {
+  font-size: 1.25rem;
+  font-weight: 700;
+}

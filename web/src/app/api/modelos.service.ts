@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Modelo, ModeloDetalle } from './tipos';
+import { ExplicacionGlobal, Modelo, ModeloDetalle } from './tipos';
 
 @Injectable({ providedIn: 'root' })
 export class ModelosService {
@@ -14,5 +14,9 @@ export class ModelosService {
 
   detalle(id: number): Observable<ModeloDetalle> {
     return this.http.get<ModeloDetalle>(`/api/modelos/${id}`);
+  }
+
+  explicacionGlobal(id: number): Observable<ExplicacionGlobal> {
+    return this.http.get<ExplicacionGlobal>(`/api/modelos/${id}/explicacion-global`);
   }
 }

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Lote, LoteCreado } from './tipos';
+import { ExplicacionLocal, Lote, LoteCreado } from './tipos';
 
 @Injectable({ providedIn: 'root' })
 export class PrediccionesService {
@@ -18,5 +18,9 @@ export class PrediccionesService {
 
   lote(id: number): Observable<Lote> {
     return this.http.get<Lote>(`/api/predicciones/${id}`);
+  }
+
+  explicacionLocal(lote: number, fila: number): Observable<ExplicacionLocal> {
+    return this.http.get<ExplicacionLocal>(`/api/predicciones/${lote}/filas/${fila}/explicacion`);
   }
 }

@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 
 import { TEXTOS, tituloRuta } from './textos';
+import { ExplicacionGlobal } from './vistas/explicacion-global/explicacion-global';
+import { ExplicacionLocal } from './vistas/explicacion-local/explicacion-local';
 import { Inicio } from './vistas/inicio/inicio';
 import { Lote } from './vistas/lote/lote';
 import { Modelos } from './vistas/modelos/modelos';
@@ -18,5 +20,17 @@ export const routes: Routes = [
     data: { paso: 5 },
   },
   { path: 'predicciones/:lote', component: Lote, title: tituloRuta(TEXTOS.lote.titulo), data: { paso: 5 } },
+  {
+    path: 'modelos/:modelo/explicacion',
+    component: ExplicacionGlobal,
+    title: tituloRuta(TEXTOS.explicacionGlobal.titulo),
+    data: { paso: 6 },
+  },
+  {
+    path: 'predicciones/:lote/filas/:fila',
+    component: ExplicacionLocal,
+    title: tituloRuta(TEXTOS.explicacionLocal.titulo),
+    data: { paso: 6 },
+  },
   { path: '**', component: NoEncontrada, title: tituloRuta(TEXTOS.noEncontrada.titulo) },
 ];

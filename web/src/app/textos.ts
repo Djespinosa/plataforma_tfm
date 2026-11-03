@@ -120,6 +120,46 @@ export const TEXTOS = {
     cargando: 'Cargando el lote…',
     sinFilas: 'Ningún caso cumple los filtros.',
   },
+  detalleTecnico: 'Ver el detalle técnico',
+  grafico: { verTabla: 'Ver los datos del gráfico en una tabla' },
+  explicacion: { sinContribucion: 'Variables que no intervienen en las estimaciones' },
+  explicacionGlobal: {
+    titulo: 'Variables que más contribuyen a las estimaciones del modelo',
+    modelo: 'Modelo',
+    fuente: 'Calculado sobre',
+    grafico: 'Contribución media de cada variable (las 15 mayores)',
+    graficoDescripcion:
+      'Barras horizontales: cuanto más larga la barra, más contribuye en promedio la variable a las estimaciones del ' +
+      'modelo, hacia arriba o hacia abajo.',
+    variable: 'Variable',
+    importancia: 'Contribución media (valor absoluto)',
+    tablaCompleta: 'Todas las variables, de mayor a menor contribución media',
+    posicion: 'Posición',
+    cargando: 'Cargando la explicación global…',
+  },
+  explicacionLocal: {
+    titulo: 'Explicación de una estimación',
+    estimacion: 'Estimación',
+    fila: 'Fila del archivo',
+    factores: 'Factores que más contribuyen a esta estimación',
+    aumentan: 'Aumentan la estimación',
+    reducen: 'Reducen la estimación',
+    extrema: '(inusualmente grande)',
+    ninguna: 'Ninguna entre las cinco de mayor contribución.',
+    grafico: 'Contribución de cada factor a esta estimación',
+    graficoDescripcion:
+      'Barras horizontales a partir de un eje central: hacia la derecha (relleno liso) las variables que aumentan la ' +
+      'estimación y hacia la izquierda (relleno rayado) las que la reducen; el valor con signo va junto a cada barra.',
+    variableValor: 'Variable y valor',
+    contribucion: 'Contribución',
+    escala: 'Escala de las contribuciones',
+    valorBase: 'Valor base',
+    logOdds: 'Salida del modelo antes de calibrar',
+    todas: 'Contribución de todas las variables',
+    valor: 'Valor',
+    volver: 'Volver a la lista del lote',
+    cargando: 'Calculando la explicación…',
+  },
   noEncontrada: {
     titulo: 'Página no encontrada',
     texto: 'La dirección no corresponde a ninguna vista de la plataforma.',
@@ -147,6 +187,14 @@ export function nombreModelo(modelo: string): string {
 
 export function textoMarcados(marcados: string, total: string, porcentaje: string): string {
   return `Se marcan para seguimiento ${marcados} de ${total} casos (${porcentaje}).`;
+}
+
+export function textoProbabilidad(porcentaje: string): string {
+  return `Probabilidad estimada por el modelo: ${porcentaje}`;
+}
+
+export function textoResto(variables: number, suma: string): string {
+  return `Otras ${variables} variables suman ${suma} en la escala del modelo.`;
 }
 
 export function textoMostrando(desde: number, hasta: number, total: number): string {

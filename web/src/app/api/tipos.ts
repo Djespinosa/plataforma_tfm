@@ -83,3 +83,51 @@ export interface Lote {
   aviso_rendimiento: string;
   aviso_decision: string;
 }
+
+export interface SinContribucion {
+  variable: string;
+  motivo: string;
+}
+
+/** GET /api/modelos/{id}/explicacion-global */
+export interface ExplicacionGlobal {
+  modelo_id: number;
+  explicador: Explicador;
+  escala: string;
+  fuente: string | null;
+  /** null si el modelo no tiene filas de referencia (entonces llega motivo). */
+  variables: { variable: string; importancia_media_abs: number }[] | null;
+  sin_contribucion: SinContribucion[];
+  motivo?: string;
+  avisos: { escala: string; causalidad: string; decision: string };
+  aviso_decision: string;
+}
+
+export interface Contribucion {
+  variable: string;
+  valor: string;
+  contribucion: number;
+  extrema: boolean;
+}
+
+/** GET /api/predicciones/{lote}/filas/{fila}/explicacion */
+export interface ExplicacionLocal {
+  fila: number;
+  identificador: string | null;
+  probabilidad: number;
+  alerta: boolean;
+  sugerencia: string | null;
+  escala: string;
+  valor_base: number;
+  log_odds: number;
+  explicador: Explicador;
+  aumentan: Contribucion[];
+  reducen: Contribucion[];
+  resto: { n_variables: number; suma: number };
+  todas: Contribucion[];
+  sin_contribucion: SinContribucion[];
+  hay_extremas: boolean;
+  avisos: { escala: string; causalidad: string; decision: string; extrema?: string };
+  aviso_rendimiento: string;
+  aviso_decision: string;
+}

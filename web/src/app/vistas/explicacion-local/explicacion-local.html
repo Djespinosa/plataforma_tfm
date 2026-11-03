@@ -1,0 +1,121 @@
+<h1 tabindex="-1">{{ t.explicacionLocal.titulo }}</h1>
+
+@if (error(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (respuesta(); as r) {
+  <app-aviso tipo="cautela"><p>{{ r.aviso_rendimiento }}</p></app-aviso>
+
+  <section aria-labelledby="estimacion">
+    <h2 id="estimacion">{{ t.explicacionLocal.estimacion }}</h2>
+    <dl class="datos">
+      <dt>{{ t.explicacionLocal.fila }}</dt>
+      <dd>{{ r.fila }}@if (r.identificador) { · {{ r.identificador }}}</dd>
+    </dl>
+    <p class="probabilidad">{{ probabilidad() }}</p>
+    @if (r.alerta) {
+      <p><span class="marcado"><span aria-hidden="true">⚑</span> {{ t.lote.marcado }}</span> {{ r.sugerencia }}</p>
+    }
+  </section>
+
+  <section aria-labelledby="factores">
+    <h2 id="factores">{{ t.explicacionLocal.factores }}</h2>
+    <div class="factores">
+      <div>
+        <h3>{{ t.explicacionLocal.aumentan }}</h3>
+        @if (r.aumentan.length) {
+          <ul>
+            @for (c of r.aumentan; track c.variable) {
+              <li>
+                {{ c.variable }}: {{ c.valor }} ({{ contribucion(c.contribucion) }})
+                @if (c.extrema) { <strong>{{ t.explicacionLocal.extrema }}</strong> }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>{{ t.explicacionLocal.ninguna }}</p>
+        }
+      </div>
+      <div>
+        <h3>{{ t.explicacionLocal.reducen }}</h3>
+        @if (r.reducen.length) {
+          <ul>
+            @for (c of r.reducen; track c.variable) {
+              <li>
+                {{ c.variable }}: {{ c.valor }} ({{ contribucion(c.contribucion) }})
+                @if (c.extrema) { <strong>{{ t.explicacionLocal.extrema }}</strong> }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>{{ t.explicacionLocal.ninguna }}</p>
+        }
+      </div>
+    </div>
+    @if (resto()) {
+      <p>{{ resto() }}</p>
+    }
+    @if (barras().length) {
+      <app-grafico-barras [barras]="barras()" [conSigno]="true" [titulo]="t.explicacionLocal.grafico"
+                          [descripcion]="t.explicacionLocal.graficoDescripcion"
+                          [cabeceraEtiqueta]="t.explicacionLocal.variableValor"
+                          [cabeceraValor]="t.explicacionLocal.contribucion" />
+    }
+    @if (r.avisos.extrema) {
+      <app-aviso tipo="cautela"><p>{{ r.avisos.extrema }}</p></app-aviso>
+    }
+    <app-aviso><p>{{ r.avisos.escala }}</p></app-aviso>
+    <app-aviso><p>{{ r.avisos.causalidad }}</p></app-aviso>
+  </section>
+
+  @if (r.sin_contribucion.length) {
+    <section aria-labelledby="sin-contribucion">
+      <h2 id="sin-contribucion">{{ t.explicacion.sinContribucion }}</h2>
+      <ul>
+        @for (s of r.sin_contribucion; track s.variable) {
+          <li>{{ s.variable }}: {{ s.motivo }}</li>
+        }
+      </ul>
+    </section>
+  }
+
+  <details>
+    <summary>{{ t.detalleTecnico }}</summary>
+    <dl class="datos">
+      <dt>{{ t.explicacionLocal.escala }}</dt>
+      <dd>{{ r.escala }}</dd>
+      <dt>{{ t.explicacionLocal.valorBase }}</dt>
+      <dd>{{ decimal(r.valor_base) }}</dd>
+      <dt>{{ t.explicacionLocal.logOdds }}</dt>
+      <dd>{{ decimal(r.log_odds) }}</dd>
+    </dl>
+    <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.explicacionLocal.todas">
+      <table>
+        <caption>{{ t.explicacionLocal.todas }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ t.explicacionGlobal.variable }}</th>
+            <th scope="col">{{ t.explicacionLocal.valor }}</th>
+            <th scope="col" class="numero">{{ t.explicacionLocal.contribucion }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of r.todas; track c.variable) {
+            <tr>
+              <th scope="row">{{ c.variable }}</th>
+              <td>{{ c.valor }}</td>
+              <td class="numero">
+                {{ contribucion(c.contribucion, 4) }}
+                @if (c.extrema) { {{ t.explicacionLocal.extrema }} }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <p><a [routerLink]="['/predicciones', lote()]">{{ t.explicacionLocal.volver }}</a></p>
+  <app-pie-decision [texto]="r.aviso_decision" />
+} @else {
+  <p role="status">{{ t.explicacionLocal.cargando }}</p>
+}
