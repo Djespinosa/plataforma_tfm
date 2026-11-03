@@ -24,6 +24,11 @@ Destinatario: agente `backend` (y `tester` para el §10). Resumen de decisiones 
 - **(c)** Congelación de la plataforma el **06/11/2026**. Si hay retraso, se recorta en este orden: RF-09, RF-08, RF-07.
   Las capturas del flujo con exp-2026-10-29-03 tienen prioridad sobre el entrenamiento web completo.
 
+Evidencia D-3 (2026-11-03): `python -m scripts.evidencia_global_api` (fuera de `api/` y de `ml/`: cruza las dos capas
+con datos de OULAD, D10) exporta un experimento `tipo: "comparacion"`,
+`analisis: "explicacion_global_api"` (esquema en `evidencias/CONTRATO.md`) con la identidad exacta y la comparación
+descriptiva con 29-02, Spearman con todas las variables y sin las nulas de 29-05 (decisión del estudiante, 2026-11-03).
+
 Nota sobre D-3: la explicación global de 29-03 sale del modelo final (entrenado con las 15 presentaciones) sobre sus
 filas de entrenamiento; 29-02/05 promedian SHAP *out-of-fold* de 5 modelos de pliegue. No son el mismo estimador y el
 orden completo no coincide (comprobado el 2026-10-30: Spearman 0,943-0,975 y solapamiento del top-10 de 0,9-1,0 con
@@ -962,3 +967,5 @@ importantes antes de la congelación).
 | Revisión del incremento 8 (2.ª) | `exportar_pruebas.py`: los tres `shutil.move` van uno tras otro; si falla uno a mitad (bloqueo de OneDrive), quedan archivos sin entrada en el manifest (mover `_pruebas.xml` el último) |
 | Revisión del incremento 9 | Evaluación única: ninguna prueba lanza dos peticiones simultáneas (la serialización con `FOR UPDATE` que afirma el §4.7 no está probada) y el segundo 409 de `test_rf04` no comprueba el mensaje; cualquier `IntegrityError` (también de un disparador, o la carrera en SQLite) responde «Estos datos ya se evaluaron…»; un `prueba.parquet` dañado o un CSV del conjunto borrado dan 500 en vez de 409 |
 | Revisión del incremento 9 | CSV exportado: `identificador` sin neutralizar fórmulas de hoja de cálculo (`=…`); los avisos de las líneas de comentario llevan comas sin comillas y un lector sin comentarios las lee como filas; Excel con configuración regional española separa por «;»; un lote de 0 filas saldría sin cabecera; `test_rf09` solo comprueba que la segunda línea empiece por «# » |
+| Revisión de la evidencia D-3 | `scripts/evidencia_global_api.py`: no comprueba que ninguna variable nula esté en los top-10 (el `metodo` afirma que el top-10 no cambia al quitarlas); con empates (la OOF está redondeada a 4 decimales) el orden depende del de entrada y podría cambiar `entran`/`salen` (hoy no hay empates en las 11 primeras); «una RL» y «5 modelos de pliegue» escritos a mano sin comprobar; el JUnit es el de `ml/tests` y no el de `api/tests`, que ejercita el importador y la ruta; un `ErrorImportacion` de otro paquete sale con traza |
+| Revisión de la evidencia D-3 | `scripts/tests/test_evidencia_global_api.py`: `sin_nulas.spearman < 1` es una aserción débil y no hay prueba de que `identidad` aborte con un valor u orden distinto o con φ ≠ 0 en una variable sin contribución |

@@ -17,6 +17,9 @@ web/ (Angular)  →  api/ (Flask + PostgreSQL)  →  ml/ (núcleo ML, Python pur
 - `web/` solo habla con `api/` por HTTP/JSON.
 - **D10:** la plataforma recibe una tabla genérica (el usuario elige objetivo y columnas ignoradas). Lo específico de
   OULAD (cortes, población, variables del aula virtual) vive en scripts de `ml/` y nunca en `api/` ni en `web/`.
+- `scripts/`: scripts de evidencias que cruzan `api/` y `ml/` con datos de OULAD (p. ej. `evidencia_global_api.py`,
+  matiz D-3). Usan la API y `ml/`, pero ni `api/` ni `ml/` los importan. Se ejecutan con `python -m scripts.<nombre>`
+  desde la raíz; sus pruebas, en `scripts/tests/`.
 
 ## Estructura del repositorio
 

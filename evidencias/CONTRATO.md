@@ -204,6 +204,16 @@ sensibilidad_en_entrenamiento, tasa_alerta_en_entrenamiento, lectura, sensibilid
 aplicado a sus propias filas de entrenamiento frente al punto de operación *out-of-fold* del que salió el umbral. Es un
 diagnóstico de la aproximación del umbral transferido, dentro de la muestra y sesgado: no es rendimiento.
 
+Con `analisis: "explicacion_global_api"` (matiz D-3 del bloque E, `scripts/evidencia_global_api.py`), sin reentrenar: los
+paquetes desplegados del modelo final importados con el importador de la API en SQLite en memoria. `experimentos` =
+[modelo final, experimento `shap`, análisis de estabilidad], `metodo` (texto: `identidad`, `comparacion`), `lectura`,
+`modelos_sha256` y `pruebas` (JUnit de `ml/tests`). Por momento `{semana, modelo, paquete, fuente_api, identidad,
+comparacion_oof}`: `identidad` = `{identica, variables, sin_contribucion, n_filas, referencia_sha256}` (solo se exporta si la
+explicación global de la API es exactamente la media de |SHAP| de `modelo_final.predecir_y_explicar` sobre las mismas
+filas de referencia, y si estas son exactamente las de entrenamiento que reconstruye `experimento.cargar_entrenamiento`); `comparacion_oof` = `{todas: {variables, spearman}, sin_nulas: {variables, spearman}, variables_nulas,
+top10: {solape, entran, salen, cambian_posicion: [{variable, posicion_api, posicion_oof}]}}`, descriptiva y sin umbral
+(modelo final frente a la media *out-of-fold* de 5 modelos de pliegue: no son el mismo estimador).
+
 Con `analisis: "no_regresion"` (`ml/no_regresion.py`, docs/diseno-api.md §6.2), sin `contrastes` ni métricas nuevas:
 el mismo ensayo de `experimento.py` en un commit base (git worktree temporal con una copia de `data/`) y en el commit nuevo.
 `commit_base`, `commit_nuevo`, `arbol_de_trabajo` (`true` solo en ensayos con cambios sin confirmar; nunca en una
