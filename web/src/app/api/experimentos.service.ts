@@ -6,6 +6,7 @@ import {
   CuerpoExperimento,
   Evaluacion,
   ExperimentoDetalle,
+  EvaluacionPrueba,
   ExperimentoHistorial,
   ValidacionExperimento,
 } from './tipos';
@@ -25,6 +26,13 @@ export class ExperimentosService {
   /** POST /api/experimentos → 202 con el experimento en cola. */
   crear(cuerpo: CuerpoExperimento): Observable<ExperimentoDetalle> {
     return this.http.post<ExperimentoDetalle>('/api/experimentos', cuerpo);
+  }
+
+  /** POST /api/experimentos/{id}/evaluacion-prueba con la confirmación explícita (§4.7). */
+  evaluarPrueba(id: string): Observable<EvaluacionPrueba> {
+    return this.http.post<EvaluacionPrueba>(`/api/experimentos/${encodeURIComponent(id)}/evaluacion-prueba`, {
+      confirmar: true,
+    });
   }
 
   /** POST /api/experimentos/{id}/reintentar → 202 con el experimento nuevo. */

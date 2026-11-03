@@ -109,6 +109,11 @@ describe('vocabulario renderizado', () => {
 
   it('no encontrada', async () => comprobar(await renderizar(NoEncontrada)));
 
+  it('evaluación con la evaluación única ya hecha', async () => {
+    comprobar(await renderizar(Evaluacion, { id: 'exp-1' },
+      { ...RESPUESTAS, '/api/experimentos/exp-1': { ...F.EXPERIMENTO, evaluacion_prueba: F.EVALUACION_PRUEBA } }));
+  });
+
   it('seguimiento fallido y sin respuesta', async () => {
     comprobar(await renderizar(Seguimiento, { id: 'exp-1' },
       { ...RESPUESTAS, '/api/experimentos/exp-1': F.EXPERIMENTO_FALLIDO }));

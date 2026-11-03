@@ -228,6 +228,50 @@
       <a [routerLink]="['/modelos', m.modelo_id, 'explicacion']">{{ t.modelos.verExplicacion }}</a>
     </p>
   }
+  @if (prueba() || puedeEvaluarPrueba()) {
+    <section aria-labelledby="evaluacion-prueba">
+      <h2 id="evaluacion-prueba" tabindex="-1">{{ t.evaluacionPrueba.titulo }}</h2>
+      @if (prueba(); as p) {
+        <app-aviso><p>{{ p.aviso_fuente }}</p></app-aviso>
+        <dl class="datos">
+          <dt>{{ t.evaluacionPrueba.fecha }}</dt>
+          <dd>{{ fecha(p.fecha) }}</dd>
+          <dt>{{ t.evaluacionPrueba.casos }}</dt>
+          <dd>{{ miles(p.n) }} · {{ t.evaluacionPrueba.positivos }}: {{ miles(p.positivos) }}</dd>
+          <dt>{{ t.evaluacionPrueba.umbral }}</dt>
+          <dd>{{ porcentaje1(p.punto_operacion.umbral) }}</dd>
+        </dl>
+        <ul>
+          <li>{{ p.punto_operacion.textos.sensibilidad }}</li>
+          <li>{{ p.punto_operacion.textos.precision }}</li>
+          <li>{{ p.punto_operacion.textos.tasa_alerta }}</li>
+        </ul>
+        <p>{{ t.evaluacionPrueba.rocAuc }}: {{ decimal(p.roc_auc) }}. {{ p.textos.roc_auc }}</p>
+        <p>{{ t.evaluacionPrueba.prAuc }}: {{ decimal(p.pr_auc) }}. {{ p.textos.pr_auc }}</p>
+        <p>
+          {{ t.evaluacionPrueba.brier }}: {{ decimal(p.brier, 4) }} ·
+          {{ t.evaluacionPrueba.tasaFalsosPositivos }}: {{ porcentaje1(p.punto_operacion.tasa_falsos_positivos) }}
+        </p>
+      } @else {
+        <p>{{ t.evaluacionPrueba.introduccion }}</p>
+        <app-aviso tipo="cautela"><p>{{ t.apiCopias.textoPrevioPrueba }}</p></app-aviso>
+        <p>
+          <label>
+            <input type="checkbox" [checked]="confirmado()" (change)="confirmado.set($any($event.target).checked)" />
+            {{ t.evaluacionPrueba.confirmar }}
+          </label>
+        </p>
+        @if (errorPrueba(); as e) {
+          <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+        }
+        <p>
+          <button type="button" [disabled]="!confirmado() || evaluandoPrueba()" (click)="evaluarPrueba()">
+            {{ evaluandoPrueba() ? t.evaluacionPrueba.evaluando : t.evaluacionPrueba.evaluar }}
+          </button>
+        </p>
+      }
+    </section>
+  }
   <app-pie-decision [texto]="r.aviso_decision" />
 } @else {
   <p role="status">{{ t.evaluacion.cargando }}</p>

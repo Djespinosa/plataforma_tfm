@@ -108,6 +108,32 @@ export interface ExperimentoDetalle {
   reintento_de: string | null;
   /** Solo en los entrenados en la plataforma y completados (los importados traen `procedencia`). */
   reproducibilidad: Reproducibilidad | null;
+  /** null si no se ha hecho (§4.7). */
+  evaluacion_prueba: EvaluacionPrueba | null;
+}
+
+/** Evaluación única en la cohorte de prueba (POST …/evaluacion-prueba → 201, y en el detalle del experimento). */
+export interface EvaluacionPrueba {
+  fecha: string;
+  modelo_id: number;
+  n: number;
+  positivos: number;
+  roc_auc: number;
+  pr_auc: number;
+  brier: number;
+  punto_operacion: {
+    umbral: number;
+    sensibilidad: number;
+    precision: number | null;
+    tasa_alerta: number;
+    tasa_falsos_positivos: number;
+    matriz_confusion: [[number, number], [number, number]];
+    textos: { sensibilidad: string; precision: string; tasa_alerta: string };
+  };
+  fuente: 'cohorte_prueba';
+  aviso_fuente: string;
+  textos: { roc_auc: string; pr_auc: string };
+  aviso_decision: string;
 }
 
 export interface Reproducibilidad {

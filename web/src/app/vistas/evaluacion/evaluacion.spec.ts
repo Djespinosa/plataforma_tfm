@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
-import { Evaluacion as Respuesta, EvaluacionModelo, ExperimentoDetalle } from '../../api/tipos';
+import { Evaluacion as Respuesta, EvaluacionModelo, EvaluacionPrueba, ExperimentoDetalle } from '../../api/tipos';
 import { TEXTOS } from '../../textos';
 import { Evaluacion } from './evaluacion';
 
@@ -67,7 +67,7 @@ const RESPUESTA: Respuesta = {
 const DETALLE = { id: 'exp-1', origen: 'importado', estado: 'completado', descripcion: null,
   configuracion: { presupuesto: { modo: 'completo' } }, modelos: [] } as Partial<ExperimentoDetalle> as ExperimentoDetalle;
 
-async function renderizar(elegido?: string, error = false) {
+async function renderizar(elegido?: string, error = false, detalle: ExperimentoDetalle = DETALLE) {
   TestBed.configureTestingModule({
     imports: [Evaluacion],
     providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
@@ -83,10 +83,28 @@ async function renderizar(elegido?: string, error = false) {
     expect(http.expectOne('/api/experimentos/exp-1').cancelled).toBe(true); // forkJoin cancela la otra petición
   } else {
     http.expectOne('/api/experimentos/exp-1/evaluacion').flush(RESPUESTA);
-    http.expectOne('/api/experimentos/exp-1').flush(DETALLE);
+    http.expectOne('/api/experimentos/exp-1').flush(detalle);
   }
   await fixture.whenStable();
   return fixture.nativeElement as HTMLElement;
+}
+
+/** Experimento entrenado en la plataforma con cohorte de prueba reservada (datos sintéticos). */
+const WEB = { ...DETALLE, origen: 'web', evaluacion_prueba: null,
+  configuracion: { presupuesto: { modo: 'completo' }, cohorte_prueba: { modo: 'aleatoria', filas: 20 } },
+} as ExperimentoDetalle;
+
+const PRUEBA: EvaluacionPrueba = {
+  fecha: '2026-11-03T10:00:00+00:00', modelo_id: 1, n: 200, positivos: 40, roc_auc: 0.71, pr_auc: 0.33, brier: 0.15,
+  punto_operacion: { umbral: 0.15, sensibilidad: 0.7, precision: 0.3, tasa_alerta: 0.45, tasa_falsos_positivos: 0.4,
+    matriz_confusion: [[96, 64], [12, 28]],
+    textos: { sensibilidad: 'prueba: sensibilidad', precision: 'prueba: precisión', tasa_alerta: 'prueba: tasa' } },
+  fuente: 'cohorte_prueba', aviso_fuente: 'aviso de la fuente de prueba',
+  textos: { roc_auc: 'prueba: ROC', pr_auc: 'prueba: PR' }, aviso_decision: 'aviso de decisión',
+};
+
+function botonPrueba(html: HTMLElement) {
+  return [...html.querySelectorAll('button')].find((b) => b.textContent?.includes(TEXTOS.evaluacionPrueba.evaluar));
 }
 
 describe('Evaluacion', () => {
@@ -139,5 +157,55 @@ describe('Evaluacion', () => {
   it('un error de la API se muestra tal cual', async () => {
     const html = await renderizar(undefined, true);
     expect(html.querySelector('[role="alert"]')?.textContent).toContain('texto de la API: no terminado');
+  });
+
+  it('evaluación única: nunca en los importados', async () => {
+    const html = await renderizar();
+    expect(html.textContent).not.toContain(TEXTOS.evaluacionPrueba.titulo);
+  });
+
+  it('evaluación única: texto previo, botón solo con la casilla, una petición y después solo lectura', async () => {
+    const html = await renderizar(undefined, false, WEB);
+    expect(html.textContent).toContain(TEXTOS.apiCopias.textoPrevioPrueba);
+    const boton = botonPrueba(html)!;
+    expect(boton.disabled).toBe(true);
+    html.querySelector<HTMLInputElement>('section[aria-labelledby="evaluacion-prueba"] input[type="checkbox"]')!.click();
+    await new Promise((r) => setTimeout(r));
+    expect(boton.disabled).toBe(false);
+    boton.click();
+    boton.click(); // un segundo clic no envía otra petición
+    const http = TestBed.inject(HttpTestingController);
+    const peticion = http.expectOne('/api/experimentos/exp-1/evaluacion-prueba');
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({ confirmar: true });
+    peticion.flush(PRUEBA, { status: 201, statusText: 'Created' });
+    await new Promise((r) => setTimeout(r));
+    expect(document.activeElement?.id).toBe('evaluacion-prueba');
+    const texto = (html.textContent ?? '').replace(/\s+/g, ' ');
+    for (const t of ['aviso de la fuente de prueba', 'prueba: sensibilidad', 'prueba: ROC', 'prueba: PR', '0,710', '0,1500']) {
+      expect(texto).toContain(t);
+    }
+    expect(botonPrueba(html)).toBeUndefined();
+    expect(html.querySelector('section[aria-labelledby="evaluacion-prueba"] input')).toBeNull();
+  });
+
+  it('evaluación única: un 409 de la API se muestra tal cual y se puede volver a intentar', async () => {
+    const html = await renderizar(undefined, false, WEB);
+    html.querySelector<HTMLInputElement>('section[aria-labelledby="evaluacion-prueba"] input[type="checkbox"]')!.click();
+    await new Promise((r) => setTimeout(r));
+    botonPrueba(html)!.click();
+    TestBed.inject(HttpTestingController).expectOne('/api/experimentos/exp-1/evaluacion-prueba').flush(
+      { error: 'La evaluación en la cohorte de prueba ya se hizo (03/11/2026 10:00 UTC); se usa una sola vez.' },
+      { status: 409, statusText: 'Conflict' });
+    await new Promise((r) => setTimeout(r));
+    expect(html.querySelector('section[aria-labelledby="evaluacion-prueba"] [role="alert"]')?.textContent)
+      .toContain('ya se hizo (03/11/2026 10:00 UTC)');
+    expect(botonPrueba(html)!.disabled).toBe(false);
+  });
+
+  it('evaluación única ya hecha: solo lectura desde el detalle del experimento', async () => {
+    const html = await renderizar(undefined, false, { ...WEB, evaluacion_prueba: PRUEBA });
+    expect(html.textContent).toContain('aviso de la fuente de prueba');
+    expect(botonPrueba(html)).toBeUndefined();
   });
 });

@@ -382,6 +382,23 @@ export const TEXTOS = {
     sinValor: 'no aplica',
     cargando: 'Cargando la evaluación…',
   },
+  evaluacionPrueba: {
+    titulo: 'Evaluación en la cohorte de prueba',
+    introduccion:
+      'Las métricas anteriores salen de la validación cruzada. La cohorte de prueba, apartada antes de entrenar, ' +
+      'permite medir una sola vez el modelo desplegado en datos que no ha visto.',
+    confirmar: 'He leído que esta evaluación se hace una sola vez',
+    evaluar: 'Evaluar en la cohorte de prueba',
+    evaluando: 'Evaluando…',
+    fecha: 'Hecha el',
+    casos: 'Casos',
+    positivos: 'Positivos',
+    rocAuc: 'ROC-AUC',
+    prAuc: 'PR-AUC',
+    brier: 'Brier',
+    umbral: 'Umbral de alerta (el mismo de la validación)',
+    tasaFalsosPositivos: 'Tasa de falsos positivos',
+  },
   noEncontrada: {
     titulo: 'Página no encontrada',
     texto: 'La dirección no corresponde a ninguna vista de la plataforma.',

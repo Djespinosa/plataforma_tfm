@@ -8,6 +8,7 @@ import {
   Estado,
   Evaluacion,
   EvaluacionModelo,
+  EvaluacionPrueba,
   ExperimentoDetalle,
   ExperimentoHistorial,
   ExplicacionGlobal,
@@ -31,11 +32,19 @@ export const MODELO_DETALLE: ModeloDetalle = { ...MODELO, columnas: { numericas:
 
 export const EXPERIMENTO: ExperimentoDetalle = {
   id: 'exp-1', origen: 'web', estado: 'completado', descripcion: 'nota', etapa: null,
-  configuracion: { presupuesto: { modo: 'demostracion' }, avisos: [API] },
+  configuracion: { presupuesto: { modo: 'demostracion' }, avisos: [API], cohorte_prueba: { modo: 'aleatoria' } },
   modelos: [{ id: 2, momento: 'semana 4', familia: 'rl' }], progreso: { completadas: 5, total: 5 }, latido_en: FECHA,
   sin_respuesta: false, aviso_sin_respuesta: null, error: null, duracion_s: 725, reintento_de: 'exp-0',
   reproducibilidad: { commit: 'abc1234', arbol_limpio: true, semillas: { modelos: 42 }, versiones: { python: '3.13' },
     sha256_datos: 'f00' },
+  evaluacion_prueba: null,
+};
+
+export const EVALUACION_PRUEBA: EvaluacionPrueba = {
+  fecha: FECHA, modelo_id: 2, n: 200, positivos: 40, roc_auc: 0.71, pr_auc: 0.33, brier: 0.15,
+  punto_operacion: { umbral: 0.15, sensibilidad: 0.7, precision: null, tasa_alerta: 0.45, tasa_falsos_positivos: 0.4,
+    matriz_confusion: [[96, 64], [12, 28]], textos: { sensibilidad: API, precision: API, tasa_alerta: API } },
+  fuente: 'cohorte_prueba', aviso_fuente: API, textos: { roc_auc: API, pr_auc: API }, aviso_decision: API,
 };
 
 /** Mismo experimento, fallido, con el proceso sin responder (los dos avisos y el botón de reintento). */

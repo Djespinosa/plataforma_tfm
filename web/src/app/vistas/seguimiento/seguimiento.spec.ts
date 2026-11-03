@@ -15,6 +15,7 @@ function experimento(cambios: Partial<ExperimentoDetalle> = {}): ExperimentoDeta
     configuracion: { presupuesto: { modo: 'completo' } }, modelos: [], etapa: 'Búsqueda: LightGBM',
     progreso: { completadas: 2, total: 5 }, latido_en: '2026-11-03T10:00:00+00:00', sin_respuesta: false,
     aviso_sin_respuesta: null, error: null, duracion_s: null, reintento_de: null, reproducibilidad: null,
+    evaluacion_prueba: null,
     ...cambios,
   };
 }

@@ -1,5 +1,16 @@
 import { KeyValuePipe } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  Injector,
+  OnInit,
+  afterNextRender,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -9,6 +20,7 @@ import { ExperimentosService } from '../../api/experimentos.service';
 import {
   AtributoEquidad,
   EvaluacionModelo,
+  EvaluacionPrueba,
   Evaluacion as RespuestaEvaluacion,
   ExperimentoDetalle,
   FilaMetricas,
@@ -16,7 +28,7 @@ import {
 import { Aviso } from '../../comun/aviso';
 import { GraficoCalibracion } from '../../comun/grafico-calibracion';
 import { PieDecision } from '../../comun/pie-decision';
-import { decimal, intervalo, miles, pValor, porcentaje1, puntos } from '../../formato';
+import { decimal, fecha, intervalo, miles, pValor, porcentaje1, puntos } from '../../formato';
 import { TEXTOS, nombreModelo, textoValidacion } from '../../textos';
 
 @Component({
@@ -36,9 +48,15 @@ export class Evaluacion implements OnInit {
   protected readonly miles = miles;
   protected readonly pValor = pValor;
   protected readonly porcentaje1 = porcentaje1;
+  protected readonly fecha = fecha;
   protected readonly respuesta = signal<RespuestaEvaluacion | null>(null);
   protected readonly experimento = signal<ExperimentoDetalle | null>(null);
   protected readonly error = signal<ErrorLegible | null>(null);
+  /** Evaluación única en la cohorte de prueba (§4.7): la guardada en el experimento o la recién hecha. */
+  protected readonly prueba = signal<EvaluacionPrueba | null>(null);
+  protected readonly confirmado = signal(false);
+  protected readonly evaluandoPrueba = signal(false);
+  protected readonly errorPrueba = signal<ErrorLegible | null>(null);
 
   /** El modelo elegido en ?modelo=, o el primero si no se indica o no es de este experimento. */
   protected readonly elegido = computed<EvaluacionModelo | null>(() => {
@@ -58,10 +76,18 @@ export class Evaluacion implements OnInit {
 
   protected readonly demostracion = computed(() => this.respuesta()?.presupuesto.modo === 'demostracion');
 
+  /** Solo en los entrenados en la plataforma con cohorte reservada y sin evaluar; nunca en los importados. */
+  protected readonly puedeEvaluarPrueba = computed(() => {
+    const e = this.experimento();
+    return !!e && e.origen === 'web' && !!e.configuracion['cohorte_prueba'] && !this.prueba();
+  });
+
   private readonly experimentos = inject(ExperimentosService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
   private readonly destruir = inject(DestroyRef);
+  private readonly inyector = inject(Injector);
+  private readonly elemento = inject<ElementRef<HTMLElement>>(ElementRef);
 
   ngOnInit(): void {
     forkJoin({ evaluacion: this.experimentos.evaluacion(this.id()), detalle: this.experimentos.detalle(this.id()) })
@@ -70,6 +96,7 @@ export class Evaluacion implements OnInit {
         next: ({ evaluacion, detalle }) => {
           this.respuesta.set(evaluacion);
           this.experimento.set(detalle);
+          this.prueba.set(detalle.evaluacion_prueba);
         },
         error: (e) => this.error.set(leerError(e)),
       });
@@ -77,6 +104,30 @@ export class Evaluacion implements OnInit {
 
   protected elegir(modeloId: number): void {
     void this.router.navigate([], { relativeTo: this.ruta, queryParams: { modelo: modeloId }, replaceUrl: true });
+  }
+
+  protected evaluarPrueba(): void {
+    if (!this.confirmado() || this.evaluandoPrueba()) return;
+    this.evaluandoPrueba.set(true);
+    this.errorPrueba.set(null);
+    this.experimentos
+      .evaluarPrueba(this.id())
+      .pipe(takeUntilDestroyed(this.destruir))
+      .subscribe({
+        next: (p) => {
+          this.prueba.set(p);
+          this.evaluandoPrueba.set(false);
+          // El botón desaparece al mostrarse el resultado: el foco va al título de la sección (como en la carga).
+          afterNextRender(
+            () => this.elemento.nativeElement.querySelector<HTMLElement>('#evaluacion-prueba')?.focus(),
+            { injector: this.inyector },
+          );
+        },
+        error: (e) => {
+          this.errorPrueba.set(leerError(e));
+          this.evaluandoPrueba.set(false);
+        },
+      });
   }
 
   protected subgrupos(atributo: AtributoEquidad) {
