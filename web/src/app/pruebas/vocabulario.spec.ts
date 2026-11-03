@@ -10,6 +10,7 @@ import { Configuracion } from '../vistas/configuracion/configuracion';
 import { Evaluacion } from '../vistas/evaluacion/evaluacion';
 import { ExplicacionGlobal } from '../vistas/explicacion-global/explicacion-global';
 import { ExplicacionLocal } from '../vistas/explicacion-local/explicacion-local';
+import { Historial } from '../vistas/historial/historial';
 import { Inicio } from '../vistas/inicio/inicio';
 import { Lote } from '../vistas/lote/lote';
 import { Modelos } from '../vistas/modelos/modelos';
@@ -41,6 +42,7 @@ const RESPUESTAS: Record<string, unknown> = {
   '/api/modelos': [F.MODELO],
   '/api/modelos/2': F.MODELO_DETALLE,
   '/api/modelos/2/explicacion-global': F.EXPLICACION_GLOBAL,
+  '/api/experimentos': F.HISTORIAL,
   '/api/experimentos/exp-1': F.EXPERIMENTO,
   '/api/experimentos/exp-1/evaluacion': F.EVALUACION,
   '/api/experimentos/validacion': ESQUEMA,
@@ -97,6 +99,7 @@ describe('vocabulario renderizado', () => {
     ['evaluación', Evaluacion, { id: 'exp-1' }],
     ['evaluación de otro momento (sin curva)', Evaluacion, { id: 'exp-1', modelo: '3' }],
     ['seguimiento completado', Seguimiento, { id: 'exp-1' }],
+    ['historial', Historial, {}],
     ['carga', Carga, {}],
     ['configuración', Configuracion, { conjunto: '3' }],
   ];

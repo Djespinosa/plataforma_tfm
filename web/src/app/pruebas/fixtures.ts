@@ -9,6 +9,7 @@ import {
   Evaluacion,
   EvaluacionModelo,
   ExperimentoDetalle,
+  ExperimentoHistorial,
   ExplicacionGlobal,
   ExplicacionLocal,
   FilaMetricas,
@@ -41,6 +42,14 @@ export const EXPERIMENTO: ExperimentoDetalle = {
 export const EXPERIMENTO_FALLIDO: ExperimentoDetalle = {
   ...EXPERIMENTO, estado: 'fallido', sin_respuesta: true, aviso_sin_respuesta: API, error: API, reproducibilidad: null,
 };
+
+export const HISTORIAL: ExperimentoHistorial[] = [
+  { id: 'exp-1', origen: 'web', estado: 'completado', creado_en: FECHA, duracion_s: 725, descripcion: 'nota',
+    conjunto: { id: 3, nombre_archivo: 'datos.csv', momento: 'semana 4' }, objetivo: 'y', presupuesto: 'demostracion',
+    reintento_de: 'exp-0', modelos: [{ id: 2, momento: 'semana 4', familia: 'rl' }] },
+  { id: 'exp-0', origen: 'importado', estado: 'interrumpido', creado_en: FECHA, duracion_s: null, descripcion: null,
+    conjunto: null, objetivo: null, presupuesto: 'completo', reintento_de: null, modelos: [] },
+];
 
 const fila = (modelo: string, papel: FilaMetricas['papel']): FilaMetricas => ({
   modelo, papel, roc_auc_oof: 0.7, roc_auc_media: 0.69, roc_auc_desv: 0.02, pr_auc_oof: 0.3, brier_oof: 0.14,

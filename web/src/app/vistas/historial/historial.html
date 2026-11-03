@@ -1,0 +1,70 @@
+<h1 tabindex="-1">{{ t.historial.titulo }}</h1>
+<p>{{ t.historial.introduccion }}</p>
+
+@if (error(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+} @else if (experimentos(); as lista) {
+  @if (lista.length) {
+    <div class="tabla-contenedor" tabindex="0" [attr.aria-label]="t.historial.tabla">
+      <table>
+        <caption>{{ t.historial.tabla }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ t.historial.experimento }}</th>
+            <th scope="col">{{ t.historial.fecha }}</th>
+            <th scope="col">{{ t.historial.estado }}</th>
+            <th scope="col">{{ t.historial.datos }}</th>
+            <th scope="col">{{ t.historial.objetivo }}</th>
+            <th scope="col">{{ t.historial.presupuesto }}</th>
+            <th scope="col" class="numero">{{ t.historial.modelos }}</th>
+            <th scope="col">{{ t.historial.acciones }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of lista; track e.id) {
+            <tr>
+              <th scope="row">
+                {{ e.id }} ({{ t.origenes[e.origen] }})
+                @if (e.descripcion) {
+                  <br /><span class="ayuda">{{ e.descripcion }}</span>
+                }
+                @if (e.reintento_de) {
+                  <br /><span class="ayuda">{{ t.historial.reintento }} {{ e.reintento_de }}</span>
+                }
+              </th>
+              <td>{{ fecha(e.creado_en) }}</td>
+              <td>
+                {{ t.seguimiento.estados[e.estado] }}
+                @if (e.duracion_s !== null) {
+                  <br /><span class="ayuda">{{ duracion(e.duracion_s) }}</span>
+                }
+              </td>
+              <td>
+                @if (e.conjunto; as c) {
+                  {{ c.nombre_archivo }}@if (c.momento) { · {{ c.momento }}}
+                } @else {
+                  {{ t.historial.noAplica }}
+                }
+              </td>
+              <td>{{ e.objetivo ?? t.historial.noAplica }}</td>
+              <td>{{ t.configuracion.modos[e.presupuesto] ?? e.presupuesto }}</td>
+              <td class="numero">{{ miles(e.modelos.length) }}</td>
+              <td>
+                <ul class="acciones">
+                  <li><a [routerLink]="['/experimentos', e.id]">{{ t.historial.verExperimento }}</a></li>
+                  @if (e.estado === 'completado') {
+                    <li><a [routerLink]="['/experimentos', e.id, 'evaluacion']">{{ t.historial.verEvaluacion }}</a></li>
+                  }
+                </ul>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p>{{ t.historial.ninguno }}</p>
+  }
+} @else {
+  <p role="status">{{ t.historial.cargando }}</p>
+}

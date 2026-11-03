@@ -2,11 +2,21 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CuerpoExperimento, Evaluacion, ExperimentoDetalle, ValidacionExperimento } from './tipos';
+import {
+  CuerpoExperimento,
+  Evaluacion,
+  ExperimentoDetalle,
+  ExperimentoHistorial,
+  ValidacionExperimento,
+} from './tipos';
 
 @Injectable({ providedIn: 'root' })
 export class ExperimentosService {
   private readonly http = inject(HttpClient);
+
+  historial(): Observable<ExperimentoHistorial[]> {
+    return this.http.get<ExperimentoHistorial[]>('/api/experimentos');
+  }
 
   validar(cuerpo: CuerpoExperimento): Observable<ValidacionExperimento> {
     return this.http.post<ValidacionExperimento>('/api/experimentos/validacion', cuerpo);

@@ -6,6 +6,7 @@ import { Configuracion } from './vistas/configuracion/configuracion';
 import { Evaluacion } from './vistas/evaluacion/evaluacion';
 import { ExplicacionGlobal } from './vistas/explicacion-global/explicacion-global';
 import { ExplicacionLocal } from './vistas/explicacion-local/explicacion-local';
+import { Historial } from './vistas/historial/historial';
 import { Inicio } from './vistas/inicio/inicio';
 import { Lote } from './vistas/lote/lote';
 import { Modelos } from './vistas/modelos/modelos';
@@ -23,6 +24,7 @@ export const routes: Routes = [
     title: tituloRuta(TEXTOS.configuracion.titulo),
     data: { paso: 2 },
   },
+  { path: 'experimentos', component: Historial, title: tituloRuta(TEXTOS.historial.titulo) },
   {
     path: 'experimentos/:id',
     component: Seguimiento,

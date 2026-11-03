@@ -118,6 +118,22 @@ export interface Reproducibilidad {
   sha256_datos: string;
 }
 
+/** GET /api/experimentos (cada elemento), del más reciente al más antiguo */
+export interface ExperimentoHistorial {
+  id: string;
+  origen: Origen;
+  estado: EstadoExperimento;
+  creado_en: string;
+  duracion_s: number | null;
+  descripcion: string | null;
+  conjunto: { id: number; nombre_archivo: string; momento: string | null } | null;
+  /** null en los importados. */
+  objetivo: string | null;
+  presupuesto: string;
+  reintento_de: string | null;
+  modelos: { id: number; momento: string | null; familia: string }[];
+}
+
 /** POST /api/modelos/{id}/predicciones → 201 */
 export interface LoteCreado {
   lote_id: number;
