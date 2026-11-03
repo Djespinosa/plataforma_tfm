@@ -98,6 +98,24 @@ export interface ExperimentoDetalle {
   descripcion: string | null;
   configuracion: { presupuesto: { modo: string }; avisos?: string[] } & Record<string, unknown>;
   modelos: { id: number; momento: string | null; familia: string }[];
+  etapa: string | null;
+  progreso: { completadas: number; total: number } | null;
+  latido_en: string | null;
+  sin_respuesta: boolean;
+  aviso_sin_respuesta: string | null;
+  error: string | null;
+  duracion_s: number | null;
+  reintento_de: string | null;
+  /** Solo en los entrenados en la plataforma y completados (los importados traen `procedencia`). */
+  reproducibilidad: Reproducibilidad | null;
+}
+
+export interface Reproducibilidad {
+  commit: string | null;
+  arbol_limpio: boolean | null;
+  semillas: Record<string, number>;
+  versiones: Record<string, string>;
+  sha256_datos: string;
 }
 
 /** POST /api/modelos/{id}/predicciones → 201 */

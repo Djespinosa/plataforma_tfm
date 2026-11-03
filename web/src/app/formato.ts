@@ -54,6 +54,14 @@ export function pValor(p: number): string {
   return p < 0.001 ? '< 0,001' : conComa(p, 3);
 }
 
+/** Duración en segundos: «45 s», «12 min 5 s», «2 h 3 min». */
+export function duracion(segundos: number): string {
+  const s = Math.round(segundos);
+  if (s < 60) return `${s} s`;
+  if (s < 3600) return `${Math.floor(s / 60)} min ${s % 60} s`;
+  return `${Math.floor(s / 3600)} h ${Math.floor((s % 3600) / 60)} min`;
+}
+
 /** Fecha ISO de la API (UTC con zona) en hora local: «dd/mm/aaaa hh:mm». */
 export function fecha(iso: string): string {
   const d = new Date(iso);

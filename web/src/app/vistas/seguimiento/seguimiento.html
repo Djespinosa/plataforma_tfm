@@ -1,0 +1,115 @@
+<h1 tabindex="-1">{{ t.seguimiento.titulo }}</h1>
+
+@if (error(); as e) {
+  <app-aviso tipo="error"><p>{{ e.mensaje }}</p></app-aviso>
+}
+
+@if (experimento(); as e) {
+  <dl class="datos">
+    <dt>{{ t.seguimiento.experimento }}</dt>
+    <dd>{{ e.id }} ({{ t.origenes[e.origen] }})@if (e.descripcion) { · {{ e.descripcion }}}</dd>
+    @if (e.reintento_de) {
+      <dt>{{ t.seguimiento.reintentoDe }}</dt>
+      <dd><a [routerLink]="['/experimentos', e.reintento_de]">{{ e.reintento_de }}</a></dd>
+    }
+  </dl>
+
+  @if (demostracion()) {
+    <app-aviso tipo="cautela">
+      <p>{{ t.demostracion }}</p>
+      @for (a of e.configuracion.avisos ?? []; track $index) {
+        <p>{{ a }}</p>
+      }
+    </app-aviso>
+  }
+
+  <p role="status">
+    {{ t.seguimiento.estado }}: {{ t.seguimiento.estados[e.estado] }}@if (e.etapa) { · {{ t.seguimiento.etapa }}: {{ e.etapa }}}
+  </p>
+  @if (e.progreso; as p) {
+    <p>
+      <label for="progreso">{{ t.seguimiento.progreso }}</label><br />
+      <progress id="progreso" [max]="p.total" [value]="p.completadas"></progress>
+      {{ textoEtapas(p.completadas, p.total) }}
+    </p>
+  }
+  <dl class="datos">
+    @if (e.latido_en) {
+      <dt>{{ t.seguimiento.ultimoLatido }}</dt>
+      <dd>{{ fecha(e.latido_en) }}</dd>
+    }
+    @if (e.duracion_s !== null) {
+      <dt>{{ t.seguimiento.duracion }}</dt>
+      <dd>{{ duracion(e.duracion_s) }}</dd>
+    }
+  </dl>
+
+  @if (e.sin_respuesta && e.aviso_sin_respuesta) {
+    <app-aviso tipo="cautela"><p>{{ e.aviso_sin_respuesta }}</p></app-aviso>
+  }
+  @if (e.estado === 'en_cola' && trabajadorActivo() === false) {
+    <app-aviso tipo="cautela"><p>{{ t.seguimiento.trabajadorInactivo }}</p></app-aviso>
+  }
+  @if (e.estado === 'en_cola' || e.estado === 'en_curso') {
+    <p class="ayuda">{{ t.seguimiento.actualizando }}</p>
+  }
+
+  @if (e.estado === 'completado') {
+    <section aria-labelledby="resultados">
+      <h2 id="resultados">{{ t.seguimiento.resultados }}</h2>
+      <p><a class="boton" [routerLink]="['/experimentos', e.id, 'evaluacion']">{{ t.seguimiento.verEvaluacion }}</a></p>
+      <ul>
+        @for (m of e.modelos; track m.id) {
+          <li>
+            {{ nombreModelo(m.familia) }}@if (m.momento) { · {{ m.momento }}}:
+            <a [routerLink]="['/modelos', m.id, 'prediccion']">{{ t.modelos.estimar }}</a> ·
+            <a [routerLink]="['/modelos', m.id, 'explicacion']">{{ t.modelos.verExplicacion }}</a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (e.estado === 'fallido' || e.estado === 'interrumpido') {
+    @if (e.error) {
+      <app-aviso tipo="error"><p>{{ e.error }}</p></app-aviso>
+    }
+    @if (errorReintento(); as x) {
+      <app-aviso tipo="error"><p>{{ x.mensaje }}</p></app-aviso>
+    }
+    <p>
+      <button type="button" [disabled]="reintentando()" (click)="reintentar()">
+        {{ reintentando() ? t.seguimiento.reintentando : t.seguimiento.reintentar }}
+      </button>
+    </p>
+  }
+
+  @if (e.reproducibilidad; as r) {
+    <details>
+      <summary>{{ t.detalleTecnico }}</summary>
+      <h3>{{ t.seguimiento.reproducibilidad }}</h3>
+      <dl class="datos">
+        <dt>{{ t.seguimiento.commit }}</dt>
+        <dd>{{ r.commit ?? t.seguimiento.desconocido }}</dd>
+        <dt>{{ t.seguimiento.arbolLimpio }}</dt>
+        <dd>{{ sinONo(r.arbol_limpio) }}</dd>
+        <dt>{{ t.seguimiento.huellaDatos }}</dt>
+        <dd><code>{{ r.sha256_datos }}</code></dd>
+        <dt>{{ t.seguimiento.semillas }}</dt>
+        <dd>
+          @for (s of r.semillas | keyvalue; track s.key) {
+            {{ s.key }} = {{ s.value }}@if (!$last) {, }
+          }
+        </dd>
+        <dt>{{ t.seguimiento.versiones }}</dt>
+        <dd>
+          @for (v of r.versiones | keyvalue; track v.key) {
+            {{ v.key }} {{ v.value }}@if (!$last) {, }
+          }
+        </dd>
+      </dl>
+    </details>
+  }
+} @else if (!error()) {
+  <p role="status">{{ t.seguimiento.cargando }}</p>
+}

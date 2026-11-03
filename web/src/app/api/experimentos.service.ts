@@ -17,6 +17,11 @@ export class ExperimentosService {
     return this.http.post<ExperimentoDetalle>('/api/experimentos', cuerpo);
   }
 
+  /** POST /api/experimentos/{id}/reintentar → 202 con el experimento nuevo. */
+  reintentar(id: string): Observable<ExperimentoDetalle> {
+    return this.http.post<ExperimentoDetalle>(`/api/experimentos/${encodeURIComponent(id)}/reintentar`, null);
+  }
+
   detalle(id: string): Observable<ExperimentoDetalle> {
     return this.http.get<ExperimentoDetalle>(`/api/experimentos/${encodeURIComponent(id)}`);
   }

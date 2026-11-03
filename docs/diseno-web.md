@@ -329,9 +329,9 @@ procedimiento de `api/exportar_pruebas.py` o con un script pequeño en `scripts/
 
 ## 10. Seguimiento del entrenamiento
 
-`timer(0, 3000).pipe(switchMap(() => experimentos.detalle(id)), takeWhile(e => e.estado === 'en_cola' || e.estado ===
+`timer(0, 3000).pipe(exhaustMap(() => experimentos.detalle(id)), takeWhile(e => e.estado === 'en_cola' || e.estado ===
 'en_curso', true), takeUntilDestroyed())`. Cada respuesta actualiza el `signal` del experimento. Un error de red no corta
-el sondeo (`catchError` dentro del `switchMap` muestra `leerError` y sigue: la API puede reiniciarse sin afectar al
+el sondeo (`catchError` dentro del `exhaustMap` muestra `leerError` y sigue: la API puede reiniciarse sin afectar al
 trabajador). `sin_respuesta: true` → `aviso_sin_respuesta` como aviso de cautela. Al llegar a `completado` se ofrecen
 los enlaces; no se navega solo. Una lectura de una fila cada 3 s no carga la API.
 

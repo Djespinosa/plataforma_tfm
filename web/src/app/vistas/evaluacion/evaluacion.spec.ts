@@ -65,7 +65,7 @@ const RESPUESTA: Respuesta = {
   aviso_decision: 'aviso de decisión',
 };
 const DETALLE = { id: 'exp-1', origen: 'importado', estado: 'completado', descripcion: null,
-  configuracion: { presupuesto: { modo: 'completo' } }, modelos: [] } as ExperimentoDetalle;
+  configuracion: { presupuesto: { modo: 'completo' } }, modelos: [] } as Partial<ExperimentoDetalle> as ExperimentoDetalle;
 
 async function renderizar(elegido?: string, error = false) {
   TestBed.configureTestingModule({

@@ -171,6 +171,40 @@ export const TEXTOS = {
     replicas: 'réplicas bootstrap',
     cargando: 'Cargando el conjunto…',
   },
+  seguimiento: {
+    titulo: 'Seguimiento del entrenamiento',
+    experimento: 'Experimento',
+    estado: 'Estado',
+    estados: {
+      en_cola: 'En cola: esperando al proceso de entrenamiento',
+      en_curso: 'Entrenando',
+      completado: 'Completado',
+      fallido: 'Ha fallado',
+      interrumpido: 'Interrumpido',
+    },
+    etapa: 'Etapa',
+    progreso: 'Progreso',
+    ultimoLatido: 'Última señal del proceso',
+    duracion: 'Duración',
+    reintentoDe: 'Reintento de',
+    trabajadorInactivo:
+      'El proceso de entrenamiento no está en marcha: el experimento esperará en cola hasta que se inicie.',
+    actualizando: 'La página se actualiza sola cada pocos segundos mientras dura el entrenamiento.',
+    resultados: 'Resultados',
+    verEvaluacion: 'Ver la evaluación',
+    reintentar: 'Reintentar con la misma configuración',
+    reintentando: 'Reintentando…',
+    reproducibilidad: 'Reproducibilidad',
+    commit: 'Versión del código',
+    arbolLimpio: 'Código sin cambios sin confirmar',
+    si: 'sí',
+    no: 'no',
+    desconocido: 'no consta',
+    semillas: 'Semillas',
+    versiones: 'Versiones de las bibliotecas',
+    huellaDatos: 'Huella SHA-256 de los datos',
+    cargando: 'Cargando el experimento…',
+  },
   origenes: { web: 'entrenado en la plataforma', importado: 'importado' } as Record<string, string>,
   demostracion: 'Entrenamiento de demostración',
   prediccion: {
@@ -382,4 +416,8 @@ export function textoPagina(pagina: number, paginas: number): string {
 
 export function tituloRuta(titulo: string): string {
   return `${titulo} · ${TEXTOS.aplicacion.nombre}`;
+}
+
+export function textoEtapas(completadas: number, total: number): string {
+  return `${completadas} de ${total} etapas`;
 }

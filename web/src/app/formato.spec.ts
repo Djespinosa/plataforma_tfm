@@ -1,4 +1,4 @@
-import { contribucion, decimal, fecha, intervalo, miles, pValor, porcentaje, porcentaje1, puntos } from './formato';
+import { contribucion, decimal, duracion, fecha, intervalo, miles, pValor, porcentaje, porcentaje1, puntos } from './formato';
 
 describe('formato', () => {
   it('porcentaje entero sin sugerir certeza en los extremos', () => {
@@ -7,6 +7,12 @@ describe('formato', () => {
     expect(porcentaje(0.996)).toBe('> 99 %');
     expect(porcentaje(0)).toBe('0 %');
     expect(porcentaje(1)).toBe('100 %');
+  });
+
+  it('duración en segundos, minutos u horas', () => {
+    expect(duracion(44.6)).toBe('45 s');
+    expect(duracion(725)).toBe('12 min 5 s');
+    expect(duracion(7380)).toBe('2 h 3 min');
   });
 
   it('porcentaje con un decimal y coma', () => {

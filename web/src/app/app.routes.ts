@@ -11,6 +11,7 @@ import { Lote } from './vistas/lote/lote';
 import { Modelos } from './vistas/modelos/modelos';
 import { NoEncontrada } from './vistas/no-encontrada/no-encontrada';
 import { Prediccion } from './vistas/prediccion/prediccion';
+import { Seguimiento } from './vistas/seguimiento/seguimiento';
 
 /** Rutas de docs/diseno-web.md §3.1; data.paso es el paso del flujo (1-6) que se marca en la cabecera. */
 export const routes: Routes = [
@@ -21,6 +22,12 @@ export const routes: Routes = [
     component: Configuracion,
     title: tituloRuta(TEXTOS.configuracion.titulo),
     data: { paso: 2 },
+  },
+  {
+    path: 'experimentos/:id',
+    component: Seguimiento,
+    title: tituloRuta(TEXTOS.seguimiento.titulo),
+    data: { paso: 3 },
   },
   {
     path: 'experimentos/:id/evaluacion',
