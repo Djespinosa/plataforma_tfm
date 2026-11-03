@@ -1,0 +1,246 @@
+{
+  "id": "exp-2026-11-03-01",
+  "tipo": "comparacion",
+  "fecha": "2026-11-03T09:26:58",
+  "commit": "70c6017",
+  "descripcion": "Explicación global que da la API para el modelo final exp-2026-10-29-03 (D-3 del bloque E): identidad con ml/ y comparación descriptiva con la importancia out-of-fold de exp-2026-10-29-02, sin reentrenar.",
+  "analisis": "explicacion_global_api",
+  "experimentos": [
+    "exp-2026-10-29-03",
+    "exp-2026-10-29-02",
+    "exp-2026-10-29-05"
+  ],
+  "metodo": {
+    "identidad": "paquetes desplegados de la carpeta de modelos importados con api/importar.py en SQLite en memoria; GET /api/modelos/{id}/explicacion-global frente a la media de |SHAP| (log-odds sin calibrar) de modelo_final.predecir_y_explicar sobre las mismas filas de referencia (iguales a las de entrenamiento que reconstruye experimento.cargar_entrenamiento: 15 presentaciones, sin 2014J; su SHA-256 en referencia_sha256), con igualdad exacta de variables, orden y valores; las variables sin contribución de la API deben tener SHAP 0 en todas las filas",
+    "comparacion": "descriptiva, sin umbral: compara el modelo final (una RL reentrenada con las 15 presentaciones, sobre sus filas de entrenamiento) con la media out-of-fold de 5 modelos de pliegue de exp-2026-10-29-02 (importancia redondeada a 4 decimales); no son el mismo estimador. Spearman del orden completo con todas las variables (las sin contribución de la API, con importancia 0) y sin las variables nulas de exp-2026-10-29-05; el top-10 no cambia al quitarlas (importancia 0). Posiciones por importancia descendente"
+  },
+  "lectura": "descriptiva: SHAP es contribución a la predicción del modelo, no causa",
+  "evaluado_en_prueba": false,
+  "modelos_sha256": {
+    "exp-2026-10-29-03_semana_0.joblib": "abd5bf8d892cf8f921ce8ff1821055e4a00e179364cfd7395cdf5e3818769a80",
+    "exp-2026-10-29-03_semana_4.joblib": "c0fd920e9c6f333daf29eac156bc443c89851c7dadbe6392bf0a8d997375c388",
+    "exp-2026-10-29-03_semana_8.joblib": "78655fd4ec4829d47fce120fe6172b26503ba69e25366fa447301cb8d244a3f6",
+    "exp-2026-10-29-03_semana_12.joblib": "ee5b8d00509ec2028be94779494f80999726793aa6542cb6dd6c3abfef1bd367"
+  },
+  "momentos": [
+    {
+      "semana": 0,
+      "modelo": "rl",
+      "paquete": "exp-2026-10-29-03_semana_0.joblib",
+      "fuente_api": "filas de entrenamiento (n = 19 023)",
+      "identidad": {
+        "identica": true,
+        "variables": 49,
+        "sin_contribucion": [
+          "proporcion_entregadas",
+          "antelacion_media"
+        ],
+        "n_filas": 19023,
+        "referencia_sha256": "44ae5913e3a292f4ea6c42065198b57c1afe6eb67083a9182d493cb46efd6181"
+      },
+      "comparacion_oof": {
+        "todas": {
+          "variables": 51,
+          "spearman": 0.9655
+        },
+        "sin_nulas": {
+          "variables": 44,
+          "spearman": 0.9464
+        },
+        "variables_nulas": [
+          "clics_folder",
+          "clics_repeatactivity",
+          "n_evaluaciones_vencidas",
+          "n_entregadas",
+          "proporcion_entregadas",
+          "antelacion_media",
+          "n_entregas_tardias"
+        ],
+        "top10": {
+          "solape": 0.9,
+          "entran": [
+            "percentil_clics_ventana_1_cohorte"
+          ],
+          "salen": [
+            "proporcion_dias_activos_28d"
+          ],
+          "cambian_posicion": []
+        }
+      }
+    },
+    {
+      "semana": 4,
+      "modelo": "rl",
+      "paquete": "exp-2026-10-29-03_semana_4.joblib",
+      "fuente_api": "filas de entrenamiento (n = 18 304)",
+      "identidad": {
+        "identica": true,
+        "variables": 51,
+        "sin_contribucion": [],
+        "n_filas": 18304,
+        "referencia_sha256": "c36ec15625423712fddbfde65eed9ca7b25477f3d53d5398c5279cd86bf94e90"
+      },
+      "comparacion_oof": {
+        "todas": {
+          "variables": 51,
+          "spearman": 0.9432
+        },
+        "sin_nulas": {
+          "variables": 49,
+          "spearman": 0.9359
+        },
+        "variables_nulas": [
+          "clics_folder",
+          "clics_repeatactivity"
+        ],
+        "top10": {
+          "solape": 0.9,
+          "entran": [
+            "date_registration"
+          ],
+          "salen": [
+            "antelacion_media"
+          ],
+          "cambian_posicion": [
+            {
+              "variable": "code_module",
+              "posicion_api": 5,
+              "posicion_oof": 7
+            },
+            {
+              "variable": "n_entregadas",
+              "posicion_api": 7,
+              "posicion_oof": 9
+            },
+            {
+              "variable": "n_entregas_tardias",
+              "posicion_api": 9,
+              "posicion_oof": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "semana": 8,
+      "modelo": "rl",
+      "paquete": "exp-2026-10-29-03_semana_8.joblib",
+      "fuente_api": "filas de entrenamiento (n = 17 629)",
+      "identidad": {
+        "identica": true,
+        "variables": 51,
+        "sin_contribucion": [],
+        "n_filas": 17629,
+        "referencia_sha256": "306cf0f6d9c401ddf3f986f4614714458b5cec06adbf25ca747c1e36d1e75b3f"
+      },
+      "comparacion_oof": {
+        "todas": {
+          "variables": 51,
+          "spearman": 0.9671
+        },
+        "sin_nulas": {
+          "variables": 50,
+          "spearman": 0.9651
+        },
+        "variables_nulas": [
+          "clics_folder"
+        ],
+        "top10": {
+          "solape": 0.9,
+          "entran": [
+            "proporcion_dias_activos_28d"
+          ],
+          "salen": [
+            "n_cma_calificadas"
+          ],
+          "cambian_posicion": [
+            {
+              "variable": "code_module",
+              "posicion_api": 5,
+              "posicion_oof": 10
+            },
+            {
+              "variable": "antelacion_media",
+              "posicion_api": 6,
+              "posicion_oof": 5
+            },
+            {
+              "variable": "n_entregadas",
+              "posicion_api": 7,
+              "posicion_oof": 6
+            },
+            {
+              "variable": "studied_credits",
+              "posicion_api": 8,
+              "posicion_oof": 7
+            },
+            {
+              "variable": "highest_education",
+              "posicion_api": 10,
+              "posicion_oof": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "semana": 12,
+      "modelo": "rl",
+      "paquete": "exp-2026-10-29-03_semana_12.joblib",
+      "fuente_api": "filas de entrenamiento (n = 17 146)",
+      "identidad": {
+        "identica": true,
+        "variables": 51,
+        "sin_contribucion": [],
+        "n_filas": 17146,
+        "referencia_sha256": "5e19588c2afcbffbbfa38c26759e7fb8eff37cfcc1300d45b525e81f81230056"
+      },
+      "comparacion_oof": {
+        "todas": {
+          "variables": 51,
+          "spearman": 0.9748
+        },
+        "sin_nulas": {
+          "variables": 50,
+          "spearman": 0.9733
+        },
+        "variables_nulas": [
+          "clics_folder"
+        ],
+        "top10": {
+          "solape": 1.0,
+          "entran": [],
+          "salen": [],
+          "cambian_posicion": [
+            {
+              "variable": "code_module",
+              "posicion_api": 6,
+              "posicion_oof": 8
+            },
+            {
+              "variable": "proporcion_entregadas",
+              "posicion_api": 7,
+              "posicion_oof": 6
+            },
+            {
+              "variable": "n_entregadas",
+              "posicion_api": 8,
+              "posicion_oof": 9
+            },
+            {
+              "variable": "n_cma_calificadas",
+              "posicion_api": 9,
+              "posicion_oof": 7
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "pruebas": {
+    "informe": "pruebas/exp-2026-11-03-01_pruebas.xml",
+    "superadas": 202,
+    "fallidas": 0,
+    "omitidas": 0
+  }
+}

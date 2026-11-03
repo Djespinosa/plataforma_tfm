@@ -1,6 +1,6 @@
 {
-  "generado": "2026-10-31T14:54:33",
-  "commit": "21b76b5",
+  "generado": "2026-11-03T09:26:58",
+  "commit": "70c6017",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -17,7 +17,8 @@
     "experimentos/exp-2026-10-29-04.json",
     "experimentos/exp-2026-10-29-05.json",
     "experimentos/exp-2026-10-29-06.json",
-    "experimentos/exp-2026-10-30-01.json"
+    "experimentos/exp-2026-10-30-01.json",
+    "experimentos/exp-2026-11-03-01.json"
   ],
   "figuras": [
     {
@@ -273,6 +274,11 @@
       "archivo": "pruebas/api-2026-10-31-01_resumen.json",
       "descripcion": "Resumen: superadas, motor, requisitos y cobertura",
       "id": "api-2026-10-31-01"
+    },
+    {
+      "archivo": "pruebas/exp-2026-11-03-01_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de ml/tests en el commit del experimento",
+      "experimento": "exp-2026-11-03-01"
     }
   ],
   "usabilidad": []
