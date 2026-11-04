@@ -1,0 +1,25 @@
+{
+  "id": "interfaz-2026-11-04-01",
+  "fecha": "2026-11-04T10:03:23",
+  "commit": "554bf0c",
+  "comando": "npx --no ng test --watch=false --reporters=junit --output-file=<temporal>",
+  "carpeta": "web",
+  "entorno": {
+    "node": "20.19.1",
+    "@angular/core": "21.2.25",
+    "vitest": "4.1.12",
+    "jsdom": "28.1.0",
+    "typescript": "5.9.3"
+  },
+  "superadas": 70,
+  "fallidas": 0,
+  "omitidas": 0,
+  "archivos": 15,
+  "cobertura": null,
+  "motivos_null": {
+    "cobertura": "sin cobertura en la Entrega 2 (docs/diseno-web.md, W-8)"
+  },
+  "informes": {
+    "junit": "pruebas/interfaz-2026-11-04-01_pruebas.xml"
+  }
+}

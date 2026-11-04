@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-04T09:55:48",
-  "commit": "13506ca",
+  "generado": "2026-11-04T10:03:23",
+  "commit": "554bf0c",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -429,6 +429,16 @@
       "archivo": "pruebas/api-2026-11-04-01_resumen.json",
       "descripcion": "Resumen: superadas, motor, requisitos y cobertura",
       "id": "api-2026-11-04-01"
+    },
+    {
+      "archivo": "pruebas/interfaz-2026-11-04-01_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas Vitest de web/ (70 en 15 archivos)",
+      "id": "interfaz-2026-11-04-01"
+    },
+    {
+      "archivo": "pruebas/interfaz-2026-11-04-01_resumen.json",
+      "descripcion": "Resumen: superadas, entorno y comando",
+      "id": "interfaz-2026-11-04-01"
     }
   ],
   "usabilidad": []
