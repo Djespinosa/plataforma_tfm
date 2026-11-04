@@ -32,10 +32,10 @@ LightGBM, Optuna, SHAP (pipeline ML).
 ## Mapa del repositorio
 
 ```
-ml/                  Núcleo ML y scripts (exploracion_oulad.py, cortes_oulad.py, evidencias.py, automl/, tests/; próximo: configs/)
-api/                 API Flask + PostgreSQL (semana 2)
+ml/                  Núcleo ML y scripts (cortes, experimento, variantes, ablación, fuga, SHAP, modelo final; automl/, configs/, tests/)
+api/                 API Flask + PostgreSQL (rutas/, servicios/, trabajador, importador, migraciones Alembic, tests/)
 scripts/             Evidencias que cruzan api/ y ml/ con datos de OULAD (evidencia_global_api.py, D-3) y registro de capturas (registrar_capturas.py)
-web/                 Interfaz Angular (semana 3)
+web/                 Interfaz Angular 21 (src/app: api/, vistas/, pruebas/, textos.ts)
 data/raw/oulad/      7 CSV de OULAD, CC-BY 4.0 (no versionados)
 evidencias/          Lo único que consume la memoria (ver CONTRATO.md)
 .claude/             Skills, agentes y comandos de Claude Code (abajo)
@@ -61,32 +61,32 @@ Detalle de capas, convenciones, API y modelo de datos: skill `arquitectura`.
 | Comando | `/cortes`, `/experimento`, `/comparar` | Construir cortes, ejecutar un experimento, comparar modelos |
 | Comando | `/auditar-fuga`, `/revisar-codigo`, `/exportar-evidencias`, `/test`, `/estado` | Auditar fugas, revisar código, validar evidencias, probar, ver el avance |
 
-## Estado actual (2026-10-27)
+## Estado actual (2026-11-03)
 
-- Hecho:
-  - Exploración (exp-2026-10-05-02), F0 y F1: cortes de OULAD con las correcciones de la importación (exp-2026-10-23-02, a496076).
-  - F2, núcleo `ml/automl/` (a981755) con D52 y D53 (d36dec0) y D54, calibración anidada con `ensemble=False` (e49f339).
-  - Experimento principal exp-2026-10-27-01: 7 familias, 50 ensayos, solo *out-of-fold*, evidencias en f9861f4. Es la
-    fuente vigente de 5.4 y 5.7.2; exp-2026-10-26-01 queda como registro superado.
-    - Resultados: RL desplegada en los 4 momentos; lecturas D49 de equivalencia práctica (semanas 0, 4 y 8) y detectable
-      sin relevancia (semana 12); ROC-AUC OOF de 0,646-0,708, por debajo de 0,75 (D4).
-    - Auditoría de fuga: apto con observaciones, en `evidencias/pruebas/exp-2026-10-27-01_auditoria.md`.
-  - Preparación de la F3 (193340c):
-    - en cada experimento, hardware, parámetros efectivos de Optuna, nivel de `n_jobs`, definición del Brier sin calibrar y
-      JUnit en `pruebas/`;
-    - OOF con todas las calibraciones;
-    - variante D8 (`ml/variante.py`, `ml/configs/con_sensibles.json`) y nombres one-hot compatibles con XGBoost.
-  - Figuras `_v2` de exp-2026-10-27-01 con coma decimal (285ea62). 115 pruebas en `ml/tests`.
-- En curso: F3 en este orden, como experimentos separados sin nueva búsqueda (D38), cada uno con su id y commit para la
-  memoria:
-  - D8 con sensibles, unas 1,7 h; en el ensayo de la semana 0 el coste máximo es +0,006, lejos de 0,02;
-  - ablación D46 sobre el mejor AutoML, unas 2,3 h, más unos 25 min si se hace también sobre la RL;
-  - D20;
-  - SHAP (D9, D32).
-  - Si la salvaguarda D38 se activa (≥ 0,02), se detiene la F3 y se avisa.
-- Después: modelo final D41 preparado sin evaluar en 2014J; luego API e interfaz mínima.
-- Pendiente de registrar en `decisiones.md`: licencia MIT del código (2026-10-23); la etiqueta `desventaja_relevante`
-  (lectura con signo); observaciones de la auditoría para la memoria (I1-I8).
+- Hecho, flujo de ML (F0-F3), todo solo *out-of-fold* y sin tocar 2014J:
+  - Cortes (exp-2026-10-23-02), núcleo `ml/automl/` con D52-D54 y experimento principal exp-2026-10-27-01 (RL desplegada
+    en los 4 momentos; ROC-AUC OOF 0,646-0,708, por debajo de 0,75 de D4).
+  - F3: D8 con sensibles (exp-2026-10-28-01, salvaguarda D38 no activada, máx. 0,0181) y su equidad descriptiva
+    (28-02); ablación D46-rev (28-03); sensibilidad a la fuga D20/D39 (29-01); SHAP y estabilidad (29-02; 29-05 sustituye
+    a 29-04); diagnóstico del umbral transferido (29-06). Todas con auditoría de fuga apta con observaciones.
+  - Modelo final D41 preparado sin evaluar en 2014J (exp-2026-10-29-03), con la variante con sensibles sin desplegar
+    (P-13). Paquetes `.joblib` en `data/procesado/modelos/` (no versionados).
+  - 207 pruebas en `ml/tests` y `scripts/tests` (2026-11-03, todas pasan).
+- Hecho, bloque E (API y web; diseño en `docs/diseno-api.md` y `docs/diseno-web.md`):
+  - API Flask + PostgreSQL 16 (pasos 0-9): conjuntos, validación y creación de experimentos con trabajador en segundo
+    plano, historial, importación de paquetes, predicciones y explicaciones, exportaciones y evaluación única en la
+    cohorte de prueba (§4.7, nunca con OULAD). Pruebas unitarias y funcionales (RF-01..RF-06, RF-08, RF-09); exportación
+    intermedia api-2026-10-31-01. Explicación global de la API idéntica a la de `ml/` (exp-2026-11-03-01).
+  - Web Angular 21 (I-0..I-10): las 11 vistas del flujo carga → configuración → seguimiento → evaluación → modelos →
+    predicción → explicaciones, historial y descargas; 70 pruebas Vitest con barrido de vocabulario prohibido.
+  - Capturas de la interfaz (9) registradas en `evidencias/capturas/` (148d259, código 9945a8c; flujo web con
+    web-2026-11-03-02).
+- Pendiente para la Entrega 2:
+  - Diagrama de arquitectura para el capítulo 5 (`evidencias/arquitectura/` está vacía).
+  - Congelación el 06/11: exportación final única de las pruebas de la API (y de la web si se decide, sin `hostname`).
+- Después del 06/11: hallazgos menores de las revisiones (§13 de `docs/diseno-api.md`); en la Entrega 3, evaluación en
+  2014J, explicador del apilamiento (permutación), usabilidad y auditoría de accesibilidad.
+- Pendiente de registrar en `decisiones.md`: la etiqueta `desventaja_relevante` (lectura con signo).
 - Entorno: `~/.venvs/plataforma_tfm` (fuera de OneDrive), versiones exactas en `requirements.txt`. Ejecutar con
   `~/.venvs/plataforma_tfm/Scripts/python`. Las ejecuciones largas las lanza el estudiante en PowerShell.
 
