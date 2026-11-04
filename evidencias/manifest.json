@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-04T09:52:34",
-  "commit": "d57a13b",
+  "generado": "2026-11-04T09:53:39",
+  "commit": "72e217e",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -288,7 +288,20 @@
       "commit": "d57a13b"
     }
   ],
-  "arquitectura": [],
+  "arquitectura": [
+    {
+      "archivo": "arquitectura/arquitectura_componentes.png",
+      "fuente": "scripts/diagrama_arquitectura.py",
+      "descripcion": "Diagrama de componentes: interfaz Angular, API Flask, trabajador, núcleo ml/automl, persistencia (PostgreSQL y archivos) y flujo de ML en scripts",
+      "commit": "72e217e"
+    },
+    {
+      "archivo": "arquitectura/arquitectura_componentes.svg",
+      "fuente": "scripts/diagrama_arquitectura.py",
+      "descripcion": "Diagrama de componentes: interfaz Angular, API Flask, trabajador, núcleo ml/automl, persistencia (PostgreSQL y archivos) y flujo de ML en scripts",
+      "commit": "72e217e"
+    }
+  ],
   "pruebas": [
     {
       "archivo": "pruebas/exp-2026-10-23-01_antifuga.xml",
