@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-03T20:57:25",
-  "commit": "9945a8c",
+  "generado": "2026-11-04T09:52:34",
+  "commit": "d57a13b",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -227,14 +227,6 @@
       }
     },
     {
-      "archivo": "capturas/web-explicacion-global.png",
-      "descripcion": "Explicación global del modelo (semana 4)",
-      "commit": "9945a8c",
-      "datos": {
-        "experimento": "exp-2026-10-29-03"
-      }
-    },
-    {
       "archivo": "capturas/web-carga.png",
       "descripcion": "Carga de un CSV de entrenamiento (flujo genérico)",
       "commit": "9945a8c",
@@ -269,6 +261,31 @@
           "sha256": "d157df0679aaad3bb1d33ddbd92a8b4d99153b5aea18517cd6867c1c4ef612c6"
         }
       }
+    },
+    {
+      "archivo": "capturas/web-explicacion-global.png",
+      "descripcion": "Explicación global del modelo (semana 4)",
+      "commit": "d57a13b",
+      "datos": {
+        "experimento": "exp-2026-10-29-03"
+      }
+    },
+    {
+      "archivo": "capturas/web-explicacion-extrema.png",
+      "descripcion": "Explicación local con una contribución extrema, |SHAP| > 5 log-odds, marcada y con su aviso (semana 12, cohorte 2014B)",
+      "commit": "d57a13b",
+      "datos": {
+        "experimento": "exp-2026-10-29-03",
+        "csv": {
+          "ruta": "data/procesado/demo/semana_12_2014B.csv",
+          "sha256": "a0d98791512f79d901b9f11b8cb045f6219ecfb6e6e2acbab09da491c13e8eed"
+        }
+      }
+    },
+    {
+      "archivo": "capturas/indice.md",
+      "descripcion": "Índice de las capturas: pantalla, requisito, experimento, CSV y comprobaciones",
+      "commit": "d57a13b"
     }
   ],
   "arquitectura": [],
