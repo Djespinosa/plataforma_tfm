@@ -1,0 +1,87 @@
+{
+  "id": "api-2026-11-04-01",
+  "fecha": "2026-11-04T09:55:48",
+  "commit": "13506ca",
+  "comando": "python -m pytest api/tests -q -p no:cacheprovider --tb=short --junitxml=<temporal>\\api-2026-11-04-01_pruebas.xml --cov=api --cov=ml/automl --cov-report=json:<temporal>\\api-2026-11-04-01_cobertura.json",
+  "entorno": {
+    "python": "3.13.3",
+    "pytest": "9.1.1",
+    "flask": "3.1.3",
+    "sqlalchemy": "2.1.6",
+    "psycopg": "3.3.6",
+    "scikit-learn": "1.9.1",
+    "coverage": "7.17.0"
+  },
+  "superadas": 141,
+  "fallidas": 0,
+  "omitidas": 0,
+  "funcionales": 13,
+  "motor_bd_funcionales": "postgresql 16.15",
+  "funcionales_por_requisito": {
+    "RF-01": 2,
+    "RF-02": 2,
+    "RF-03, RNF-03, RNF-06": 1,
+    "RF-04": 3,
+    "RF-05": 2,
+    "RF-06, RE-01, RE-02, RE-03": 1,
+    "RF-08": 1,
+    "RF-09": 1
+  },
+  "pruebas_por_motor": {
+    "postgresql": 28,
+    "sqlite": 113
+  },
+  "pruebas_por_requisito": {
+    "RF-01": [
+      "api.tests.funcionales.test_rf01::test_carga_resume_la_tabla_y_avisa",
+      "api.tests.funcionales.test_rf01::test_rechaza_una_tabla_mal_formada"
+    ],
+    "RF-02": [
+      "api.tests.funcionales.test_rf02::test_esquema_efectivo_sin_crear_nada",
+      "api.tests.funcionales.test_rf02::test_configuracion_invalida"
+    ],
+    "RF-03": [
+      "api.tests.funcionales.test_rf03::test_entrena_en_segundo_plano_y_responde_mientras"
+    ],
+    "RF-04": [
+      "api.tests.funcionales.test_rf04::test_evaluacion_de_un_experimento_web",
+      "api.tests.funcionales.test_rf04::test_evaluacion_de_un_modelo_importado",
+      "api.tests.funcionales.test_rf04::test_evaluacion_unica_en_la_cohorte_de_prueba"
+    ],
+    "RF-05": [
+      "api.tests.funcionales.test_rf05::test_prediccion_con_un_modelo_web",
+      "api.tests.funcionales.test_rf05::test_prediccion_con_un_modelo_importado"
+    ],
+    "RF-06": [
+      "api.tests.funcionales.test_rf06::test_explicacion_global_y_local"
+    ],
+    "RF-07": [],
+    "RF-08": [
+      "api.tests.funcionales.test_rf08::test_historial_reapertura_y_reintento"
+    ],
+    "RF-09": [
+      "api.tests.funcionales.test_rf09::test_exportar_lote_y_evaluacion"
+    ]
+  },
+  "requisitos_sin_prueba_funcional": {
+    "RF-07": "sin ruta propia en la API: la vista resumida y la detallada son de web/ (pruebas Vitest de la evaluación y de la explicación local)"
+  },
+  "cobertura": {
+    "api": {
+      "archivos": 24,
+      "lineas": 1497,
+      "cubiertas": 1395,
+      "porcentaje": 93.2
+    },
+    "ml/automl": {
+      "archivos": 11,
+      "lineas": 627,
+      "cubiertas": 565,
+      "porcentaje": 90.1
+    }
+  },
+  "informes": {
+    "junit": "pruebas/api-2026-11-04-01_pruebas.xml",
+    "cobertura": "pruebas/api-2026-11-04-01_cobertura.json"
+  }
+}
