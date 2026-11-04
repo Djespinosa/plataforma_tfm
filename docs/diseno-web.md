@@ -321,11 +321,11 @@ CSV».
 Verificación manual por incremento: el flujo en el navegador contra la API real (§11) y navegación solo con teclado. Sin
 cobertura en la E2: necesitaría `@vitest/coverage-v8`, una dependencia más.
 
-Exportación (la decide el estudiante en la congelación): `npx ng test --watch=false --reporters=junit
+Exportación (la decide el estudiante en la congelación): `npx --no ng test --watch=false --reporters=junit
 --output-file=<tmp>/web_pruebas.xml` desde un árbol limpio. Vitest escribe `hostname` en cada `testsuite`, que el
 contrato prohíbe: hay que quitarlo antes de copiar el informe a
-`evidencias/pruebas/web-AAAA-MM-DD-NN_pruebas.xml` y añadirlo a `manifest.json`. Se puede hacer con el mismo
-procedimiento de `api/exportar_pruebas.py` o con un script pequeño en `scripts/`.
+`evidencias/pruebas/interfaz-AAAA-MM-DD-NN_pruebas.xml` (no `web-`, que es el prefijo de los experimentos web) y añadirlo a `manifest.json`. Se puede hacer con el mismo
+procedimiento de `api/exportar_pruebas.py`: `python -m scripts.exportar_pruebas_web`.
 
 ## 10. Seguimiento del entrenamiento
 
@@ -363,6 +363,7 @@ diseno-api).
 | `web-evaluacion-detalle.png` | candidatos y referencias, contraste, matriz de confusión |
 | `web-prediccion-lista.png` | lote de 2014B ordenado por probabilidad, con `aviso_rendimiento` y resumen |
 | `web-explicacion-local.png` | una fila marcada: aumentan/reducen, avisos de escala y causalidad |
+| `web-explicacion-extrema.png` | regla de las contribuciones extremas (valor absoluto de SHAP > 5 log-odds): marcadas, sin recortar y con su aviso; semana 12, `semana_12_2014B.csv`, fila 3261 (632215, `clics_glossary` −7,61) |
 | `web-explicacion-global.png` | importancia global y variables sin contribución |
 | `web-carga.png`, `web-configuracion.png`, `web-seguimiento.png` | flujo genérico (datos: decisión W-9) |
 

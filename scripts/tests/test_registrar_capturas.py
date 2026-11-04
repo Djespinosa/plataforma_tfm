@@ -43,6 +43,7 @@ def test_clasificar_solo_admite_capturas_de_la_lista_nuevas_o_cambiadas():
         "?? evidencias/capturas/notas.txt",
         "?? evidencias/capturas/web-otra.png",  # no está en CAPTURAS
         "?? evidencias/capturas/sub/web-carga.png",  # no está directamente en capturas/
+        " M evidencias/capturas/indice.md",  # lo reescribe el script: ni cambiada ni ajena
     ])
     cambiadas, ajenas = clasificar(status)
     assert cambiadas == {"web-evaluacion-detalle.png", "web-carga.png", "web-modelos.png"}
@@ -57,9 +58,21 @@ def test_registrar_sustituye_las_del_mismo_archivo_y_conserva_el_resto(tmp_path)
                 "pruebas": [], "usabilidad": [],
                 "capturas": [{"archivo": "capturas/a.png"}, {"archivo": "capturas/web-modelos.png", "commit": "viejo"}]}
     (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
-    nueva = {"archivo": "capturas/web-modelos.png", "descripcion": "d", "commit": "nuevo", "datos": {}}
+    (tmp_path / "capturas").mkdir()
+    nueva = {"archivo": "capturas/web-modelos.png", "descripcion": "d", "commit": "nuevo",
+             "datos": {"experimento": "exp-1"}}
     registrar(tmp_path, [nueva], "nuevo", datetime(2026, 11, 4, 10, 0))
+    registrar(tmp_path, [nueva], "nuevo", datetime(2026, 11, 4, 10, 0))  # el índice no se duplica
     resultado = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
-    assert resultado["capturas"] == [{"archivo": "capturas/a.png"}, nueva]
+    indice = {"archivo": "capturas/indice.md", "descripcion": resultado["capturas"][-1]["descripcion"],
+              "commit": "nuevo"}
+    assert resultado["capturas"] == [{"archivo": "capturas/a.png"}, nueva, indice]
+    texto = (tmp_path / "capturas" / "indice.md").read_text(encoding="utf-8")
+    assert "| `web-modelos.png` | Modelos desplegados (paso 5) | RF-05 | exp-1 | `—` | nuevo |" in texto
     assert (resultado["commit"], resultado["generado"], resultado["experimentos"]) == ("nuevo", "2026-11-04T10:00:00",
                                                                                        ["e"])
+
+
+def test_cada_captura_tiene_pantalla_y_requisito():
+    from scripts.registrar_capturas import CAPTURAS, PANTALLAS
+    assert set(PANTALLAS) == set(CAPTURAS)

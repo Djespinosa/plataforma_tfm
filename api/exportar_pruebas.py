@@ -29,6 +29,9 @@ from api import RAIZ  # también pone ml/ en sys.path
 from evidencias import EVIDENCIAS, SECCIONES_MANIFEST, comprobar_arbol_limpio, escribir_json, versiones_entorno
 
 COBERTURA = ("api", "ml/automl")
+REQUISITOS = [f"RF-0{i}" for i in range(1, 10)]  # docs/diseno-api.md §1
+SIN_PRUEBA_FUNCIONAL = {"RF-07": "sin ruta propia en la API: la vista resumida y la detallada son de web/ (pruebas Vitest "
+                                 "de la evaluación y de la explicación local)"}
 
 
 def siguiente_id(carpeta: Path, fecha: datetime) -> str:
@@ -65,8 +68,26 @@ def limpiar_junit(junit: Path) -> dict:
     requisitos = Counter(p.get("value") for caso in suite.iter("testcase") for p in caso.iter("property")
                          if p.get("name") == "requisito")
     # Solo las funcionales (y las unitarias marcadas «postgres») usan PostgreSQL; el resto, SQLite en memoria.
+    motores = [_propiedad(caso, "motor_bd") for caso in suite.iter("testcase")]
+    if None in motores:
+        sys.exit("Alguna prueba no registra su motor de base de datos (motor_bd): no se exporta.")
+    por_requisito = {r: [] for r in REQUISITOS}
+    for caso in suite.iter("testcase"):
+        for r in (_propiedad(caso, "requisito") or "").split(", "):
+            if r.startswith("RF-"):
+                if r not in por_requisito:
+                    sys.exit(f"Requisito desconocido {r} en {caso.get('name')}: no se exporta.")
+                por_requisito[r].append(f"{caso.get('classname')}::{caso.get('name')}")
     return {"superadas": total, "fallidas": 0, "omitidas": 0, "funcionales": sum(requisitos.values()),
-            "motor_bd_funcionales": motor_bd, "funcionales_por_requisito": dict(sorted(requisitos.items()))}
+            "motor_bd_funcionales": motor_bd, "funcionales_por_requisito": dict(sorted(requisitos.items())),
+            "pruebas_por_motor": dict(sorted(Counter(motores).items())),
+            "pruebas_por_requisito": por_requisito,
+            "requisitos_sin_prueba_funcional": {r: SIN_PRUEBA_FUNCIONAL.get(r, "sin prueba funcional")
+                                                for r, casos in por_requisito.items() if not casos}}
+
+
+def _propiedad(caso: ET.Element, nombre: str) -> str | None:
+    return next((p.get("value") for p in caso.iter("property") if p.get("name") == nombre), None)
 
 
 def resumir_cobertura(cobertura: Path) -> dict:

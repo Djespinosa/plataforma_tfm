@@ -10,8 +10,8 @@ evidencias/
 ├── manifest.json            # Índice de todo lo exportado (obligatorio)
 ├── experimentos/<id>.json   # Un archivo por experimento (esquemas abajo)
 ├── figuras/                 # PNG/SVG a 300 ppp: ROC, PR, calibración, SHAP global/local, comparativas
-├── capturas/                # Capturas de pantalla de la interfaz (PNG), nombre descriptivo
-├── arquitectura/            # Diagramas (PNG/SVG + fuente .mmd/.puml/.drawio)
+├── capturas/                # Capturas de pantalla de la interfaz (PNG) e indice.md
+├── arquitectura/            # Diagramas (PNG/SVG + fuente: script versionado o .mmd/.puml/.drawio)
 ├── pruebas/                 # Informes de pruebas y cobertura (JUnit XML, HTML o resumen JSON)
 └── usabilidad/              # Resultados anonimizados (CSV) + instrumento utilizado (cuestionario)
 ```
@@ -233,12 +233,23 @@ las predicciones dentro de la tolerancia); `oof_sha256` = `{base, nuevo}` por se
 ## Informes de pruebas de la API (`pruebas/api-<fecha>-NN_*`)
 
 `api/exportar_pruebas.py` (docs/diseno-api.md §10), sin experimento asociado: `_pruebas.xml` (JUnit de todo `api/tests`
-con `--tb=short`, sin `hostname`; propiedad de la suite `motor_bd_funcionales` y de cada caso funcional `requisito`), `_cobertura.json`
+con `--tb=short`, sin `hostname`; propiedad de la suite `motor_bd_funcionales`, de cada caso `motor_bd` (`postgresql` o
+`sqlite`) y de cada caso funcional `requisito`), `_cobertura.json`
 (coverage.py, rutas relativas, de `api/` y `ml/automl/` sin las pruebas) y `_resumen.json` = `{id, fecha, commit, comando,
-entorno, superadas, fallidas, omitidas, funcionales, motor_bd_funcionales, funcionales_por_requisito, cobertura: {<paquete>: {archivos, lineas,
+entorno, superadas, fallidas, omitidas, funcionales, motor_bd_funcionales, funcionales_por_requisito, pruebas_por_motor, pruebas_por_requisito: {RF-01…RF-09:
+[clase::prueba]}, requisitos_sin_prueba_funcional: {RF: motivo}, cobertura: {<paquete>: {archivos, lineas,
 cubiertas, porcentaje}}, informes}`; solo las funcionales (y las unitarias marcadas `postgres`) usan
 PostgreSQL, el resto SQLite en memoria. Solo se exporta con todas superadas y ninguna omitida. En `manifest.json`, sus
 entradas de `pruebas` llevan `id` en lugar de `experimento`.
+
+## Informes de pruebas de la interfaz (`pruebas/interfaz-<fecha>-NN_*`)
+
+`python -m scripts.exportar_pruebas_web` (docs/diseno-web.md §9), sin experimento asociado: `_pruebas.xml` (JUnit de
+todas las pruebas Vitest de `web/`, sin el `hostname` que Vitest pone en cada `testsuite`) y `_resumen.json` = `{id, fecha,
+commit, comando, carpeta, entorno: {node, @angular/core, vitest, jsdom, typescript}, superadas, fallidas, omitidas,
+archivos, cobertura: null, motivos_null, informes}` (sin cobertura en la Entrega 2, W-8). Solo se exporta con todas
+superadas, ninguna omitida y sin rutas del usuario. Entradas de `pruebas` con `id`, como las de la API. El prefijo
+`interfaz-` evita confundir el informe con un experimento web (`web-AAAA-MM-DD-NN`); `entorno` = versiones instaladas.
 
 ## Capturas de la interfaz (`capturas/web-<vista>.png`)
 
@@ -248,6 +259,17 @@ sustituye en `capturas` una entrada por PNG nuevo o cambiado (sin confirmar nada
 confirmadas sin cambios conservan su entrada): `{archivo, descripcion, commit, datos: {experimento, csv?: {ruta, sha256}}}`
 (`commit` = el del código que se ve; `experimento` = el que muestra la vista; `csv` = el archivo cargado en ella). Nunca
 2014J, ni la evaluación única en la cohorte de prueba con datos de OULAD, ni métricas de prueba.
+Cada registro reescribe `capturas/indice.md` (archivo, pantalla, requisito, experimento, CSV y commit de cada captura,
+con las comprobaciones de 2014J y de demostración) y lo añade a `capturas` como `{archivo, descripcion, commit}`.
+
+## Arquitectura (`arquitectura/<nombre>.png|svg|md`)
+
+Generados por un script versionado, que es su fuente (PNG a 300 ppp y SVG sin fecha). `python -m
+scripts.diagrama_arquitectura`, desde un árbol limpio, añade o sustituye en `arquitectura` una entrada por archivo:
+`{archivo, fuente, descripcion, commit}` (`fuente` = ruta del script; `commit` = el HEAD con que se generó).
+`python -m scripts.documentar_arquitectura` añade igual `arquitectura/modelo_datos.md` (DDL de PostgreSQL de las 6
+tablas y disparadores de D-2, desde `api/tablas.py` y la migración) y `arquitectura/endpoints.md` (método, ruta,
+requisito y descripción; falla si la tabla del script no coincide con las rutas registradas en Flask).
 
 ## `manifest.json`
 

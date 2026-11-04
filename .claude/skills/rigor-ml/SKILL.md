@@ -66,9 +66,14 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       *out-of-fold*. De 2014J solo se exportan recuentos descriptivos (población, prevalencia, subgrupos, solapamiento).
 - [ ] **D38 Variantes sin nueva búsqueda:** D8 (con y sin sensibles), la ablación y D20 **reutilizan los hiperparámetros**
       de la configuración principal (mismo momento y familia) y solo reentrenan; se declara. La búsqueda principal se hace
-      **sin variables sensibles**, así que la ventaja de la variante "con" es una cota inferior. **Salvaguarda:** si aun así
-      excluirlas cuesta ≥ 0,02 de ROC-AUC *out-of-fold*, la configuración principal pasa a ser "con" y se repite la búsqueda
-      para ella. En D20 la inflación medida también es una cota inferior (la variante con fuga no está optimizada).
+      **sin variables sensibles**, así que la ventaja de la variante "con" es una cota inferior (D38).
+      **Salvaguarda (D38-concreción):** si excluirlas cuesta ≥ 0,02 de ROC-AUC *out-of-fold* calibrada (estimación
+      puntual, con − sin) en algún momento, en algún candidato o entre los mejores de cada variante, la configuración
+      principal pasa a ser "con" y se repite la búsqueda para ella. Resultado: no activada (exp-2026-10-28-01, máx. 0,0181,
+      MLP en la semana 4, cuyo IC llega a 0,0242: no se afirma que el coste sea < 0,02 con seguridad).
+      **D38-concreción-D20:** la inflación de D20 se describe como **estimación previsiblemente sesgada a la baja**, no como
+      cota inferior garantizada (TPE estocástico, calibración elegida por Brier, ruido de reentrenamiento; control de la
+      semana 0: +0,0045 en el apilamiento y −0,0023 en la RL).
       Implementación de D8: `ml/variante.py` con `ml/configs/con_sensibles.json`; compara por modelo la ROC-AUC
       *out-of-fold* calibrada con − sin sobre las mismas filas (las "sin" son las OOF del principal, por SHA-256), y la
       salvaguarda se activa si la diferencia puntual es ≥ 0,02 en algún candidato o entre los mejores de cada variante,
@@ -126,6 +131,15 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - [ ] Modelo final (desplegado y, en la Entrega 3, evaluado en prueba): reentrenado con las 15 presentaciones y calibrado
       con `CalibratedClassifierCV` sobre los 5 pliegues agrupados; se le aplica el umbral anterior. SHAP sobre su modelo base
       sin calibrar (D32). Se declara que umbral y modelo final proceden de ajustes distintos.
+- [ ] **D41-concreción** (preparado, no evaluado; exp-2026-10-29-03): en cada momento, la RL desplegada con los
+      hiperparámetros y el método de calibración del principal (D38), reentrenada con las presentaciones de entrenamiento y
+      calibrada sobre los 5 pliegues agrupados con `ensemble=False` (D54). Umbral recalculado desde las OOF calibradas del
+      principal, que debe coincidir con su JSON: 0,213612 / 0,150952 / 0,132519 / 0,117117 (semanas 0/4/8/12). Un
+      `.joblib` por momento (modelo calibrado, umbral, columnas, fondo del explicador) en `data/procesado/modelos/`, no
+      versionado, con su SHA-256 en el JSON. 2014J no se lee; `metricas_test` = null. D45 pendiente antes de evaluar.
+- [ ] **P-13** Modelo final de la variante con sensibles: se prepara igual que D41-concreción (hiperparámetros de
+      exp-2026-10-27-01, calibración elegida en exp-2026-10-28-01, umbral desde sus OOF) para informar en prueba ambas
+      variantes como dato informativo, sin usarlas para elegir. No se despliega.
 - [ ] **D21** En prueba, la sensibilidad se informa literalmente junto con umbral, precisión y **tasa de alerta** (D19).
 - [ ] **D4/D22** Umbrales congelados: ROC-AUC ≥ 0,75 y sensibilidad ≥ 0,70 en las semanas 8 y 12, cada una por separado,
       sobre 2014J global. Superar a las referencias en **todos** los momentos.
@@ -146,8 +160,11 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       no significativa → no concluyente, salvo IC dentro de ±0,02 → equivalencia práctica. Implementación propia de DeLong
       con prueba unitaria contra un caso conocido. La lectura usa el **signo** de *Δ*ₖ (AutoML − RL): una desventaja
       significativa ≥ 0,02 es `desventaja_relevante`, nunca una ventaja.
-- [ ] **D46** Ablación (solo en validación cruzada) sobre el **mejor modelo del motor** (D44), reutilizando sus
-      hiperparámetros (la pérdida es una cota superior de la contribución), por momento, con los 5 grupos de `GRUPOS` en
+- [ ] **D46-rev** Ablación (solo en validación cruzada) sobre el **mejor modelo del motor** (D44; principal) y la **RL
+      desplegada** (complementario), reutilizando sus hiperparámetros (D38). La pérdida (completo − sin el grupo, mismas
+      filas) es una **estimación sesgada al alza** de la contribución, no una cota superior garantizada. Los IC
+      *bootstrap* y DeLong no recogen la variabilidad del reentrenamiento (control de la semana 0: ≈ 0,0045); las pérdidas
+      de ese orden no se leen como contribución aunque su IC excluya el 0. Por momento, con los 5 grupos de `GRUPOS` en
       `ml/cortes_oulad.py` (columna `grupo_ablacion` del catálogo; reparto de D51-rev): (1) demográficas y matrícula;
       (2) aula virtual, clics agregados, 25 (totales, por tipo de actividad, por ventana semanal, días activos); (3) aula
       virtual, variables derivadas, 8 (regularidad, tendencia, recencia, inactividad, percentiles de cohorte);
@@ -155,6 +172,13 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - [ ] **D20** Sensibilidad a la fuga: repetir cada momento **sin** excluir a los ya retirados (salvo las bajas anteriores al
       día 0) e informar la diferencia de ROC-AUC (figura por semana). Se mantienen la exclusión por matrícula tardía y
       D26/D27, para que solo cambie la exclusión de los ya retirados. Es un análisis, no un criterio de éxito.
+- [ ] **D39-concreción** (exp-2026-10-29-01): (1) lectura primaria, cada variante con sus OOF en su propia población, IC
+      por *bootstrap* de estudiantes sobre la población con fuga (2000 réplicas, semilla 42); (2) complementaria, modelo
+      con fuga en las filas comunes frente al principal (IC pareado, DeLong informativo); (3) descomposición: inflación
+      total = efecto de evaluar con casos triviales [fuga(su población) − fuga(comunes)] + efecto de entrenar con ellos
+      [fuga(comunes) − principal(comunes)]; (4) mismos dos modelos que la ablación (D46-rev), hiperparámetros del
+      principal, mismos pliegues, n y prevalencia por población y momento, 2014J fuera. Inflación: estimación
+      previsiblemente sesgada a la baja (D38-concreción-D20).
 - [ ] **D33/D49-rev** Parsimonia por **no inferioridad**: "el mejor" es el candidato de mayor ROC-AUC *out-of-fold* (incluida
       la RL). Se despliega el modelo más simple (RL < árboles < MLP < apilamiento) cuya pérdida de ROC-AUC *out-of-fold*
       frente al mejor (mejor − candidato) tenga el **límite superior del IC *bootstrap* del 95 % < 0,02**. DeLong ya no decide
@@ -167,6 +191,13 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 
 - [ ] **D32** SHAP sobre la salida **sin calibrar** (log-odds). La interfaz muestra la probabilidad calibrada.
 - [ ] **D33** TreeSHAP para árboles; permutación con muestra de fondo para MLP y apilamiento (se informa el coste).
+- [ ] **D33-concreción** La RL desplegada se explica con **SHAP lineal exacto** en log-odds sin calibrar,
+      φ_j = coef_j · (x_j − media de las filas de ajuste transformadas) (≡ `shap.LinearExplainer` con fondo independiente =
+      filas de ajuste; en el modelo final, todo el entrenamiento). Por colinealidad, contexto de la presentación y actividad
+      se leen por bloques. Estabilidad en dos versiones: la principal excluye las variables con SHAP nulo en todos los
+      pliegues; la secundaria las incluye. Los SHAP locales extremos (p. ej. −40,6 log-odds) se atienden en la interfaz,
+      no en el modelo. Implementación de la plataforma: |φ| > 5 (`automl.explicacion.LIMITE_EXTREMO`, de
+      exp-2026-10-29-05) se marca y se avisa, sin recortar.
 - [ ] **OE4** SHAP local para el 100 % de las predicciones que emite la plataforma.
 - [ ] **D9** Estabilidad: Spearman de las importancias medias |SHAP| entre pares de pliegues y solapamiento del top-10
       (media y rango), solo entre pliegues, sin umbral.
@@ -194,7 +225,10 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - Optuna selecciona con los mismos pliegues con los que se informan las métricas *out-of-fold*: ligero optimismo de las
   métricas de validación (sin búsqueda anidada, por coste).
 - Las variantes (D8, ablación, D20) reutilizan los hiperparámetros de la configuración principal (D38): la ventaja de
-  "con sensibles" y la inflación de D20 son cotas inferiores; la pérdida de la ablación, una cota superior (D46).
+  "con sensibles" es una cota inferior (D38); la inflación de D20, una estimación previsiblemente sesgada a la baja
+  (D38-concreción-D20), y la pérdida de la ablación, una estimación sesgada al alza (D46-rev), no cotas garantizadas.
+- Los IC *bootstrap* y DeLong se calculan sobre predicciones ya ajustadas y no recogen la variabilidad del
+  reentrenamiento (≈ 0,0045 en el control de la semana 0; D46-rev).
 - Umbral sin margen (D45): la sensibilidad en prueba puede quedar por debajo de 0,70.
 - CCC solo tiene una presentación de entrenamiento (2014B): en el pliegue que la contiene, CCC no se ve al entrenar.
 - Withdrawn como aproximación a la deserción (D2).

@@ -1,5 +1,5 @@
 """Salvaguardas de la exportación de pruebas a evidencias/ (api/exportar_pruebas.py, docs/diseno-api.md §10): nada se
-exporta con pruebas omitidas o fallidas, sin el motor de las funcionales, con rutas absolutas ni con la contraseña."""
+exporta con pruebas omitidas o fallidas, sin el motor de las funcionales o de alguna prueba, con rutas absolutas ni con la contraseña."""
 
 import json
 from urllib.parse import quote_plus
@@ -9,25 +9,35 @@ import pytest
 from api import exportar_pruebas
 
 
-def junit(tmp_path, *, omitidas=0, fallos=0, motor=True):
+def junit(tmp_path, *, omitidas=0, fallos=0, motor=True, motor_caso=True):
     propiedades = '<properties><property name="motor_bd_funcionales" value="postgresql 16.15" /></properties>'
-    caso = '<testcase name="a"><properties><property name="requisito" value="RF-01" /></properties></testcase>'
+    caso_a = ('<testcase classname="funcionales.test_rf03" name="a"><properties>'
+              '<property name="motor_bd" value="postgresql" />'
+              '<property name="requisito" value="RF-03, RNF-03, RNF-06" /></properties></testcase>')
+    caso_b = ('<testcase classname="test_x" name="b"><properties><property name="motor_bd" value="sqlite" />'
+              '</properties></testcase>' if motor_caso else '<testcase classname="test_x" name="b" />')
     ruta = tmp_path / "x_pruebas.xml"
     ruta.write_text(f'<testsuites><testsuite name="pytest" hostname="equipo" tests="2" skipped="{omitidas}" '
-                    f'failures="{fallos}" errors="0">{propiedades if motor else ""}{caso}<testcase name="b" />'
+                    f'failures="{fallos}" errors="0">{propiedades if motor else ""}{caso_a}{caso_b}'
                     '</testsuite></testsuites>', encoding="utf-8")
     return ruta
 
 
 def test_junit_sin_hostname_y_resumen(tmp_path):
     ruta = junit(tmp_path)
-    assert exportar_pruebas.limpiar_junit(ruta) == {
+    resumen = exportar_pruebas.limpiar_junit(ruta)
+    sin = resumen.pop("requisitos_sin_prueba_funcional")
+    assert resumen == {
         "superadas": 2, "fallidas": 0, "omitidas": 0, "funcionales": 1, "motor_bd_funcionales": "postgresql 16.15",
-        "funcionales_por_requisito": {"RF-01": 1}}
+        "funcionales_por_requisito": {"RF-03, RNF-03, RNF-06": 1},
+        "pruebas_por_motor": {"postgresql": 1, "sqlite": 1},
+        "pruebas_por_requisito": {f"RF-0{i}": (["funcionales.test_rf03::a"] if i == 3 else []) for i in range(1, 10)}}
+    assert list(sin) == ["RF-01", "RF-02", "RF-04", "RF-05", "RF-06", "RF-07", "RF-08", "RF-09"]
+    assert sin["RF-07"].startswith("sin ruta propia")
     assert "hostname" not in ruta.read_text(encoding="utf-8")
 
 
-@pytest.mark.parametrize("cambios", [{"omitidas": 1}, {"fallos": 1}, {"motor": False}])
+@pytest.mark.parametrize("cambios", [{"omitidas": 1}, {"fallos": 1}, {"motor": False}, {"motor_caso": False}])
 def test_junit_con_omitidas_fallidas_o_sin_motor_no_se_exporta(tmp_path, cambios):
     with pytest.raises(SystemExit):
         exportar_pruebas.limpiar_junit(junit(tmp_path, **cambios))

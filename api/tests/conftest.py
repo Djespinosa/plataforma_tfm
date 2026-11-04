@@ -52,6 +52,22 @@ def pytest_runtest_makereport(item, call):
     informe.sections = [(titulo, ocultar(contenido)) for titulo, contenido in informe.sections]
 
 
+@pytest.fixture(autouse=True)
+def motor_bd_prueba(request, record_property):  # (las funcionales tienen su fixture «motor_bd», de sesión)
+    """Motor de cada prueba en el JUnit (propiedad «motor_bd»): PostgreSQL si lleva el marcador «postgres» (las que usan
+    la base del contenedor, también las parametrizadas de test_tablas que la piden con getfixturevalue), si no SQLite
+    en memoria (o ninguna base)."""
+    record_property("motor_bd", "postgresql" if request.node.get_closest_marker("postgres") else "sqlite")
+
+
+def pytest_collection_modifyitems(items):
+    """Toda prueba que pide la base del contenedor debe llevar el marcador «postgres» (de él sale su motor_bd)."""
+    sin_marcar = [i.nodeid for i in items if "url_postgres" in getattr(i, "fixturenames", ())
+                  and not i.get_closest_marker("postgres")]
+    if sin_marcar:
+        raise pytest.UsageError("Usan PostgreSQL sin el marcador «postgres»: " + ", ".join(sin_marcar))
+
+
 @pytest.fixture
 def app(tmp_path):
     app = crear_app(Pruebas(datos=tmp_path))

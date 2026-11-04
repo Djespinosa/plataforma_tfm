@@ -23,8 +23,9 @@ rechaza como bloqueante cualquier experimento sin partición, semilla o control 
 - Experimento: `exp-AAAA-MM-DD-NN` (NN correlativo del día, desde 01). Nunca se reutiliza ni se sobrescribe un id:
   un experimento citado en la memoria no se borra; se añade otro.
 - Figuras: `figuras/<id>_<nombre>.png`, 300 ppp, títulos y ejes en español, legibles en escala de grises.
-- Capturas: `capturas/web-<vista>.png`, manuales, registradas con `python -m scripts.registrar_capturas` (`{archivo, descripcion, commit, datos}`, CONTRATO.md). Diagramas: `arquitectura/<nombre>.png|svg` + fuente
-  (`.mmd`, `.puml` o `.drawio`). Pruebas: `pruebas/<id>_<suite>.xml|json`.
+- Capturas: `capturas/web-<vista>.png`, manuales, registradas con `python -m scripts.registrar_capturas` (`{archivo, descripcion, commit, datos}`, CONTRATO.md). Arquitectura: `arquitectura/<nombre>.png|svg` con `python -m scripts.diagrama_arquitectura` y `modelo_datos.md` y
+  `endpoints.md` con `python -m scripts.documentar_arquitectura` (`{archivo, fuente, descripcion, commit}`, CONTRATO.md; la fuente es el script
+  o un `.mmd`, `.puml` o `.drawio`). Pruebas: `pruebas/<id>_<suite>.xml|json`.
 
 ## Código reutilizable
 

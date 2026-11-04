@@ -34,7 +34,7 @@ LightGBM, Optuna, SHAP (pipeline ML).
 ```
 ml/                  Núcleo ML y scripts (cortes, experimento, variantes, ablación, fuga, SHAP, modelo final; automl/, configs/, tests/)
 api/                 API Flask + PostgreSQL (rutas/, servicios/, trabajador, importador, migraciones Alembic, tests/)
-scripts/             Evidencias que cruzan api/ y ml/ con datos de OULAD (evidencia_global_api.py, D-3) y registro de capturas (registrar_capturas.py)
+scripts/             Evidencias que cruzan api/ y ml/ con datos de OULAD (evidencia_global_api.py, D-3), registro de capturas (registrar_capturas.py), diagrama de arquitectura (diagrama_arquitectura.py), modelo de datos y endpoints (documentar_arquitectura.py) y pruebas web (exportar_pruebas_web.py)
 web/                 Interfaz Angular 21 (src/app: api/, vistas/, pruebas/, textos.ts)
 data/raw/oulad/      7 CSV de OULAD, CC-BY 4.0 (no versionados)
 evidencias/          Lo único que consume la memoria (ver CONTRATO.md)
@@ -86,7 +86,7 @@ Detalle de capas, convenciones, API y modelo de datos: skill `arquitectura`.
   - Congelación el 06/11: exportación final única de las pruebas de la API (y de la web si se decide, sin `hostname`).
 - Después del 06/11: hallazgos menores de las revisiones (§13 de `docs/diseno-api.md`); en la Entrega 3, evaluación en
   2014J, explicador del apilamiento (permutación), usabilidad y auditoría de accesibilidad.
-- Pendiente de registrar en `decisiones.md`: la etiqueta `desventaja_relevante` (lectura con signo).
+- `desventaja_relevante` registrada en las decisiones de la plataforma (D-9 de `docs/diseno-api.md`); falta en `decisiones.md` de la memoria.
 - Entorno: `~/.venvs/plataforma_tfm` (fuera de OneDrive), versiones exactas en `requirements.txt`. Ejecutar con
   `~/.venvs/plataforma_tfm/Scripts/python`. Las ejecuciones largas las lanza el estudiante en PowerShell.
 

@@ -196,6 +196,8 @@ textos que genera la API usan coma decimal. Códigos comunes: 400 cuerpo mal for
 («Esta ruta no admite el método solicitado.»), 409 conflicto de estado, 413 («El archivo supera el tamaño
 máximo de 50 MB.»), 415, 422 validación, 500 («Error interno de la plataforma. Inténtelo de nuevo; si persiste, consulte
 el registro del servidor.»), 503 («La base de datos no está disponible.»).
+Limitación declarada: cualquier `OperationalError` de SQLAlchemy responde 503, aunque la causa no sea de
+disponibilidad (p. ej. un bloqueo o una consulta cancelada); el detalle queda en el registro del servidor.
 Toda respuesta de resultados (evaluación, predicciones, explicaciones) incluye `aviso_decision` = pie fijo de
 `guardarrailes-interfaz` («Herramienta de apoyo a la decisión…»).
 
@@ -846,7 +848,7 @@ PLATAFORMA_MAX_FILAS_PREDICCION=20000
 | Capa | Dónde | Motor | Qué |
 |---|---|---|---|
 | Núcleo ML | `ml/tests/test_validacion.py`, `test_motor.py`, `test_explicacion.py` + las 155 actuales | — | §6; anti-fuga: la cohorte de prueba nunca llega a `modelar` (espía) |
-| Servicios y rutas | `api/tests/test_*.py` | SQLite en memoria | lectura CSV (separadores, BOM, duplicadas, vacío), configuración (cada 422 del §4.2), importador (§8), paquetes, explicaciones (top-5, extremos, sin contribución), textos (§7), trabajador (`ejecutar` síncrono con presupuesto `prueba`; huérfanos → `interrumpido`; fallo → `fallido` sin `modelo`) |
+| Servicios y rutas | `api/tests/test_*.py` | SQLite en memoria (las marcadas `postgres`, PostgreSQL) | lectura CSV (separadores, BOM, duplicadas, vacío), configuración (cada 422 del §4.2), importador (§8), paquetes, explicaciones (top-5, extremos, sin contribución), textos (§7), trabajador (`ejecutar` síncrono con presupuesto `prueba`; huérfanos → `interrumpido`; fallo → `fallido` sin `modelo`) |
 | Funcionales | `api/tests/funcionales/test_rf01…rf09.py` (`@pytest.mark.postgres`) | **PostgreSQL 16.15 del contenedor** | Un caso por requisito con el cliente de Flask, tabla sintética (300 filas, 10 grupos) y presupuesto `prueba`; RF-03 con el trabajador en otro hilo y `GET /experimentos/{id}` respondiendo mientras entrena (RNF-03); RF-04/05/06 también con un paquete importado sintético |
 
 - Cada caso funcional registra su requisito con `record_property("requisito", "RF-0x")`; el JUnit lleva
@@ -861,8 +863,8 @@ Al implementar (incremento 8):
 - `api/tests/funcionales/test_rf01…rf08.py` (11 casos; RF-07 no tiene ruta y RF-09 llega en el incremento 9; en el
   incremento 9, `test_rf09.py` y la evaluación única en `test_rf04.py`: 13 casos), con el
   `conftest.py` de la carpeta: `app` es la de PostgreSQL, la propiedad `requisito` sale de la constante `REQUISITO` del
-  módulo y la de la suite `motor_bd_funcionales` (no `motor_bd`: el resto de `api/tests` usa SQLite), de `SHOW
-  server_version`. RF-03 cubre también RNF-03 (consultas mientras entrena el trabajador
+  módulo y la de la suite `motor_bd_funcionales`, de `SHOW server_version`. Además, cada caso de `api/tests` registra
+  `motor_bd` (`postgresql` si lleva el marcador `postgres`, si no `sqlite`). RF-03 cubre también RNF-03 (consultas mientras entrena el trabajador
   en otro hilo, cada una en menos de 2 s) y RNF-06; RF-06, también RE-01/02/03.
 - `api/tests/test_textos.py`: constantes y funciones de `textos.py` (con valores de ejemplo por anotación) y 24
   respuestas de las rutas; la única excepción es la nota fija de causalidad, leída de `guardarrailes-interfaz`.
@@ -903,6 +905,7 @@ Los incrementos 0-6 cubren todos los Must de la plataforma; 7-9 son S/C.
 | D-6 | **Presupuesto `demostracion`** = 5 ensayos por familia y 200 réplicas *bootstrap* | Aceptar; las capturas de evaluación para la memoria, con el modelo importado (resultados reales de 27-01) y no con una demostración |
 | D-7 | **Pliegues agrupados genéricos** con `StratifiedGroupKFold` (equilibra la prevalencia entre pliegues), distinto del reparto de D29-rev (3 presentaciones por pliegue, permutación con semilla), que sigue siendo el de OULAD | Aceptar y declararlo en 5.6 de la memoria |
 | D-8 | **Extraer** `motor.py` y `explicacion.py` de `experimento.py`, `modelo_final.py` y `shap_estabilidad.py` (movimientos con reexportación) en vez de duplicar | Extraer, con la no regresión del §6.2 antes del commit |
+| D-9 | **Lectura `desventaja_relevante`** (lectura con signo de D49, registrada el 2026-11-03): en el contraste central, diferencia = ROC-AUC OOF de AutoML − RL optimizada; si DeLong (corregido por Holm) es significativo y la diferencia es ≤ −0,02, la lectura es `desventaja_relevante` (la RL optimizada ordena mejor), nunca una ventaja. Se calcula en `ml/automl/comparacion.lectura` (prueba en `ml/tests/test_automl.py`); se exporta en el JSON de los experimentos (`momentos[].contraste_central.lectura`) y en `GET /api/experimentos/{id}/evaluacion` (`contraste.lectura` y `lectura_texto`, `api/textos.LECTURAS`), y la interfaz muestra `lectura_texto` en la vista de evaluación | Registrada; en exp-2026-10-27-01 no aparece en ningún momento |
 
 ## 13. Pendientes
 
@@ -982,3 +985,5 @@ importantes antes de la congelación).
 | Revisión del incremento web I-8 | Historial: la fila de un experimento ya reintentado no lo indica y la introducción promete un reintento que la API rechaza con 409 (mostrar «reintentado en {id}» calculándolo de la lista, o matizar el texto); `inicio.historialAyuda` dice «reintente los que no terminaron» (incluye en cola y en curso, excluye fallidos): «los que fallaron o se interrumpieron»; el fixture `HISTORIAL` tiene un importado interrumpido, combinación que la API no produce |
 | Revisión del incremento web I-9 | Evaluación única: un 409 «ya se hizo» (otra pestaña) deja el formulario sin mostrar el resultado guardado (volver a leer el detalle tras el 409); con los mismos datos y cohorte ya evaluados en otro experimento, el botón aparece en cada visita y siempre da 409 (la API no lo expone en el detalle: limitación conocida); la prueba no afirma el botón desactivado y el texto «Evaluando…» durante la petición |
 | Revisión del incremento web I-10 | Descargas: `lote.spec` usa el mismo id en la entrada y en el fixture (no distingue `r.lote.id` de `lote()`); `evaluacion.spec` no comprueba el texto ni el `aria-describedby` del enlace; la URL del lote se compone en la plantilla y la de la evaluación en un `computed` (estilos distintos, ambos correctos) |
+| Revisión del diagrama de arquitectura | `scripts/diagrama_arquitectura.py`: en un ensayo con `--salida` sin `manifest.json`, `registrar()` crea las secciones sin `generado` ni `commit` delante (no aplica el orden de `ml/evidencias.actualizar_manifest`); en `evidencias/` no ocurre |
+| Revisión de la exportación de pruebas web | `scripts/exportar_pruebas_web.py`: si falla el segundo `shutil.move` o la escritura del manifest queda un archivo sin entrada (mismo riesgo que `api/exportar_pruebas.py`); sin prueba de `main` (nada escrito si fallan las pruebas; dos entradas con `id`); la comprobación de rutas distingue mayúsculas y un nombre de prueba con `hostname=` abortaría (falso positivo); `siguiente_id` y `limpiar_junit` duplican en parte los de la API |
