@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-04T09:53:39",
-  "commit": "72e217e",
+  "generado": "2026-11-04T09:54:36",
+  "commit": "a5cbf80",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -300,6 +300,18 @@
       "fuente": "scripts/diagrama_arquitectura.py",
       "descripcion": "Diagrama de componentes: interfaz Angular, API Flask, trabajador, núcleo ml/automl, persistencia (PostgreSQL y archivos) y flujo de ML en scripts",
       "commit": "72e217e"
+    },
+    {
+      "archivo": "arquitectura/endpoints.md",
+      "fuente": "scripts/documentar_arquitectura.py",
+      "descripcion": "Endpoints de la API: método, ruta, requisito y descripción",
+      "commit": "a5cbf80"
+    },
+    {
+      "archivo": "arquitectura/modelo_datos.md",
+      "fuente": "scripts/documentar_arquitectura.py",
+      "descripcion": "Modelo de datos: DDL de las 6 tablas (claves, CHECK, índices) y disparadores de la evaluación única (D-2)",
+      "commit": "a5cbf80"
     }
   ],
   "pruebas": [
