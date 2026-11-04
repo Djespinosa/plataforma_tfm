@@ -140,7 +140,6 @@ def descripcion_importado(experimento: str, evaluacion_de: str) -> str:
 
 # Predicción (RF-05, §4.4)
 TEXTO_PROBABILIDAD = "Probabilidad estimada por el modelo"
-SUGERENCIA = "Sugerencia: priorizar contacto de apoyo"
 AVISO_RENDIMIENTO = ("Estas estimaciones no miden el rendimiento del modelo. Si las filas formaron parte de su "
                      "entrenamiento, como los datos de demostración, están dentro de la muestra y solo sirven para "
                      "mostrar el funcionamiento de la plataforma.")

@@ -4,8 +4,9 @@ Las capturas se toman a mano (Chrome a 1440 × 900) con web/ y api/ confirmados 
 evidencias/capturas/ con los nombres de CAPTURAS. Este script, desde la raíz y con ese mismo commit, añade o sustituye
 en `capturas` una entrada {archivo, descripcion, commit, datos} por cada PNG nuevo o cambiado según `git status` (las
 capturas ya confirmadas y sin cambios conservan su entrada y su commit); `datos` lleva el experimento y el
-CSV (ruta y SHA-256) que muestra la vista. Reescribe también capturas/indice.md (pantalla y requisito de cada captura). El árbol debe estar limpio salvo esos PNG (nuevos o cambiados, no
-borrados) y no se confirma nada entre la toma y el registro: el commit registrado es el HEAD, el del código que se ve. El
+CSV (ruta y SHA-256) que muestra la vista. Reescribe también capturas/indice.md (pantalla, requisito y cambios de código
+de cada captura). El árbol debe estar limpio salvo esos PNG (nuevos o cambiados, no borrados) y no se confirma nada
+entre la toma y el registro: el commit registrado es el HEAD, el del código que se ve. El
 estudiante confirma después los PNG y el manifest en un commit propio.
 
     python -m scripts.registrar_capturas --experimento-web web-2026-11-04-01
@@ -74,18 +75,31 @@ COMPROBACIONES = (
     "demostración, con su aviso visible.")
 
 
-def indice(capturas: list[dict]) -> str:
-    """Tabla de las capturas registradas: archivo, pantalla, requisito, experimento y CSV."""
+def cambios_de_codigo(desde: str, hasta: str) -> list[str]:
+    """Archivos de web/src y api/ que cambian entre dos commits, sin las pruebas ni api/exportar_pruebas.py."""
+    salida = _git("diff", "--name-only", desde, hasta, "--", "web/src", "api",
+                  ":(exclude)api/tests", ":(exclude)*.spec.ts", ":(exclude)web/src/app/pruebas",
+                  ":(exclude)api/exportar_pruebas.py")
+    return salida.splitlines()
+
+
+def indice(capturas: list[dict], commit: str, cambios=cambios_de_codigo) -> str:
+    """Tabla de las capturas registradas: archivo, pantalla, requisito, experimento, CSV, commit del código con que se
+    tomó y archivos de web/ y api/ que cambian desde ese commit hasta `commit` (el del registro)."""
     filas = []
     por_nombre = {c["archivo"].removeprefix("capturas/"): c for c in capturas}
     for nombre in [n for n in PANTALLAS if n in por_nombre]:  # en el orden de los pasos, no del manifest
         c = por_nombre[nombre]
         pantalla, requisito = PANTALLAS[nombre]
         csv = c["datos"].get("csv", {}).get("ruta", "—")
-        filas.append(f"| `{nombre}` | {pantalla} | {requisito} | {c['datos']['experimento']} | `{csv}` | {c['commit']} |")
+        distintos = ", ".join(f"`{a}`" for a in cambios(c["commit"], commit)) or "ninguno"
+        filas.append(f"| `{nombre}` | {pantalla} | {requisito} | {c['datos']['experimento']} | `{csv}` | {c['commit']} "
+                     f"| {distintos} |")
     return "\n".join(["# Capturas de la interfaz", "", COMPROBACIONES, "",
-                      "| Archivo | Pantalla | Requisito | Experimento | CSV | Commit del código |",
-                      "|---|---|---|---|---|---|", *filas, ""])
+                      f"Código de referencia: {commit}. La última columna lista los archivos de `web/src` y `api/` (sin "
+                      "pruebas) que cambian entre el commit de cada captura y el de referencia.", "",
+                      "| Archivo | Pantalla | Requisito | Experimento | CSV | Commit del código | Cambios hasta el de "
+                      "referencia |", "|---|---|---|---|---|---|---|", *filas, ""])
 
 
 def entradas(nombres: set[str], raiz: Path, commit: str, experimento_web: str | None) -> list[dict]:
@@ -105,12 +119,12 @@ def entradas(nombres: set[str], raiz: Path, commit: str, experimento_web: str | 
     return nuevas
 
 
-def registrar(evidencias: Path, nuevas: list[dict], commit: str, fecha: datetime) -> None:
+def registrar(evidencias: Path, nuevas: list[dict], commit: str, fecha: datetime, cambios=cambios_de_codigo) -> None:
     ruta = evidencias / "manifest.json"
     manifest = json.loads(ruta.read_text(encoding="utf-8"))
     archivos = {c["archivo"] for c in nuevas}
     manifest["capturas"] = [c for c in manifest["capturas"] if c["archivo"] not in archivos | {INDICE}] + nuevas
-    (evidencias / INDICE).write_text(indice(manifest["capturas"]), encoding="utf-8", newline="\n")
+    (evidencias / INDICE).write_text(indice(manifest["capturas"], commit, cambios), encoding="utf-8", newline="\n")
     manifest["capturas"].append({"archivo": INDICE, "descripcion": "Índice de las capturas: pantalla, requisito, "
                                  "experimento, CSV y comprobaciones", "commit": commit})
     manifest["generado"] = fecha.isoformat(timespec="seconds")

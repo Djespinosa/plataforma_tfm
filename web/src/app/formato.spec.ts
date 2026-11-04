@@ -1,4 +1,6 @@
-import { contribucion, decimal, duracion, fecha, intervalo, miles, pValor, porcentaje, porcentaje1, puntos } from './formato';
+import {
+  contribucion, decimal, duracion, fecha, intervalo, miles, pValor, porcentaje, porcentaje1, probabilidad, puntos,
+} from './formato';
 
 describe('formato', () => {
   it('porcentaje entero sin sugerir certeza en los extremos', () => {
@@ -13,6 +15,12 @@ describe('formato', () => {
     expect(duracion(44.6)).toBe('45 s');
     expect(duracion(725)).toBe('12 min 5 s');
     expect(duracion(7380)).toBe('2 h 3 min');
+  });
+
+  it('probabilidad de un caso: nunca 0 % ni 100 %, tampoco con 0 o 1 exactos', () => {
+    expect(probabilidad(0.344)).toBe('34 %');
+    expect([probabilidad(0), probabilidad(0.004), probabilidad(0.005)]).toEqual(['< 1 %', '< 1 %', '1 %']);
+    expect([probabilidad(1), probabilidad(0.996), probabilidad(0.994)]).toEqual(['> 99 %', '> 99 %', '99 %']);
   });
 
   it('porcentaje con un decimal y coma', () => {

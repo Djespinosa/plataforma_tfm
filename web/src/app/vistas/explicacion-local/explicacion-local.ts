@@ -8,7 +8,7 @@ import { ExplicacionLocal as RespuestaLocal } from '../../api/tipos';
 import { Aviso } from '../../comun/aviso';
 import { Barra, GraficoBarras } from '../../comun/grafico-barras';
 import { PieDecision } from '../../comun/pie-decision';
-import { contribucion, decimal, porcentaje } from '../../formato';
+import { contribucion, decimal, probabilidad as formatoProbabilidad } from '../../formato';
 import { TEXTOS, textoProbabilidad, textoResto } from '../../textos';
 
 @Component({
@@ -29,7 +29,7 @@ export class ExplicacionLocal implements OnInit {
 
   protected readonly probabilidad = computed(() => {
     const r = this.respuesta();
-    return r ? textoProbabilidad(porcentaje(r.probabilidad)) : '';
+    return r ? textoProbabilidad(formatoProbabilidad(r.probabilidad)) : '';
   });
 
   protected readonly resto = computed(() => {

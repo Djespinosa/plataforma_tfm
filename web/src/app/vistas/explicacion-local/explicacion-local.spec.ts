@@ -12,7 +12,6 @@ const RESPUESTA: Respuesta = {
   identificador: 'A-3',
   probabilidad: 0.343,
   alerta: true,
-  sugerencia: 'texto de la API: sugerencia',
   escala: 'texto de la API: escala',
   valor_base: -1.2,
   log_odds: -0.4,

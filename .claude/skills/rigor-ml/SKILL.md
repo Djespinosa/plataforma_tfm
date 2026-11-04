@@ -66,7 +66,8 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
       *out-of-fold*. De 2014J solo se exportan recuentos descriptivos (población, prevalencia, subgrupos, solapamiento).
 - [ ] **D38 Variantes sin nueva búsqueda:** D8 (con y sin sensibles), la ablación y D20 **reutilizan los hiperparámetros**
       de la configuración principal (mismo momento y familia) y solo reentrenan; se declara. La búsqueda principal se hace
-      **sin variables sensibles**, así que la ventaja de la variante "con" es una cota inferior (D38).
+      **sin variables sensibles**, así que la ventaja de la variante "con" se describe como **estimación previsiblemente
+      sesgada a la baja**, no como cota inferior (D38-concreción-sensibles, 2026-11-04, por los mismos motivos que D20).
       **Salvaguarda (D38-concreción):** si excluirlas cuesta ≥ 0,02 de ROC-AUC *out-of-fold* calibrada (estimación
       puntual, con − sin) en algún momento, en algún candidato o entre los mejores de cada variante, la configuración
       principal pasa a ser "con" y se repite la búsqueda para ella. Resultado: no activada (exp-2026-10-28-01, máx. 0,0181,
@@ -225,8 +226,9 @@ Cada punto se puede comprobar en el código o en el JSON exportado. Una casilla 
 - Optuna selecciona con los mismos pliegues con los que se informan las métricas *out-of-fold*: ligero optimismo de las
   métricas de validación (sin búsqueda anidada, por coste).
 - Las variantes (D8, ablación, D20) reutilizan los hiperparámetros de la configuración principal (D38): la ventaja de
-  "con sensibles" es una cota inferior (D38); la inflación de D20, una estimación previsiblemente sesgada a la baja
-  (D38-concreción-D20), y la pérdida de la ablación, una estimación sesgada al alza (D46-rev), no cotas garantizadas.
+  "con sensibles" y la inflación de D20 son estimaciones previsiblemente sesgadas a la baja (D38-concreción-sensibles y
+  D38-concreción-D20), y la pérdida de la ablación, una estimación sesgada al alza (D46-rev); ninguna es una cota
+  garantizada.
 - Los IC *bootstrap* y DeLong se calculan sobre predicciones ya ajustadas y no recogen la variabilidad del
   reentrenamiento (≈ 0,0045 en el control de la semana 0; D46-rev).
 - Umbral sin margen (D45): la sensibilidad en prueba puede quedar por debajo de 0,70.

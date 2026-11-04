@@ -23,7 +23,7 @@ from datetime import datetime
 from pathlib import Path
 
 from api import RAIZ  # noqa: F401  (pone ml/ en sys.path)
-from evidencias import EVIDENCIAS, SECCIONES_MANIFEST, comprobar_arbol_limpio, escribir_json
+from evidencias import EVIDENCIAS, SECCIONES_MANIFEST, commit_codigo, comprobar_arbol_limpio, escribir_json
 
 WEB = RAIZ / "web"
 # --no: si falta el CLI local, npx falla en lugar de descargar e instalar un paquete del registro.
@@ -93,6 +93,7 @@ def main() -> None:
         resumen_json = Path(temporal) / f"{id_}_resumen.json"
         escribir_json(resumen_json, {
             "id": id_, "fecha": fecha.isoformat(timespec="seconds"), "commit": commit,
+            "commit_codigo": commit_codigo(),
             "comando": " ".join([*COMANDO, "--output-file=<temporal>"]), "carpeta": "web",
             "entorno": versiones_web(), **resumen, "cobertura": None,
             "motivos_null": {"cobertura": "sin cobertura en la Entrega 2 (docs/diseno-web.md, W-8)"},

@@ -83,6 +83,9 @@ export const TEXTOS = {
     archivoAyuda: 'CSV en UTF-8 separado por comas o por punto y coma, con una fila de encabezado.',
     momento: 'Momento de predicción (opcional)',
     momentoAyuda: 'Por ejemplo, «semana 4». Solo sirve para reconocer el conjunto y los modelos que se entrenen con él.',
+    avisoDemostracion:
+      'Si carga los datos de demostración, el entrenamiento y sus resultados solo sirven para mostrar el ' +
+      'funcionamiento de la plataforma: no miden cómo funcionaría el modelo con estudiantes nuevos.',
     enviar: 'Cargar el archivo',
     enviando: 'Cargando…',
     sinArchivo: 'Elija un archivo CSV.',
@@ -260,7 +263,6 @@ export const TEXTOS = {
     fila: 'Fila',
     identificador: 'Identificador',
     alerta: 'Alerta',
-    sugerencia: 'Sugerencia',
     explicacion: 'Explicación',
     verExplicacion: 'Ver la explicación',
     marcado: 'Marcado para seguimiento',

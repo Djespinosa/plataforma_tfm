@@ -15,6 +15,8 @@ export const PROHIBIDOS = [
   'alto riesgo',
   'en riesgo',
   'predicción de fracaso',
+  'sugerencia', // RF-11: la plataforma no propone actuaciones
+  'priorizar',
 ];
 export const CODIGO = /\bD-?\d+|P-\d+/g;
 export const NOTA =

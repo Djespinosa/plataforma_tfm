@@ -22,12 +22,11 @@ def test_exporta_el_lote_con_los_avisos(app, cliente, importados):  # noqa: F811
 
     exportado = pd.read_csv(io.StringIO("\n".join(lineas[2:])), keep_default_na=False)
     filas = cliente.get(f"/api/predicciones/{lote_id}").get_json()["filas"]
-    assert list(exportado.columns) == ["fila", "identificador", "probabilidad_estimada_pct", "alerta", "sugerencia"]
+    assert list(exportado.columns) == ["fila", "identificador", "probabilidad_estimada_pct", "alerta"]
     assert exportado["fila"].tolist() == list(range(1, 41))
     assert exportado["identificador"].tolist() == [f"A-{i}" for i in range(40)]
     assert exportado["probabilidad_estimada_pct"].tolist() == [round(100 * f["probabilidad"], 1) for f in filas]
     assert exportado["alerta"].tolist() == ["sí" if f["alerta"] else "no" for f in filas]
-    assert exportado["sugerencia"].tolist() == [textos.SUGERENCIA if f["alerta"] else "" for f in filas]
 
 
 def test_lote_inexistente(cliente):

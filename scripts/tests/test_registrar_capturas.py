@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from scripts.registrar_capturas import clasificar, entradas, registrar
+from scripts.registrar_capturas import clasificar, entradas, indice, registrar
 
 
 @pytest.fixture
@@ -61,16 +61,27 @@ def test_registrar_sustituye_las_del_mismo_archivo_y_conserva_el_resto(tmp_path)
     (tmp_path / "capturas").mkdir()
     nueva = {"archivo": "capturas/web-modelos.png", "descripcion": "d", "commit": "nuevo",
              "datos": {"experimento": "exp-1"}}
-    registrar(tmp_path, [nueva], "nuevo", datetime(2026, 11, 4, 10, 0))
-    registrar(tmp_path, [nueva], "nuevo", datetime(2026, 11, 4, 10, 0))  # el índice no se duplica
+    sin_cambios = lambda desde, hasta: []  # noqa: E731
+    registrar(tmp_path, [nueva], "nuevo", datetime(2026, 11, 4, 10, 0), sin_cambios)
+    registrar(tmp_path, [nueva], "nuevo", datetime(2026, 11, 4, 10, 0), sin_cambios)  # el índice no se duplica
     resultado = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
-    indice = {"archivo": "capturas/indice.md", "descripcion": resultado["capturas"][-1]["descripcion"],
+    entrada_indice = {"archivo": "capturas/indice.md", "descripcion": resultado["capturas"][-1]["descripcion"],
               "commit": "nuevo"}
-    assert resultado["capturas"] == [{"archivo": "capturas/a.png"}, nueva, indice]
+    assert resultado["capturas"] == [{"archivo": "capturas/a.png"}, nueva, entrada_indice]
     texto = (tmp_path / "capturas" / "indice.md").read_text(encoding="utf-8")
-    assert "| `web-modelos.png` | Modelos desplegados (paso 5) | RF-05 | exp-1 | `—` | nuevo |" in texto
+    assert "| `web-modelos.png` | Modelos desplegados (paso 5) | RF-05 | exp-1 | `—` | nuevo | ninguno |" in texto
     assert (resultado["commit"], resultado["generado"], resultado["experimentos"]) == ("nuevo", "2026-11-04T10:00:00",
                                                                                        ["e"])
+
+
+def test_indice_lista_el_codigo_que_cambia_desde_cada_captura():
+    capturas = [{"archivo": "capturas/web-modelos.png", "commit": "viejo", "datos": {"experimento": "exp-1"}},
+                {"archivo": "capturas/web-carga.png", "commit": "nuevo", "datos": {"experimento": "web-1"}}]
+    cambios = {("viejo", "nuevo"): ["api/textos.py", "web/src/app/textos.ts"], ("nuevo", "nuevo"): []}
+    texto = indice(capturas, "nuevo", lambda desde, hasta: cambios[(desde, hasta)])
+    assert "| nuevo | ninguno |" in texto
+    assert "| viejo | `api/textos.py`, `web/src/app/textos.ts` |" in texto
+    assert texto.index("web-carga.png") < texto.index("web-modelos.png")  # orden de los pasos
 
 
 def test_cada_captura_tiene_pantalla_y_requisito():

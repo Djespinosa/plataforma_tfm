@@ -7,7 +7,7 @@ import { PrediccionesService } from '../../api/predicciones.service';
 import { Lote as RespuestaLote } from '../../api/tipos';
 import { Aviso } from '../../comun/aviso';
 import { PieDecision } from '../../comun/pie-decision';
-import { miles, porcentaje, porcentaje1 } from '../../formato';
+import { miles, porcentaje1, probabilidad } from '../../formato';
 import { TEXTOS, textoMarcados, textoMostrando, textoPagina } from '../../textos';
 import { Columna, Direccion, filtrar, ordenar, paginar } from './lista';
 
@@ -21,7 +21,7 @@ export class Lote implements OnInit {
   readonly lote = input.required<string>();
 
   protected readonly t = TEXTOS;
-  protected readonly porcentaje = porcentaje;
+  protected readonly probabilidad = probabilidad;
   protected readonly porcentaje1 = porcentaje1;
   protected readonly textoMostrando = textoMostrando;
   protected readonly textoPagina = textoPagina;

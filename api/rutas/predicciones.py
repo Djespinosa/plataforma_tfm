@@ -113,9 +113,9 @@ def lote(lote_id: int):
                  "n_filas": lote.n_filas, "n_alertas": lote.n_alertas, "tasa_alerta": lote.n_alertas / lote.n_filas,
                  "umbral": lote.umbral, "columna_id": lote.columna_id, "columnas_ignoradas": lote.columnas_ignoradas,
                  "explicaciones": _modo_explicaciones(modelo), "creado_en": fecha_iso(lote.creado_en)},
-        "filas": [{"fila": p.fila, "identificador": p.identificador, "probabilidad": p.probabilidad, "alerta": p.alerta,
-                   "sugerencia": textos.SUGERENCIA if p.alerta else None} for p in filas],
-        "textos": {"probabilidad": textos.TEXTO_PROBABILIDAD, "sugerencia": textos.SUGERENCIA},
+        "filas": [{"fila": p.fila, "identificador": p.identificador, "probabilidad": p.probabilidad, "alerta": p.alerta}
+                  for p in filas],
+        "textos": {"probabilidad": textos.TEXTO_PROBABILIDAD},
         "aviso_rendimiento": textos.AVISO_RENDIMIENTO, "aviso_decision": textos.AVISO_DECISION,
     })
 
@@ -128,7 +128,7 @@ def exportar(lote_id: int):
     filas = sesion().scalars(select(Prediccion).where(Prediccion.lote_id == lote_id).order_by(Prediccion.fila))
     tabla = pd.DataFrame([{"fila": p.fila, "identificador": p.identificador,
                            "probabilidad_estimada_pct": round(100 * p.probabilidad, 1),
-                           "alerta": "sí" if p.alerta else "no", "sugerencia": textos.SUGERENCIA if p.alerta else ""}
+                           "alerta": "sí" if p.alerta else "no"}
                           for p in filas])
     contenido = (f"# {textos.AVISO_DECISION}\n# {textos.AVISO_RENDIMIENTO}\n"
                  + tabla.to_csv(index=False, lineterminator="\n"))
@@ -168,7 +168,6 @@ def explicacion_local(lote_id: int, fila: int):
         avisos["extrema"] = textos.AVISO_EXTREMA
     return jsonify({"fila": prediccion.fila, "identificador": prediccion.identificador,
                     "probabilidad": prediccion.probabilidad, "alerta": prediccion.alerta,
-                    "sugerencia": textos.SUGERENCIA if prediccion.alerta else None,
                     "escala": textos.ESCALA, "valor_base": prediccion.base_log_odds, "log_odds": prediccion.log_odds,
                     "explicador": fila_explicada.explicador, **detalle, "avisos": avisos,
                     # La vista local se abre por URL sin el lote: lleva también el aviso de D-4 (diseno-web.md, A-1).

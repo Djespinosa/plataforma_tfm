@@ -18,7 +18,7 @@ def predecir(cliente, modelo_id: int, lote) -> None:
     filas = cliente.get(f"/api/predicciones/{cuerpo['lote_id']}").get_json()["filas"]
     assert len(filas) == len(lote) and all(0 <= f["probabilidad"] <= 1 for f in filas)
     assert sum(f["alerta"] for f in filas) == cuerpo["n_alertas"]
-    assert all((f["sugerencia"] is not None) == f["alerta"] for f in filas)
+    assert all("sugerencia" not in f for f in filas)  # RF-11: la plataforma no propone actuaciones
 
 
 def test_prediccion_con_un_modelo_web(cliente, entrenado):

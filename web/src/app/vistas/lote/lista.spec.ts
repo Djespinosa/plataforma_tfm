@@ -2,10 +2,10 @@ import { FilaLote } from '../../api/tipos';
 import { filtrar, ordenar, paginar } from './lista';
 
 const filas: FilaLote[] = [
-  { fila: 1, identificador: 'A-10', probabilidad: 0.2, alerta: false, sugerencia: null },
-  { fila: 2, identificador: 'a-2', probabilidad: 0.8, alerta: true, sugerencia: 's' },
-  { fila: 3, identificador: null, probabilidad: 0.5, alerta: true, sugerencia: 's' },
-  { fila: 4, identificador: 'B-1', probabilidad: 0.5, alerta: true, sugerencia: 's' },
+  { fila: 1, identificador: 'A-10', probabilidad: 0.2, alerta: false },
+  { fila: 2, identificador: 'a-2', probabilidad: 0.8, alerta: true },
+  { fila: 3, identificador: null, probabilidad: 0.5, alerta: true },
+  { fila: 4, identificador: 'B-1', probabilidad: 0.5, alerta: true },
 ];
 const numeros = (f: FilaLote[]) => f.map((x) => x.fila);
 
@@ -27,8 +27,8 @@ describe('lista del lote', () => {
     expect(numeros(filtrar(filas, { ...sinFiltro, minimoPct: 50 }))).toEqual([2, 3, 4]);
     // Con el redondeo de la tabla: 0,29 se lee «29 %» (100 × 0,29 = 28,999…) y 0,296 se lee «30 %».
     const bordes: FilaLote[] = [
-      { fila: 1, identificador: null, probabilidad: 0.29, alerta: false, sugerencia: null },
-      { fila: 2, identificador: null, probabilidad: 0.296, alerta: false, sugerencia: null },
+      { fila: 1, identificador: null, probabilidad: 0.29, alerta: false },
+      { fila: 2, identificador: null, probabilidad: 0.296, alerta: false },
     ];
     expect(numeros(filtrar(bordes, { ...sinFiltro, minimoPct: 29 }))).toEqual([1, 2]);
     expect(numeros(filtrar(bordes, { ...sinFiltro, minimoPct: 30 }))).toEqual([2]);

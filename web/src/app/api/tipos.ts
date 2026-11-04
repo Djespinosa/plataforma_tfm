@@ -179,7 +179,6 @@ export interface FilaLote {
   identificador: string | null;
   probabilidad: number;
   alerta: boolean;
-  sugerencia: string | null;
 }
 
 /** GET /api/predicciones/{lote_id} */
@@ -198,7 +197,7 @@ export interface Lote {
     creado_en: string;
   };
   filas: FilaLote[];
-  textos: { probabilidad: string; sugerencia: string };
+  textos: { probabilidad: string };
   aviso_rendimiento: string;
   aviso_decision: string;
 }
@@ -235,7 +234,6 @@ export interface ExplicacionLocal {
   identificador: string | null;
   probabilidad: number;
   alerta: boolean;
-  sugerencia: string | null;
   escala: string;
   valor_base: number;
   log_odds: number;

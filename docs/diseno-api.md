@@ -363,10 +363,11 @@ explicaciones: "completas" | "bajo_demanda", aviso_decision}`.
   columnas que el modelo necesita: a, b.»; 422 «La columna «x» debe ser numérica (fila N: «abc»).»; 422 «La columna
   identificadora «x» no existe.».
 
-`GET /api/predicciones/{lote_id}` → 200 `{lote: {...}, filas: [{fila, identificador, probabilidad, alerta, sugerencia}],
-textos: {probabilidad: "Probabilidad estimada por el modelo", sugerencia: "Sugerencia: priorizar contacto de apoyo"},
+`GET /api/predicciones/{lote_id}` → 200 `{lote: {...}, filas: [{fila, identificador, probabilidad, alerta}],
+textos: {probabilidad: "Probabilidad estimada por el modelo"},
 aviso_decision}`. Se devuelven todas las filas (≤ 20 000); ordenar y filtrar (por probabilidad, alerta, identificador) lo
-hace la interfaz. `sugerencia` solo si `alerta`.
+hace la interfaz. Sin sugerencia de actuación (RF-11, Won't; corrección del 2026-11-04 tras la congelación): la alerta
+solo marca para seguimiento y la decisión es del personal académico.
 
 ### 4.5 Explicaciones (RF-06, M)
 
@@ -385,7 +386,7 @@ hace la interfaz. `sugerencia` solo si `alerta`.
 `GET /api/predicciones/{lote_id}/filas/{fila}/explicacion` → 200
 
 ```json
-{"fila": 12, "identificador": "A-123", "probabilidad": 0.34, "alerta": true, "sugerencia": "Sugerencia: priorizar contacto de apoyo",
+{"fila": 12, "identificador": "A-123", "probabilidad": 0.34, "alerta": true,
  "escala": "log-odds sin calibrar", "valor_base": -1.2, "log_odds": -0.4, "explicador": "lineal",
  "aumentan": [{"variable": "dias_desde_ultima_conexion", "valor": "12", "contribucion": 0.8, "extrema": false}],
  "reducen": [{"variable": "n_cma_calificadas", "valor": "2", "contribucion": -10.8, "extrema": true}],
@@ -440,7 +441,8 @@ Al implementar (incremento 5, §4.4 y §4.5):
 ### 4.6 Exportación (RF-09, C; último incremento)
 
 `GET /api/predicciones/{lote_id}/exportar` → `text/csv; charset=utf-8`, adjunto: primera línea `# <aviso_decision>`,
-columnas `fila, identificador, probabilidad_estimada_pct, alerta, sugerencia`.
+columnas `fila, identificador, probabilidad_estimada_pct, alerta`. `probabilidad_estimada_pct` es un dato numérico con 1 decimal
+(puede valer 0,0 o 100,0 tras redondear); la regla «< 1 %» / «> 99 %» es de presentación en pantalla.
 `GET /api/experimentos/{id}/evaluacion/exportar` → `application/json`, adjunto: la respuesta de §4.3 + `configuracion` y
 `reproducibilidad`.
 
@@ -987,3 +989,4 @@ importantes antes de la congelación).
 | Revisión del incremento web I-10 | Descargas: `lote.spec` usa el mismo id en la entrada y en el fixture (no distingue `r.lote.id` de `lote()`); `evaluacion.spec` no comprueba el texto ni el `aria-describedby` del enlace; la URL del lote se compone en la plantilla y la de la evaluación en un `computed` (estilos distintos, ambos correctos) |
 | Revisión del diagrama de arquitectura | `scripts/diagrama_arquitectura.py`: en un ensayo con `--salida` sin `manifest.json`, `registrar()` crea las secciones sin `generado` ni `commit` delante (no aplica el orden de `ml/evidencias.actualizar_manifest`); en `evidencias/` no ocurre |
 | Revisión de la exportación de pruebas web | `scripts/exportar_pruebas_web.py`: si falla el segundo `shutil.move` o la escritura del manifest queda un archivo sin entrada (mismo riesgo que `api/exportar_pruebas.py`); sin prueba de `main` (nada escrito si fallan las pruebas; dos entradas con `id`); la comprobación de rutas distingue mayúsculas y un nombre de prueba con `hostname=` abortaría (falso positivo); `siguiente_id` y `limpiar_junit` duplican en parte los de la API |
+| Revisión de la corrección posterior a la congelación (2026-11-04) | `ml/variante.py` (docstring y texto del JSON), `ml/sensibilidad_fuga.py` y `ml/configs/sin_exclusion_retirados.json` siguen diciendo «cota inferior»: alinearlos con D38-concreción-sensibles y D38-concreción-D20 antes de la próxima exportación de esos experimentos (no cambia ninguna evidencia ya exportada) |

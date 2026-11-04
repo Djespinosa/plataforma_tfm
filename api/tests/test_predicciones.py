@@ -62,9 +62,8 @@ def test_prediccion_lineal_igual_que_predecir_y_explicar(app, cliente, importado
     assert [f["probabilidad"] for f in lote["filas"]] == esperada["probabilidad"].tolist()
     assert [f["alerta"] for f in lote["filas"]] == esperada["alerta"].tolist()
     assert [f["identificador"] for f in lote["filas"]] == [f"A-{i}" for i in range(40)]
-    assert all((f["sugerencia"] is not None) == f["alerta"] for f in lote["filas"])
-    assert lote["textos"] == {"probabilidad": "Probabilidad estimada por el modelo",
-                              "sugerencia": "Sugerencia: priorizar contacto de apoyo"}
+    assert all("sugerencia" not in f for f in lote["filas"])  # RF-11: la plataforma no propone actuaciones
+    assert lote["textos"] == {"probabilidad": "Probabilidad estimada por el modelo"}
 
     for fila in (1, 4):
         local = cliente.get(f"/api/predicciones/{cuerpo['lote_id']}/filas/{fila}/explicacion").get_json()

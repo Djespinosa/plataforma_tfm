@@ -62,6 +62,7 @@ describe('Carga', () => {
     const { html } = await renderizar();
     const aviso = html.querySelector('app-aviso')!;
     expect(aviso.textContent).toContain(TEXTOS.apiCopias.avisoPrivacidad);
+    expect(html.querySelectorAll('app-aviso')[1].textContent).toContain(TEXTOS.carga.avisoDemostracion);
     expect(aviso.compareDocumentPosition(html.querySelector('form')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(filas(tabla(html, TEXTOS.carga.tablaAnteriores))[0].slice(0, 4))
       .toEqual(['anterior.csv', TEXTOS.modelos.sinMomento, '12 000', '9']);

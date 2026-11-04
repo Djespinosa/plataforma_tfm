@@ -23,6 +23,12 @@ def git(*args: str) -> str:
     ).stdout.strip()
 
 
+def commit_codigo() -> str:
+    """Último commit que cambia algo fuera de evidencias/: con el árbol limpio, el código ejecutado es idéntico al suyo
+    aunque HEAD sea un commit posterior que solo añade evidencias."""
+    return git("log", "-1", "--format=%h", "--", ".", ":(exclude)evidencias")
+
+
 def comprobar_arbol_limpio(salida: Path) -> str:
     """Devuelve el commit actual; aborta si se exporta a evidencias/ con cambios sin confirmar."""
     commit = git("rev-parse", "--short", "HEAD")

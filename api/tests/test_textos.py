@@ -17,7 +17,7 @@ from test_predicciones import subir
 from test_trabajador import crear, procesar
 
 PROHIBIDOS = ["va a abandonar", "abandonará", "seguro", "causa", "motivo", "porque", "por qué", "debido a", "provoca",
-              "alto riesgo", "en riesgo", "predicción de fracaso"]
+              "alto riesgo", "en riesgo", "predicción de fracaso", "sugerencia", "priorizar"]
 CODIGO = re.compile(r"\bD-?\d+|P-\d+")  # decisiones de la memoria (D41, P-18) y del diseño de la API (D-4)
 SKILL = Path(__file__).resolve().parents[2] / ".claude" / "skills" / "guardarrailes-interfaz" / "SKILL.md"
 # Nota fija que niega la causalidad (RE-03): la única excepción, comprobada por igualdad con la skill.

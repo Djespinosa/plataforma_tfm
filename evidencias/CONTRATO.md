@@ -235,18 +235,19 @@ las predicciones dentro de la tolerancia); `oof_sha256` = `{base, nuevo}` por se
 `api/exportar_pruebas.py` (docs/diseno-api.md §10), sin experimento asociado: `_pruebas.xml` (JUnit de todo `api/tests`
 con `--tb=short`, sin `hostname`; propiedad de la suite `motor_bd_funcionales`, de cada caso `motor_bd` (`postgresql` o
 `sqlite`) y de cada caso funcional `requisito`), `_cobertura.json`
-(coverage.py, rutas relativas, de `api/` y `ml/automl/` sin las pruebas) y `_resumen.json` = `{id, fecha, commit, comando,
+(coverage.py, rutas relativas, de `api/` y `ml/automl/` sin las pruebas) y `_resumen.json` = `{id, fecha, commit, commit_codigo, comando,
 entorno, superadas, fallidas, omitidas, funcionales, motor_bd_funcionales, funcionales_por_requisito, pruebas_por_motor, pruebas_por_requisito: {RF-01…RF-09:
 [clase::prueba]}, requisitos_sin_prueba_funcional: {RF: motivo}, cobertura: {<paquete>: {archivos, lineas,
 cubiertas, porcentaje}}, informes}`; solo las funcionales (y las unitarias marcadas `postgres`) usan
 PostgreSQL, el resto SQLite en memoria. Solo se exporta con todas superadas y ninguna omitida. En `manifest.json`, sus
-entradas de `pruebas` llevan `id` en lugar de `experimento`.
+entradas de `pruebas` llevan `id` en lugar de `experimento`. `commit` es el HEAD de la exportación y `commit_codigo`, el último
+commit que cambia algo fuera de `evidencias/`: con el árbol limpio, el código probado es idéntico al de ese commit.
 
 ## Informes de pruebas de la interfaz (`pruebas/interfaz-<fecha>-NN_*`)
 
 `python -m scripts.exportar_pruebas_web` (docs/diseno-web.md §9), sin experimento asociado: `_pruebas.xml` (JUnit de
 todas las pruebas Vitest de `web/`, sin el `hostname` que Vitest pone en cada `testsuite`) y `_resumen.json` = `{id, fecha,
-commit, comando, carpeta, entorno: {node, @angular/core, vitest, jsdom, typescript}, superadas, fallidas, omitidas,
+commit, commit_codigo, comando, carpeta, entorno: {node, @angular/core, vitest, jsdom, typescript}, superadas, fallidas, omitidas,
 archivos, cobertura: null, motivos_null, informes}` (sin cobertura en la Entrega 2, W-8). Solo se exporta con todas
 superadas, ninguna omitida y sin rutas del usuario. Entradas de `pruebas` con `id`, como las de la API. El prefijo
 `interfaz-` evita confundir el informe con un experimento web (`web-AAAA-MM-DD-NN`); `entorno` = versiones instaladas.
@@ -260,7 +261,8 @@ confirmadas sin cambios conservan su entrada): `{archivo, descripcion, commit, d
 (`commit` = el del código que se ve; `experimento` = el que muestra la vista; `csv` = el archivo cargado en ella). Nunca
 2014J, ni la evaluación única en la cohorte de prueba con datos de OULAD, ni métricas de prueba.
 Cada registro reescribe `capturas/indice.md` (archivo, pantalla, requisito, experimento, CSV y commit de cada captura,
-con las comprobaciones de 2014J y de demostración) y lo añade a `capturas` como `{archivo, descripcion, commit}`.
+los archivos de `web/src` y `api/` que cambian desde ese commit hasta el del registro, y las comprobaciones de 2014J y
+de demostración) y lo añade a `capturas` como `{archivo, descripcion, commit}`.
 
 ## Arquitectura (`arquitectura/<nombre>.png|svg|md`)
 

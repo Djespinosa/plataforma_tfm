@@ -9,11 +9,19 @@ function conComa(valor: number, decimales: number): string {
   return valor.toFixed(decimales).replace('.', ',');
 }
 
-/** Probabilidad en % entero («34 %»); nunca «0 %» ni «100 %» si no lo es exactamente, para no sugerir certeza (W-12). */
+/** Porcentaje entero («34 %») para ejes y tablas de calibración; «0 %» y «100 %» solo si lo son exactamente (W-12). */
 export function porcentaje(p: number): string {
   const entero = Math.round(100 * p);
   if (entero === 0 && p > 0) return '< 1 %';
   if (entero === 100 && p < 1) return '> 99 %';
+  return `${entero} %`;
+}
+
+/** Probabilidad estimada de un caso: nunca «0 %» ni «100 %», tampoco si el calibrador da 0 o 1 exactos (guardarraíles). */
+export function probabilidad(p: number): string {
+  const entero = Math.round(100 * p);
+  if (entero < 1) return '< 1 %';
+  if (entero > 99) return '> 99 %';
   return `${entero} %`;
 }
 

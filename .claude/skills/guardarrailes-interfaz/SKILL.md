@@ -17,7 +17,7 @@ Regla 4 de CLAUDE.md, en la práctica. Cuatro ideas que todo texto debe respetar
 | Usar | No usar |
 |---|---|
 | "probabilidad estimada de retiro: 34 %" | "va a abandonar", "abandonará", "34 % de riesgo seguro" |
-| "el modelo sugiere priorizar el seguimiento" | "estudiante de alto riesgo" como etiqueta de la persona |
+| "marcado para seguimiento" (sin proponer qué hacer: RF-11) | "estudiante de alto riesgo" como etiqueta de la persona; "sugerencia", "priorizar" o cualquier actuación propuesta |
 | "factores que más contribuyen a esta estimación" | "causas", "motivos", "porque", "debido a" |
 | "aumenta / reduce la estimación del modelo" | "provoca", "explica por qué abandona" |
 | "estudiantes marcados para seguimiento" | "estudiantes en riesgo" (como hecho) |
@@ -25,8 +25,10 @@ Regla 4 de CLAUDE.md, en la práctica. Cuatro ideas que todo texto debe respetar
 
 ## Presentación de una predicción individual
 
-- Probabilidad **calibrada** en porcentaje entero, con la frase "estimada por el modelo".
-- Si supera el umbral: "Sugerencia: priorizar contacto de apoyo". Nunca rojo como único indicador.
+- Probabilidad **calibrada** en porcentaje entero, con la frase "estimada por el modelo"; nunca "0 %" ni "100 %": por
+  debajo de 1 %, "< 1 %", y por encima de 99 %, "> 99 %". (En el CSV exportado la probabilidad es un dato numérico con 1 decimal.)
+- Si supera el umbral: "Marcado para seguimiento", sin proponer ninguna actuación (RF-11, Won't: la decisión es del
+  personal académico). Nunca rojo como único indicador.
 - Factores SHAP locales: los 5 de mayor magnitud, separados en "aumentan la estimación" y "reducen la estimación",
   con el valor de la variable en lenguaje llano ("Días desde la última conexión: 12").
 - Nota fija bajo la explicación: "Estos factores describen cómo llegó el modelo a su estimación. No son causas

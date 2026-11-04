@@ -103,10 +103,10 @@ export const LOTE: Lote = {
   lote: { id: 7, modelo_id: 2, nombre_archivo: 'casos.csv', n_filas: 2, n_alertas: 1, tasa_alerta: 0.5, umbral: 0.2,
     columna_id: 'codigo', columnas_ignoradas: ['y'], explicaciones: 'bajo_demanda', creado_en: FECHA },
   filas: [
-    { fila: 1, identificador: 'A-1', probabilidad: 0.34, alerta: true, sugerencia: API },
-    { fila: 2, identificador: 'A-2', probabilidad: 0.05, alerta: false, sugerencia: null },
+    { fila: 1, identificador: 'A-1', probabilidad: 0.34, alerta: true },
+    { fila: 2, identificador: 'A-2', probabilidad: 0.05, alerta: false },
   ],
-  textos: { probabilidad: API, sugerencia: API },
+  textos: { probabilidad: API },
   aviso_rendimiento: API,
   aviso_decision: API,
 };
@@ -120,7 +120,7 @@ export const EXPLICACION_GLOBAL: ExplicacionGlobal = {
 };
 
 export const EXPLICACION_LOCAL: ExplicacionLocal = {
-  fila: 1, identificador: 'A-1', probabilidad: 0.34, alerta: true, sugerencia: API, escala: API, valor_base: -1.2,
+  fila: 1, identificador: 'A-1', probabilidad: 0.34, alerta: true, escala: API, valor_base: -1.2,
   log_odds: -0.4, explicador: 'lineal',
   aumentan: [{ variable: 'x1', valor: '12', contribucion: 6.1, extrema: true }],
   reducen: [{ variable: 'c', valor: 'b', contribucion: -0.25, extrema: false }],

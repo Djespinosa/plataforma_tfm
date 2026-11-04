@@ -232,8 +232,10 @@ Si el experimento del modelo es de demostración, la etiqueta de D-6. `201` → 
 - con `bajo_demanda`, la ayuda «la explicación de cada fila se calcula al abrirla (unos segundos)».
 
 Lista:
-- columnas: fila, identificador, `textos.probabilidad` (en %), alerta y sugerencia;
-- la alerta va como texto («Marcado para seguimiento» + `sugerencia`) con borde e icono, nunca solo con color;
+- columnas: fila, identificador, `textos.probabilidad` (en %, con `probabilidad()`: «< 1 %» y «> 99 %» en los extremos) y
+  alerta;
+- la alerta va como texto («Marcado para seguimiento», sin proponer actuaciones: RF-11) con borde e icono, nunca solo con
+  color;
 - orden por probabilidad descendente (predeterminado), fila o identificador, con botones en los `th` y `aria-sort`;
 - filtros: «todos / solo marcados», búsqueda por identificador (contiene, sin distinguir mayúsculas) y probabilidad
   mínima en %;
@@ -249,7 +251,7 @@ CSV».
 
 **Explicación local (RF-06).**
 - Resumen:
-  - probabilidad en % con «estimada por el modelo» y `sugerencia` si hay alerta;
+  - probabilidad en % con «estimada por el modelo» («< 1 %» y «> 99 %» en los extremos) y la marca si hay alerta;
   - dos listas, «Aumentan la estimación» (`aumentan`) y «Reducen la estimación» (`reducen`), con «variable: valor» y la
     contribución con signo y coma decimal; las barras con signo de `grafico-barras` hacia la derecha o la izquierda del
     eje;
@@ -282,7 +284,7 @@ CSV».
 ## 8. Textos y formato
 
 - **De la API, tal cual:** errores, `avisos`, `aviso_*`, `lectura_texto`, `motivo_texto`, `punto_operacion.textos`,
-  `calibracion.texto|motivo`, `equidad.texto`, `textos.*`, `etapa`, `error`, `sugerencia` y `motivo` de
+  `calibracion.texto|motivo`, `equidad.texto`, `textos.*`, `etapa`, `error` y `motivo` de
   `sin_contribucion`.
 - **Propios, solo en `textos.ts`:** un objeto `TEXTOS` agrupado por vista (etiquetas, botones, ayudas, encabezados de
   tabla, títulos de ruta, errores de conexión) más funciones para las frases con cifras. Las plantillas no llevan texto

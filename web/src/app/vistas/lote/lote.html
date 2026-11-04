@@ -77,7 +77,6 @@
                 </button>
               </th>
               <th scope="col">{{ t.lote.alerta }}</th>
-              <th scope="col">{{ t.lote.sugerencia }}</th>
               <th scope="col">{{ t.lote.explicacion }}</th>
             </tr>
           </thead>
@@ -86,7 +85,7 @@
               <tr>
                 <td class="numero">{{ f.fila }}</td>
                 <td>{{ f.identificador }}</td>
-                <td class="numero">{{ porcentaje(f.probabilidad) }}</td>
+                <td class="numero">{{ probabilidad(f.probabilidad) }}</td>
                 <td>
                   @if (f.alerta) {
                     <span class="marcado"><span aria-hidden="true">⚑</span> {{ t.lote.marcado }}</span>
@@ -94,7 +93,6 @@
                     {{ t.lote.noMarcado }}
                   }
                 </td>
-                <td>{{ f.sugerencia }}</td>
                 <td><a [routerLink]="['/predicciones', r.lote.id, 'filas', f.fila]">{{ t.lote.verExplicacion }}</a></td>
               </tr>
             }

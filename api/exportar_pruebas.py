@@ -26,7 +26,8 @@ from dotenv import load_dotenv
 from sqlalchemy import make_url
 
 from api import RAIZ  # también pone ml/ en sys.path
-from evidencias import EVIDENCIAS, SECCIONES_MANIFEST, comprobar_arbol_limpio, escribir_json, versiones_entorno
+from evidencias import (EVIDENCIAS, SECCIONES_MANIFEST, commit_codigo, comprobar_arbol_limpio, escribir_json,
+                        versiones_entorno)
 
 COBERTURA = ("api", "ml/automl")
 REQUISITOS = [f"RF-0{i}" for i in range(1, 10)]  # docs/diseno-api.md §1
@@ -150,6 +151,7 @@ def main() -> None:
         sin_contrasena(junit, cobertura)
         escribir_json(resumen_json, {
             "id": id_, "fecha": fecha.isoformat(timespec="seconds"), "commit": commit,
+            "commit_codigo": commit_codigo(),
             "comando": " ".join(["python", *comando[1:]]).replace(temporal, "<temporal>"),  # sin rutas del equipo
             "entorno": entorno, **resumen, "cobertura": resumen_cobertura,
             "informes": {"junit": f"pruebas/{nombres['pruebas.xml']}",
