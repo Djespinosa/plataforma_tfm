@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-04T10:56:54",
-  "commit": "ff98ea1",
+  "generado": "2026-11-04T10:57:56",
+  "commit": "421d45f",
   "experimentos": [
     "experimentos/exp-2026-10-05-01.json",
     "experimentos/exp-2026-10-05-02.json",
@@ -439,6 +439,21 @@
       "archivo": "pruebas/interfaz-2026-11-04-01_resumen.json",
       "descripcion": "Resumen: superadas, entorno y comando",
       "id": "interfaz-2026-11-04-01"
+    },
+    {
+      "archivo": "pruebas/api-2026-11-04-02_pruebas.xml",
+      "descripcion": "JUnit de todas las pruebas de api/tests (unitarias en SQLite salvo las marcadas postgres; 13 funcionales contra postgresql 16.15)",
+      "id": "api-2026-11-04-02"
+    },
+    {
+      "archivo": "pruebas/api-2026-11-04-02_cobertura.json",
+      "descripcion": "Cobertura de api/ y ml/automl/ de todas las pruebas de api/tests (unitarias en SQLite salvo las marcadas postgres; 13 funcionales contra postgresql 16.15)",
+      "id": "api-2026-11-04-02"
+    },
+    {
+      "archivo": "pruebas/api-2026-11-04-02_resumen.json",
+      "descripcion": "Resumen: superadas, motor, requisitos y cobertura",
+      "id": "api-2026-11-04-02"
     }
   ],
   "usabilidad": []
