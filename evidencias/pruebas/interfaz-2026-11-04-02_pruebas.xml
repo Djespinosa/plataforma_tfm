@@ -1,0 +1,192 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites name="vitest tests" tests="71" failures="0" errors="0" time="6.875672">
+    <testsuite name="src/app/app.spec.ts" timestamp="2026-11-04T16:04:29.926Z" tests="1" failures="0" errors="0" skipped="0" time="0.2219976">
+        <testcase classname="src/app/app.spec.ts" name="App &gt; muestra la cabecera, el enlace para saltar al contenido y los seis pasos" time="0.2182566">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/formato.spec.ts" timestamp="2026-11-04T16:04:29.930Z" tests="9" failures="0" errors="0" skipped="0" time="0.0302792">
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; porcentaje entero sin sugerir certeza en los extremos" time="0.0081831">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; duración en segundos, minutos u horas" time="0.0015595">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; probabilidad de un caso: nunca 0 % ni 100 %, tampoco con 0 o 1 exactos" time="0.0032632">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; porcentaje con un decimal y coma" time="0.0017409">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; decimal con coma y signo menos tipográfico" time="0.0031895">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; miles con espacio desde 10 000, como la API" time="0.0017025">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; intervalo con punto y coma y p-valor" time="0.0013901">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; diferencias de proporciones en puntos porcentuales" time="0.0014609">
+        </testcase>
+        <testcase classname="src/app/formato.spec.ts" name="formato &gt; fecha en hora local" time="0.0022525">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/textos.spec.ts" timestamp="2026-11-04T16:04:29.935Z" tests="2" failures="0" errors="0" skipped="0" time="0.0205525">
+        <testcase classname="src/app/textos.spec.ts" name="textos &gt; ningún texto propio usa el vocabulario prohibido ni códigos de decisión" time="0.0124089">
+        </testcase>
+        <testcase classname="src/app/textos.spec.ts" name="textos &gt; el detector encuentra los prohibidos, salvo en la nota fija de causalidad" time="0.0039124">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/api/errores.spec.ts" timestamp="2026-11-04T16:04:29.937Z" tests="3" failures="0" errors="0" skipped="0" time="0.0231164">
+        <testcase classname="src/app/api/errores.spec.ts" name="leerError &gt; muestra el mensaje y los detalles de la API tal cual" time="0.0122714">
+        </testcase>
+        <testcase classname="src/app/api/errores.spec.ts" name="leerError &gt; sin conexión: cualquier respuesta HTTP sin el cuerpo de la API" time="0.0030869">
+        </testcase>
+        <testcase classname="src/app/api/errores.spec.ts" name="leerError &gt; lo que no es una respuesta HTTP: mensaje genérico" time="0.0023579">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/api/servicios.spec.ts" timestamp="2026-11-04T16:04:29.939Z" tests="2" failures="0" errors="0" skipped="0" time="0.1199836">
+        <testcase classname="src/app/api/servicios.spec.ts" name="servicios de la API &gt; GET de estado, modelos, experimento y lote con sus rutas" time="0.0728602">
+        </testcase>
+        <testcase classname="src/app/api/servicios.spec.ts" name="servicios de la API &gt; POST de predicciones con FormData: archivo y columna_id solo si se indica" time="0.0404363">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/pruebas/vocabulario.spec.ts" timestamp="2026-11-04T16:04:29.941Z" tests="17" failures="0" errors="0" skipped="0" time="1.8780902">
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; inicio" time="0.2392085">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; modelos" time="0.1026262">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; estimación" time="0.1093431">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; lote" time="0.1087806">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; explicación global" time="0.1086936">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; explicación local" time="0.109721">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; evaluación" time="0.1279698">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; evaluación de otro momento (sin curva)" time="0.1055592">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; seguimiento completado" time="0.0773404">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; historial" time="0.0603102">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; carga" time="0.0791785">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; configuración" time="0.112925">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; no encontrada" time="0.0600177">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; evaluación con la evaluación única ya hecha" time="0.0662176">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; seguimiento fallido y sin respuesta" time="0.0763528">
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; carga tras subir un archivo" time="0.158432">
+            <system-err>
+NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+key "3" at index "0" and "1". Find more at https://v21.angular.dev/errors/NG0955
+
+NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+key "3" at index "0" and "1". Find more at https://v21.angular.dev/errors/NG0955
+
+NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+key "3" at index "0" and "1". Find more at https://v21.angular.dev/errors/NG0955
+
+NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+key "3" at index "0" and "1". Find more at https://v21.angular.dev/errors/NG0955
+
+NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+key "3" at index "0" and "1". Find more at https://v21.angular.dev/errors/NG0955
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/app/pruebas/vocabulario.spec.ts" name="vocabulario renderizado &gt; configuración comprobada, con cohorte y demostración" time="0.1710322">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/carga/carga.spec.ts" timestamp="2026-11-04T16:04:29.949Z" tests="5" failures="0" errors="0" skipped="0" time="0.5668127">
+        <testcase classname="src/app/vistas/carga/carga.spec.ts" name="Carga &gt; muestra el aviso de privacidad antes del formulario y los conjuntos ya cargados con su enlace" time="0.3017296">
+        </testcase>
+        <testcase classname="src/app/vistas/carga/carga.spec.ts" name="Carga &gt; sin conjuntos, lo dice" time="0.0330206">
+        </testcase>
+        <testcase classname="src/app/vistas/carga/carga.spec.ts" name="Carga &gt; sube archivo y momento; muestra el resumen, los avisos de la API y las columnas, y lo añade a la lista" time="0.1211645">
+        </testcase>
+        <testcase classname="src/app/vistas/carga/carga.spec.ts" name="Carga &gt; un 415 o un 422 de la API se muestran tal cual, con sus detalles, y se puede reintentar" time="0.0706613">
+        </testcase>
+        <testcase classname="src/app/vistas/carga/carga.spec.ts" name="Carga &gt; sin archivo no envía nada" time="0.0358666">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/configuracion/configuracion.spec.ts" timestamp="2026-11-04T16:04:29.952Z" tests="6" failures="0" errors="0" skipped="0" time="0.9231107">
+        <testcase classname="src/app/vistas/configuracion/configuracion.spec.ts" name="Configuracion &gt; compone el cuerpo del formulario, muestra el esquema efectivo y entrena con el cuerpo validado" time="0.5042246">
+        </testcase>
+        <testcase classname="src/app/vistas/configuracion/configuracion.spec.ts" name="Configuracion &gt; si la configuración cambia tras comprobarla, «Entrenar» se desactiva y lo dice" time="0.0900497">
+        </testcase>
+        <testcase classname="src/app/vistas/configuracion/configuracion.spec.ts" name="Configuracion &gt; al cambiar el objetivo se vacía la clase y se quita de grupo, excluidas y sensibles" time="0.1022432">
+        </testcase>
+        <testcase classname="src/app/vistas/configuracion/configuracion.spec.ts" name="Configuracion &gt; con más de 20 valores distintos, la clase positiva se escribe" time="0.0487442">
+        </testcase>
+        <testcase classname="src/app/vistas/configuracion/configuracion.spec.ts" name="Configuracion &gt; cada 422 de la API se muestra tal cual, con sus detalles, y no deja entrenar" time="0.0742286">
+        </testcase>
+        <testcase classname="src/app/vistas/configuracion/configuracion.spec.ts" name="Configuracion &gt; sin objetivo o sin valores de la cohorte no llama a la API" time="0.0985995">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/evaluacion/evaluacion.spec.ts" timestamp="2026-11-04T16:04:29.957Z" tests="9" failures="0" errors="0" skipped="0" time="0.970144">
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; sin ?modelo= muestra el primero, con los textos de la API tal cual y la curva" time="0.3774462">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; con ?modelo= muestra ese modelo; sin curva, el motivo; la matriz con encabezados en su sitio" time="0.0897433">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; equidad: proporciones e intervalos en %, diferencias en puntos porcentuales, nulos y solo descriptiva" time="0.0828679">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; el selector cambia ?modelo= sin añadir una entrada al historial" time="0.0845379">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; un error de la API se muestra tal cual" time="0.0163261">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; evaluación única: nunca en los importados" time="0.0616763">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; evaluación única: texto previo, botón solo con la casilla, una petición y después solo lectura" time="0.1199117">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; evaluación única: un 409 de la API se muestra tal cual y se puede volver a intentar" time="0.0746827">
+        </testcase>
+        <testcase classname="src/app/vistas/evaluacion/evaluacion.spec.ts" name="Evaluacion &gt; evaluación única ya hecha: solo lectura desde el detalle del experimento" time="0.0582848">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/explicacion-global/explicacion-global.spec.ts" timestamp="2026-11-04T16:04:29.963Z" tests="2" failures="0" errors="0" skipped="0" time="0.4231248">
+        <testcase classname="src/app/vistas/explicacion-global/explicacion-global.spec.ts" name="ExplicacionGlobal &gt; 15 barras en el resumen, todas las variables en el detalle y las sin contribución aparte" time="0.36874">
+        </testcase>
+        <testcase classname="src/app/vistas/explicacion-global/explicacion-global.spec.ts" name="ExplicacionGlobal &gt; sin filas de referencia: muestra el motivo de la API y ningún gráfico" time="0.0493029">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/explicacion-local/explicacion-local.spec.ts" timestamp="2026-11-04T16:04:29.966Z" tests="1" failures="0" errors="0" skipped="0" time="0.3429203">
+        <testcase classname="src/app/vistas/explicacion-local/explicacion-local.spec.ts" name="ExplicacionLocal &gt; muestra la probabilidad, los factores por signo, las extremas, el resto y todos los avisos" time="0.3396893">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/historial/historial.spec.ts" timestamp="2026-11-04T16:04:29.968Z" tests="2" failures="0" errors="0" skipped="0" time="0.3629358">
+        <testcase classname="src/app/vistas/historial/historial.spec.ts" name="Historial &gt; lista web e importados con estado, datos, objetivo, presupuesto y enlaces para reabrirlos" time="0.288729">
+        </testcase>
+        <testcase classname="src/app/vistas/historial/historial.spec.ts" name="Historial &gt; sin experimentos lo dice; un error de la API se muestra tal cual" time="0.0695465">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/lote/lista.spec.ts" timestamp="2026-11-04T16:04:29.970Z" tests="3" failures="0" errors="0" skipped="0" time="0.0518721">
+        <testcase classname="src/app/vistas/lote/lista.spec.ts" name="lista del lote &gt; ordena por probabilidad, fila e identificador, con desempate por fila" time="0.0389295">
+        </testcase>
+        <testcase classname="src/app/vistas/lote/lista.spec.ts" name="lista del lote &gt; filtra por alerta, identificador (contiene, sin mayúsculas) y probabilidad mínima" time="0.0039277">
+        </testcase>
+        <testcase classname="src/app/vistas/lote/lista.spec.ts" name="lista del lote &gt; pagina de 50 en 50 y ajusta la página al intervalo válido" time="0.004456">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/lote/lote.spec.ts" timestamp="2026-11-04T16:04:29.972Z" tests="1" failures="0" errors="0" skipped="0" time="0.3150354">
+        <testcase classname="src/app/vistas/lote/lote.spec.ts" name="Lote &gt; ofrece la descarga del CSV del lote completo (RF-09) como enlace directo a la API" time="0.3095667">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/vistas/seguimiento/seguimiento.spec.ts" timestamp="2026-11-04T16:04:29.974Z" tests="8" failures="0" errors="0" skipped="0" time="0.6256967">
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; sondea cada 3 s mientras está en cola o en curso y para al completar, con los enlaces" time="0.3010701">
+        </testcase>
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; en cola con el proceso detenido avisa; en demostración, la etiqueta y los avisos" time="0.0635558">
+        </testcase>
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; muestra el aviso de la API cuando el proceso no responde" time="0.0375314">
+        </testcase>
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; un error de red no corta el sondeo; un 404 sí" time="0.0460986">
+        </testcase>
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; fallido: el error tal cual y «Reintentar» lleva al experimento nuevo; un 409 se muestra" time="0.0711389">
+        </testcase>
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; al cambiar el id (tras reintentar) vuelve a sondear el nuevo" time="0.0361501">
+        </testcase>
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; una lectura que tarda más de 3 s no se cancela ni se duplica" time="0.0295491">
+        </testcase>
+        <testcase classname="src/app/vistas/seguimiento/seguimiento.spec.ts" name="Seguimiento &gt; la reproducibilidad va en el detalle técnico" time="0.0368209">
+        </testcase>
+    </testsuite>
+</testsuites>
